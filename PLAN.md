@@ -557,7 +557,7 @@ not need Codex-specific sidecar metadata."*
 | **E** | `crawl_site.py`: SPA JSON extraction, retail/considered-purchase surfaces, sitemap walk |
 | **F** | `sources.json` — dated class → concrete-source map with `access_conditions[]` |
 | **G** | `capability_matrix.py` + `validate_report.py` + `test_discrimination.py` |
-| **H** | SKILL.md + `assets/` templates + ≤2 references; `docs/architecture.md` |
+| **H** | SKILL.md + `assets/` templates + ≤2 references; `docs/architecture.md`. **Blocked on D**, not improved by starting early: the body's premise is "run filter_signals.py; never write a signal it did not return", so writing it first means writing pointers to absent artifacts |
 | **I** | buyer-lens boundary clause + its own before/after eval |
 | **J** | Tier 0 CI → Tier 1 dry (77-skill fixture listing) → Tier 2 wet (5 fixture sites) → README "Measured" |
 | **K** | Verify both install paths clean on a fresh machine |
@@ -565,6 +565,115 @@ not need Codex-specific sidecar metadata."*
 Two long poles now: **C** (92 acquisition rows — parallelisable by family) and
 **D + G** (the deterministic core). The catalogue is authored per-family so families
 can land incrementally without blocking the scripts.
+
+---
+
+## 11b. What Pomo and Hightouch changed (2026-08-01)
+
+Two products were studied to test the use case. The Pomo study reverse-engineered the
+shipped app from its public JS bundle rather than trusting the marketing site, which is
+why the conclusions below are about what is *built*.
+
+### The positioning claim survives, but narrowed — and two parts of it are refuted
+
+**Refuted: "nobody tells a company which signals to collect."** Segment, Google,
+Amplitude and Mixpanel publish per-vertical event taxonomies free. Bombora and Demandbase
+ship URL→signals onboarding. Pomo ships a 40-minute URL→spec crawl. Consultants sell the
+mapped deliverable at $1,500–$15,000.
+
+**Refuted: "the permission column is the moat."** Measured: it carries ~0.80 bits per row
+beyond what `source_class` already implies, reads `notice` on 64/92, and
+`jurisdiction_blocklist` is empty on **92/92**.
+
+**What survives, and could not be broken:**
+
+1. **The join on one row, structurally unavailable to incumbents.** Every website→signals
+   flow in existence is owned by the vendor selling the signal and returns only what that
+   vendor sells — Bombora returns Bombora topics, Pomo returns its 17 hardcoded
+   connectors. Vendor neutrality is a position only a non-seller can occupy.
+2. **The families nobody templates and autocapture cannot reach.** 66/92 rows draw on
+   `first_party_backend`, 53 on `crm`, 38 on `offline_system`, 27 on `partner_feed`,
+   23 on `public_record`. You cannot retroactively capture a permit filing — which is why
+   "collect everything and sort it out later" is not a substitute here.
+3. **Adjacency enforcement**, the finding replicated across all seven baseline runs.
+4. **The 16 restricted classes.** `restricted.household_graph_inference` independently
+   pre-refuses Match Booster's Household Expansion, and `f02.device_and_session_continuity`
+   counter-prescribes probabilistic matching — **two paid features of the market-leading
+   composable CDP, refused by a catalogue written without either in view.**
+5. **712 unique false-positive strings** out of 713, attached to the row each contaminates.
+
+**The buyer is not the one the README implies.** Pomo's $83/mo one-person marketing team
+will never run this — their purchase is *subtraction*, and a 92-row inventory is the
+artifact they pay to escape. Nor the enterprise privacy buyer, who has counsel and won't
+sign off on `no_known_restriction_identified`. What survives: the GTM/growth engineer, the
+agency doing client onboarding, and the team about to buy a CDP — at exactly the moment
+Hightouch's own docs delegate the question to a meeting. All three are small, technical
+and **non-paying**, which is consistent with a free MIT skill and inconsistent with a
+priced product. That is the honest read, not a consolation.
+
+### The market-signal gap is a TYPE gap, not a coverage gap
+
+A purchase-intent signal has a **subject** — an entity that can be resolved, scored,
+suppressed and approached. A market-state signal has none. "Cold-brew searches rose 32%"
+has no person in it.
+
+The catalogue is already lying about this on two rows: `f03.social_proof_momentum` and
+`f04.marketplace_activity` both carry `identity_level: visitor` over pure aggregate
+counts, and the first one's own `access_conditions` say *"Momentum is a property of a
+source, not of a person."* 11 of 92 rows have no subject identifier at all.
+
+The precise statement: **the catalogue's external signals are all "external event × your
+own book". It has no object for "external event × the market."** Only 7 of 92 rows fire
+on a subject the company has no prior record of, and not one is category-, demand- or
+competitor-shaped. That is why four rows would close it and forty would not.
+
+Concretely missing: category demand shift; competitor ad-transparency repositories (Meta
+Ad Library, Google Ads Transparency Center, TikTok Commercial Content Library, EU DSA
+Art. 39 — free, statutory, with real first-seen/last-seen series); **answer-engine
+visibility**, where the only trace of generative engines in 108 rows is ten mentions of
+LLM agents as *traffic pollution*; creator-community fit; partner/wholesale acquisition.
+
+`f15.competitor_disruption` is also defective for the commonest case: its qualifying
+condition requires the event to *degrade the competitor's own customers* and hard-requires
+`account_incumbent_vendor`, so "a rival launched 20% off at midnight" does not qualify —
+and at rung 1 the row is inert for every D2C and local buyer its `applicability` claims.
+
+### The bigger boundary is the activation edge, not the market edge
+
+**Zero of 92 capability ladders reach a warehouse, an ad-platform audience, or a CSV
+handed to a destination.** `required_raw_fields` carry no types, no roles, no grain, no
+keys. So the deliverable under-serves both buyers for the same reason: it tells the
+smaller buyer what to compute and never how to act, and hands the larger one homework
+rather than something pasteable into Customer Studio. Adding `activation_readiness` per
+rung and a field role/type/grain shape buys more than twenty new rows would.
+
+### The ranking backbone is broken and must be settled before `filter_signals.py`
+
+**All 92 `strength` values are `author_estimate`.** Applying PLAN §8.3 as written —
+"any facet whose evidence is `author_estimate` or missing clamps to the neutral midpoint" —
+makes both ranking columns constant at 3:
+
+```
+strength    authored {4:44, 3:25, 5:17, 2:6}  → post-clamp {3:92}
+reliability authored {4:51, 3:29, 5:7,  2:5}  → post-clamp {3:92}
+```
+
+The README's published 17.9% counts an `author_estimate` row as evidenced, which is
+exactly the case §8.3 says must clamp; under the design's own rule the honest number is
+100%. One of the two documents is wrong. **Recommendation: rank on activation feasibility**
+— can you climb rung 1 this week with records you already hold, and is there a reachable
+destination — which the buyer-side study reached independently.
+
+### Content review: catalogue 7/10, evals 8.5/10, contract 8/10, docs 6/10
+
+The rows themselves are near publication quality; rung-1 discipline and the false-positive
+lists rate 9/10 alone. The **facet layer** rates 4/10, and that gap is the whole story:
+three advertised columns are empty on every row (`coverage` 92/92, `jurisdiction_blocklist`
+92/92, `terms_note` 43/92), `half_life_days` is on 69 rows with zero evidence and is not
+even in `NUMERIC_EVIDENCE_FACETS`, and `min_data` is absent on 18/92 without validation.
+One evidence row self-cites a `docs/architecture.md` that does not exist. `f04.product_comparison`
+— the gold exemplar every other shard was written against — is now the thinnest row in the
+catalogue.
 
 ---
 
@@ -580,10 +689,41 @@ can land incrementally without blocking the scripts.
   against a snapshot, since the edit invalidates its published trigger numbers.
 - **Catalogue is the full 92** with a complete acquisition row per entry (§2).
 
-**Still open:**
+**Now open, in priority order (from the Pomo/Hightouch study):**
 
-1. **`data/` vs `assets/`** for the catalogue — spec says `assets/`, house doctrine
+1. **The ranking backbone.** Strength/reliability cannot rank — all 92 are
+   `author_estimate`. Rank on activation feasibility instead, and reconcile the README's
+   17.9% with §8.3's own rule. **Blocks `filter_signals.py`.**
+2. **Market-state signals: partition, widen, or decline?** They are a different type, not
+   a missing slice. Recommended: add a `subject_scope` facet
+   (`subject_bearing | market_state`), fix the two mistyped rows, add ~4–6 market-state
+   rows (category demand, competitor paid activity, answer-engine visibility), and let the
+   filter present them as a separate section rather than ranking them against
+   subject-bearing signals. Declining is also defensible; widening to forty is not.
+3. **The activation edge.** Add `activation_readiness` per rung, and field role/type/grain
+   /keys to `required_raw_fields`. Emit canonical event names where a canon exists
+   (Segment's ~31 ecommerce events, Google's recommended events) — without them the
+   taxonomy output is strictly worse than a free Segment spec, because destination
+   mappings are written against the canonical names.
+4. **The missing control.** Unaided vs. model-plus-a-40-line-checklist vs.
+   model-plus-signal-lens, on the same 7 prompts. 13 of the 15 measured failures are
+   structural. **If a checklist closes them, the 92 rows are not the product** and should
+   be cut to the fields carrying irreplaceable content. This must run before the catalogue
+   is defended in public.
+5. **Empty columns: populate or delete.** `jurisdiction_blocklist` is empty on 92/92 while
+   27 rows carry `terminal_equipment_access: true`. Either populate it or delete the field
+   and say the tool is jurisdiction-blind — a column the README describes as measured and
+   which is empty everywhere is worse than an absent one.
+6. **`adjacent_prohibitions[]` as a data field.** Only 14 of 92 rows mention a
+   `restricted.*` id, and the 16 classes reach 11 of 15 families — F02, F03, F04, F09 and
+   F11 have none, which is exactly where query text and per-person topic history live. The
+   do-not-collect bucket is failure #3 at 7/7 and cannot be produced deterministically
+   today.
+7. **`data/` vs `assets/`** for the catalogue — spec says `assets/`, house doctrine
    defines `assets/` as "ends up in the deliverable". Pick and justify in the README.
+8. **Projection.** The catalogue is ~862 KB; a 15-row shortlist at median row size is
+   ~24k tokens, which does not fit a body budget. Which ~8 of 35 facets survive into
+   context must be settled before SKILL.md can be written.
 2. **Report centrepiece** — ranked list vs 2–4 named **signal stacks** with trigger
    rule, response SLA and CRM destination. The B2B evidence favours stacks (91% use
    intent data, only 24% report exceptional ROI; CRM-native scoring lifts sales
