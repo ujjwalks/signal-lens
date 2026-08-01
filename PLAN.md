@@ -549,10 +549,10 @@ not need Codex-specific sidecar metadata."*
 
 | Phase | Work |
 |---|---|
-| **0 ✅** | Baseline failure study — done; 109 failures; also the without-skill arm |
-| **A** | Public repo, skeleton, MIT + CC0 split, `DISCLAIMER.md`, `.claude-plugin/` only, universal install line, `$SKILL_DIR`-vs-relative resolution test, repo-lens backport |
-| **B** | Catalogue schema incl. acquisition-row contract, permission axis, provenance, `restricted.*` class ids; `validate_catalogue.py` with the §3.1 hard-fail rules |
-| **C** | **All 92 entries**, authored family by family in parallel, blind-spot families first — every entry a complete acquisition row |
+| **0 ✅** | Baseline failure study — 109 failures; also the without-skill arm |
+| **A ✅** | Public repo live, MIT + CC0 split, `DISCLAIMER.md`. *Still open in A:* `.claude-plugin/` packaging, universal install line, `$SKILL_DIR` resolution test, repo-lens backport |
+| **B ✅** | Acquisition-row contract + `validate_catalogue.py`: §3.1 restricted hard-fail (adversarially tested) plus three cross-field coherence rules |
+| **C ✅** | **92 buildable entries across all 15 families** + 16 restricted prohibition classes. 4 red-team blockers fixed; **25 serious findings still open** |
 | **D** | `filter_signals.py`: gate → score, null-passes-applicability, completeness gate, `plan.json` hashing, REMINDER header |
 | **E** | `crawl_site.py`: SPA JSON extraction, retail/considered-purchase surfaces, sitemap walk |
 | **F** | `sources.json` — dated class → concrete-source map with `access_conditions[]` |
