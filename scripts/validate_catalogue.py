@@ -28,7 +28,7 @@ import sys
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_CATALOGUE = os.path.join(HERE, os.pardir, "data", "signals.json")
+DEFAULT_CATALOGUE = os.path.join(HERE, os.pardir, "data", "families")
 
 # --- the 15 families, and how many signals the source spec enumerates for each ---
 FAMILIES = {
@@ -312,33 +312,62 @@ def check_catalogue(entries, f):
     return coverage
 
 
+def load_catalogue(path):
+    """Load one shard or a directory of them.
+
+    The catalogue is sharded one file per family so that a contributor edits one
+    small file, and so that entries can be authored in parallel without merge
+    conflicts. Nothing is generated, so there is no source-vs-build drift.
+    Returns (entries, sources) or raises ValueError with a readable message.
+    """
+    paths = []
+    if os.path.isdir(path):
+        paths = sorted(os.path.join(path, n) for n in os.listdir(path)
+                       if n.endswith(".json"))
+        if not paths:
+            raise ValueError(f"no .json shards found in {path}")
+    elif os.path.isfile(path):
+        paths = [path]
+    else:
+        raise ValueError(f"no catalogue at {path}")
+
+    entries, sources = [], []
+    for p in paths:
+        try:
+            with open(p, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{os.path.relpath(p)} is not valid JSON - {exc}")
+        got = data.get("signals") if isinstance(data, dict) else data
+        if not isinstance(got, list):
+            raise ValueError(f"{os.path.relpath(p)}: expected a list of signals, or "
+                             "an object with a 'signals' key")
+        entries.extend(got)
+        sources.append((os.path.relpath(p), len(got)))
+    return entries, sources
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("catalogue", nargs="?", default=DEFAULT_CATALOGUE)
+    ap.add_argument("catalogue", nargs="?", default=DEFAULT_CATALOGUE,
+                    help="a shard, or a directory of shards (default: data/families)")
     ap.add_argument("--json", action="store_true", help="emit structured JSON")
+    ap.add_argument("--shard-only", action="store_true",
+                    help="skip whole-catalogue checks (family coverage, cross-shard "
+                         "references) so a single family can be validated while the "
+                         "rest are still being authored")
     args = ap.parse_args()
 
     try:
-        with open(args.catalogue, encoding="utf-8") as fh:
-            data = json.load(fh)
-    except FileNotFoundError:
-        print(f"CANNOT READ: no catalogue at {args.catalogue}", file=sys.stderr)
-        return 2
-    except json.JSONDecodeError as exc:
-        print(f"CANNOT READ: {args.catalogue} is not valid JSON - {exc}",
-              file=sys.stderr)
-        return 2
-
-    entries = data.get("signals") if isinstance(data, dict) else data
-    if not isinstance(entries, list):
-        print("CANNOT READ: expected a list of signals, or an object with a "
-              "'signals' key", file=sys.stderr)
+        entries, sources = load_catalogue(args.catalogue)
+    except ValueError as exc:
+        print(f"CANNOT READ: {exc}", file=sys.stderr)
         return 2
 
     f = Findings()
     n_restricted = sum(1 for e in entries if check_entry(e, f))
-    coverage = check_catalogue(entries, f)
+    coverage = [] if args.shard_only else check_catalogue(entries, f)
 
     buildable = len(entries) - n_restricted
     unevidenced = sum(1 for r in f.warnings() if r["field"] in NUMERIC_EVIDENCE_FACETS)
@@ -359,15 +388,17 @@ def main():
         }, indent=2))
         return 1 if f.errors() else 0
 
-    print(f"CATALOGUE  {os.path.relpath(args.catalogue)}")
+    print(f"CATALOGUE  {os.path.relpath(args.catalogue)}  "
+          f"({len(sources)} shard{'s' if len(sources) != 1 else ''})")
     print(f"  {len(entries)} entries: {buildable} buildable, {n_restricted} restricted "
           f"(spec enumerates {EXPECTED_TOTAL})")
     print()
-    print("FAMILY COVERAGE")
-    for fam, label, got, expected in coverage:
-        mark = "ok " if got >= expected else ("EMPTY" if got == 0 else "thin ")
-        print(f"  {mark} {fam}  {got:>2}/{expected:<2}  {label}")
-    print()
+    if coverage:
+        print("FAMILY COVERAGE")
+        for fam, label, got, expected in coverage:
+            mark = "ok " if got >= expected else ("EMPTY" if got == 0 else "thin ")
+            print(f"  {mark} {fam}  {got:>2}/{expected:<2}  {label}")
+        print()
 
     if f.errors():
         print(f"ERRORS ({len(f.errors())})")

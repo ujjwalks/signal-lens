@@ -1,0 +1,113 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "restricted",
+  "signals": [
+    {
+      "id": "restricted.health_status_inference",
+      "family": "F12",
+      "name": "Inferred health status or clinical journey stage",
+      "definition": "Deriving a person's health condition, treatment stage, diagnosis, fertility status, or clinical trajectory from behaviour - browsing, purchases, content consumption, or device signals - rather than from information they knowingly provided for that purpose.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected.",
+      "intent_dimensions": [
+        "need",
+        "urgency"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "first_party_web"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Regulated as consumer health data in several US states regardless of the source of the underlying behaviour.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Inferred health status is regulated consumer health data under Washington's My Health My Data Act (opt-in consent, separate authorization to sell, private right of action, extraterritorial reach) and comparable Nevada and Connecticut provisions; Maryland's Online Data Privacy Act restricts the sale of sensitive data regardless of consent. Under GDPR Art. 9 it is special-category data requiring an Art. 9(2) condition, which behavioural inference does not supply. The FTC's actions against GoodRx, Premom and Flo Health charged exactly the practice of building audience segments from inferred health signals. Beyond the legal exposure, the failure mode is not theoretical: shared-device and household-linked retargeting of a clinical journey causes documented, serious harm to real people.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_MD",
+          "US_NV",
+          "US_CT"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Research on behalf of a family member, patient, or client",
+        "Clinical, academic, or journalistic research",
+        "A shared device used by several members of a household"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/legal-library/browse/cases-proceedings/2023062-goodrx-holdings-inc",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

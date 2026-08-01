@@ -1,0 +1,163 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F04",
+  "signals": [
+    {
+      "id": "f04.product_comparison",
+      "family": "F04",
+      "name": "Product comparison",
+      "definition": "The subject places two or more specific products, plans, or vendors side by side, or repeatedly views the same competing set within a session window. Qualifying condition: at least two distinct product or plan identifiers appear in one comparison context, or a dedicated comparison surface is opened.",
+      "question_answered": "Has the buyer moved from browsing a category to narrowing a shortlist, and which alternatives are still live?",
+      "intent_dimensions": [
+        "category",
+        "preference",
+        "fit"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "compared_item_ids",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "comparison_attributes",
+        "repeat_comparison_count",
+        "session_id",
+        "referrer"
+      ],
+      "source_class": [
+        "first_party_web",
+        "marketplace",
+        "review_platform"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Instrument comparison_started / comparison_updated / comparison_completed on your own comparison tool or plan table",
+          "requires": [
+            "tag manager or app-level analytics"
+          ],
+          "gives": "First-party, full fidelity, no third party involved"
+        },
+        {
+          "rung": 2,
+          "how": "Infer from consecutive product-detail views of two or more items in the same category inside one session",
+          "requires": [
+            "pageview stream with product identifiers"
+          ],
+          "gives": "Lower precision, but needs no new instrumentation"
+        },
+        {
+          "rung": 3,
+          "how": "Category-level comparison intent from a review-platform partner programme",
+          "requires": [
+            "paid vendor listing in that category"
+          ],
+          "gives": "Account-level only, and only if your category is listed"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Rung 3 is obtainable only by becoming a listed vendor; it cannot be bought as raw data"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "A comparison is meaningful while the shortlist is open; it decays as the buyer either commits or lapses."
+      },
+      "false_positives": [
+        "Competitor or price-scraper reconnaissance",
+        "Analyst or press research",
+        "Existing customer checking whether to upgrade rather than buy",
+        "Student or academic research"
+      ],
+      "confirmation_signals": [
+        "f06.quote_request",
+        "f07.demo"
+      ],
+      "recommended_action_class": "surface_a_direct_comparison_and_qualify",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": "https://github.com/ujjwalks/signal-lens/blob/main/docs/architecture.md",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}
