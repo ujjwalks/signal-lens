@@ -1,0 +1,1099 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F14",
+  "signals": [
+    {
+      "id": "f14.buying_group_formation",
+      "family": "F14",
+      "name": "Buying-group formation",
+      "definition": "Two or more distinct people belonging to the same buying organisation engage with the same evaluation inside a bounded window - additional named contacts appear on one opportunity, colleagues are invited into a shared trial, workspace, document or thread, or a new department appears in the account's activity. Qualifying condition: at least two distinct person identifiers resolve to one account and touch the same opportunity, artefact or product instance within the window; a single person visiting many times does not qualify.",
+      "question_answered": "Has this stopped being one interested person and become a group with a budget holder - and which roles have joined since last week?",
+      "intent_dimensions": [
+        "authority",
+        "commitment",
+        "readiness",
+        "identity_scope"
+      ],
+      "identity_level": "buying_group",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "person_id",
+        "interaction_event",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "opportunity_id",
+        "role_or_title",
+        "department",
+        "seniority_band",
+        "invited_by_person_id",
+        "shared_artefact_id",
+        "first_touch_channel"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_backend",
+        "product_analytics",
+        "first_party_web"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Group the signups, form fills and trials you already store by email domain and count distinct people per domain in a rolling 90-day window; flag any domain that goes from one person to two or more",
+          "requires": [
+            "existing user or lead table with email addresses",
+            "a free-mail domain exclusion list"
+          ],
+          "gives": "The signal this week from a single query, with no new instrumentation and no third party"
+        },
+        {
+          "rung": 2,
+          "how": "Read contact roles already recorded against open opportunities in the CRM and treat the count and mix of roles as the group, rather than the raw contact count",
+          "requires": [
+            "CRM with an opportunity-to-contact relationship",
+            "nightly export or API read"
+          ],
+          "gives": "Named roles rather than head-count, and it covers people who never filled in a web form"
+        },
+        {
+          "rung": 3,
+          "how": "Instrument invitation and sharing inside the product or trial - seat added, teammate invited, document shared, workspace joined - so the event names who pulled whom in",
+          "requires": [
+            "backend event emission on invite and seat changes"
+          ],
+          "gives": "Direction as well as membership: the champion is the person doing the inviting"
+        },
+        {
+          "rung": 4,
+          "how": "Attach attendee lists from the seller's own meeting and conferencing records to the opportunity, so people who only ever appear on a call are counted as group members",
+          "requires": [
+            "calendar or conferencing records joined to the deal",
+            "an account key on the meeting record"
+          ],
+          "gives": "Coverage of the entirely off-website part of the group, which in sales-led motions is most of it"
+        }
+      ],
+      "min_data": {
+        "min_distinct_people": 2,
+        "window_days": 90,
+        "note": "Below two resolved people there is no group; a domain with hundreds of unrelated users is a large organisation, not a buying group, and needs an opportunity or artefact key to be meaningful."
+      },
+      "access_conditions": [
+        "Rung 1 mis-groups on free-mail domains, on holding companies and on multi-entity organisations; the exclusion list is the work, not the query",
+        "Rung 4 uses the seller's own meeting records - attendee lists from inside the buyer's systems are not an available source"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "A group assembles for an evaluation and disperses with it. If no new member and no new group interaction appears for about a quarter, the group has dissolved or the decision was made somewhere you cannot see."
+      },
+      "false_positives": [
+        "Several colleagues arriving from one internally shared link with no mandate to buy",
+        "A large organisation in which unrelated teams evaluate the same tool independently",
+        "An existing customer's support, renewal or training traffic read as a new group",
+        "Diligence by an acquirer, investor or consultant using the buyer's domain",
+        "Competitor employees registering with a corporate address",
+        "Automated security, procurement or link-preview tooling opening shared artefacts",
+        "A shared inbox or generic alias that stands for no identifiable person"
+      ],
+      "confirmation_signals": [
+        "f14.internal_approval_step",
+        "f14.stakeholder_role_coverage",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "map_the_group_and_supply_role_specific_material",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "problem",
+          "contract_expiry",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "financial_services",
+          "manufacturing",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Widely repeated buying-committee size figures trace back to analyst and vendor material that could not be verified against a primary source in this session, so no benchmark is cited and the rating is an estimate."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f14.household_coordination",
+      "family": "F14",
+      "name": "Declared household coordination on one purchase",
+      "definition": "Two or more people who have themselves declared a shared household, family plan or joint-purchase relationship to the seller act on one purchase - a joint application, a family or multi-member plan, a co-registered account, a second named person on a quote, booking, finance agreement or appointment, a registry or shared wishlist. Qualifying condition: the relationship is stated by the people involved for this purpose and is stored as a declaration with a timestamp. A relationship reconstructed from shared devices, IP addresses, delivery addresses or an identity graph does not qualify and is excluded under restricted.household_graph_inference.",
+      "question_answered": "Is a second person in this household part of the decision, and does the quote, appointment or offer need to address both of them by name?",
+      "intent_dimensions": [
+        "authority",
+        "identity_scope",
+        "readiness",
+        "commitment"
+      ],
+      "identity_level": "household",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "household_or_plan_id",
+        "member_person_id",
+        "declared_relationship_basis",
+        "declaration_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "shared_item_ids",
+        "registry_or_wishlist_id",
+        "joint_application_id",
+        "invitation_sender_id",
+        "consent_record_id",
+        "second_attendee_on_appointment",
+        "decision_role_stated"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "crm"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Query the declarations you already hold: family or multi-member plan membership, co-applicants and second cardholders on finance and insurance applications, second named guests on bookings, registry owner-and-contributor pairs",
+          "requires": [
+            "existing account, plan or application tables"
+          ],
+          "gives": "A household signal from data already collected with a declared basis, with no new collection at all"
+        },
+        {
+          "rung": 2,
+          "how": "Add one optional question where coordination actually happens - on the quote, appointment or configurator - asking whether anyone else is deciding, and store the answer alongside the purpose text that was shown",
+          "requires": [
+            "a form field and a consent or purpose record"
+          ],
+          "gives": "Declared coordination for high-ticket purchases that never involve a shared account"
+        },
+        {
+          "rung": 3,
+          "how": "Instrument the share-and-invite mechanics you offer - send to partner, shared basket, co-browse link, registry invite - so the second person's engagement is attributable to a declared relationship rather than to a device match",
+          "requires": [
+            "invite or share events with a sender and a recipient id"
+          ],
+          "gives": "Timing and direction: who brought whom in, and when the second opinion arrived"
+        },
+        {
+          "rung": 4,
+          "how": "Record the second attendee at the in-home consultation, showroom visit, viewing, fitting or test drive on the appointment record",
+          "requires": [
+            "field or branch appointment system with an attendee field"
+          ],
+          "gives": "The off-website version, which for property, home improvement, automotive and finance is where household coordination is actually visible"
+        }
+      ],
+      "min_data": {
+        "min_declared_members": 2,
+        "note": "One declared member is an account, not a household. The declaration must name the basis; a shared surname or address is not a basis."
+      },
+      "access_conditions": [
+        "A relationship declared for one purpose does not license another - a second name captured for delivery or eligibility is not consent to market to that person",
+        "The second person's own contact details come from the first person; obtaining them is not the same as being allowed to use them",
+        "Never reconstruct household membership from device graphs, shared IP addresses or address matching; that class is excluded, not merely discouraged"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "explicit_consent",
+      "terms_constrained": false,
+      "terms_note": "The declaration is lawful to hold; contacting the second declared person on the strength of someone else's declaration generally needs that person's own basis.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "A declared relationship persists until it is withdrawn or changed, which is exactly why it must be re-confirmed rather than assumed: people separate, move and die, and nobody updates the plan record."
+      },
+      "false_positives": [
+        "A gift purchase in which the second name is a recipient, not a co-decider",
+        "A shared plan created to split cost between flatmates or colleagues who are not a household",
+        "An administrative proxy - an assistant, carer or adult child - transacting on someone's behalf",
+        "A registry contributor who is a guest rather than a member of the household",
+        "A second name added only to satisfy a credit, insurance or eligibility rule",
+        "A stale declaration left in place after a separation, bereavement or move",
+        "One person operating both accounts on a family plan"
+      ],
+      "confirmation_signals": [
+        "f07.consultation",
+        "f06.financing_calculation",
+        "f12.declared_occasion_date"
+      ],
+      "recommended_action_class": "address_both_declared_parties_and_offer_a_joint_appointment",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "household_change",
+          "occasion",
+          "property_or_relocation",
+          "travel",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_improvement",
+          "automotive",
+          "travel",
+          "financial_services",
+          "insurance",
+          "furniture",
+          "telecom"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated high because the declaration is explicit and identifies the second decider by name; no independent measurement of its predictive value was verified in this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "family": "F14",
+      "name": "Named referral or partner-sourced arrival",
+      "definition": "A new enquiry, signup or opportunity arrives carrying an identifiable human or organisational referrer - a referral code or link tied to a person, a 'how did you hear about us' answer that names someone, an introduction email, a reseller or partner deal registration, or an existing customer naming the person they sent. Qualifying condition: the referrer is a named party that can be resolved to a record, not a channel bucket such as 'word of mouth', 'direct' or 'organic'.",
+      "question_answered": "Which named people, firms and partners actually send us buyers - and does this particular deal already carry borrowed trust that we should not make the buyer re-earn?",
+      "intent_dimensions": [
+        "confidence",
+        "channel",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "referrer_identifier",
+        "referral_basis",
+        "first_touch_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "referral_code",
+        "partner_or_firm_id",
+        "introduction_thread_id",
+        "deal_registration_id",
+        "referrer_relationship_to_subject",
+        "referrer_client_count",
+        "downstream_outcome"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_backend",
+        "first_party_web",
+        "partner_feed"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Add a free-text 'who sent you?' box to the enquiry, signup or checkout you already have, store the raw string, and in parallel grep the last twelve months of CRM notes, inbound email and first-call notes for the phrases 'recommended', 'referred', 'suggested' and 'our accountant said'",
+          "requires": [
+            "one form field",
+            "read access to existing notes and inbound mail"
+          ],
+          "gives": "The referrals you already received are sitting unlabelled in text you own; this recovers them this week and produces the first version of the channel map"
+        },
+        {
+          "rung": 2,
+          "how": "Issue per-referrer codes or unique links to customers, advisors and partners so each referrer resolves to an id instead of forty spelling variants of a firm name",
+          "requires": [
+            "a code or link issuing mechanism and a referrer record"
+          ],
+          "gives": "Attribution that aggregates: you can rank referrers, not just count referrals"
+        },
+        {
+          "rung": 3,
+          "how": "Run a partner or reseller deal-registration form in which the partner submits the buyer before the deal starts",
+          "requires": [
+            "partner agreement",
+            "a registration form and a conflict rule"
+          ],
+          "gives": "A dated, contractual, attributable record of deals that never touch your website at all - the only reliable view of reseller-sourced demand"
+        },
+        {
+          "rung": 4,
+          "how": "Ask the question again in the first sales conversation and write it to a structured CRM field, then reconcile monthly against the free-text answers and codes",
+          "requires": [
+            "a required CRM field and a monthly reconciliation"
+          ],
+          "gives": "Closes the gap where the referral was verbal, off-website and would otherwise be recorded as 'direct'"
+        }
+      ],
+      "min_data": {
+        "min_resolved_referrers": 1,
+        "note": "One named referrer is enough to act on. Ranking referrers as a channel needs roughly 30 resolved referrals before the order means anything."
+      },
+      "access_conditions": [
+        "A partner-registered buyer arrives under the partner agreement; check whether their details may be used for direct marketing before the partner has made the introduction",
+        "Self-reported attribution is a memory test, not a measurement - it tells you which name the buyer trusts, not which touch caused the visit",
+        "Paying for referrals is regulated in several categories (financial advice, insurance, healthcare, legal) and may have to be disclosed to the buyer"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Who referred whom does not expire - it is the channel map, and it should accumulate. The urgency attached to the individual arrival decays with the enquiry and is scored by the signals that follow it, not by this one."
+      },
+      "false_positives": [
+        "An incentivised code redeemed by someone who had already decided, which buys a discount rather than sourcing a buyer",
+        "Self-referral: the buyer entering their own or a colleague's code",
+        "A staff member's name given because they answered the phone, not because they referred anyone",
+        "A defensive deal registration filed by a partner to lock margin on a deal they did not source",
+        "'A friend recommended it' as the socially acceptable answer that masks an ad click",
+        "Recency bias in self-reported attribution - the last touch remembered, not the one that mattered",
+        "An affiliate content site described by the buyer as a person"
+      ],
+      "confirmation_signals": [
+        "f14.advisor_involvement",
+        "f03.community_recommendation",
+        "f02.search_query"
+      ],
+      "recommended_action_class": "route_to_the_referrer_owner_and_shorten_the_proof_burden",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "professional_services",
+          "construction",
+          "healthcare",
+          "financial_services",
+          "home_services",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Published referral-value benchmarks are largely vendor material or paywalled academic work that could not be verified this session; the rating reflects the mechanism (borrowed trust plus a named human guarantor), not a measured lift."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f14.advisor_involvement",
+      "family": "F14",
+      "name": "Professional advisor or intermediary in the decision",
+      "definition": "A third party whose business is advising the buyer - accountant, bookkeeper, broker, financial adviser, solicitor, architect, specifier, engineer, consultant, managed service provider, agency, buying group or purchasing co-operative representative - participates in, recommends or controls the evaluation. Qualifying condition: a person or firm distinct from both buyer and seller appears in the transaction path in an advisory role, evidenced by an advisor-designated account, an introduction, a firm domain or credential, an advisor acting across several unrelated client accounts, or the buyer naming them.",
+      "question_answered": "Is the real decision being made by someone we are not talking to - and if so, is that advisor a channel we can serve directly, or one our competitor already serves?",
+      "intent_dimensions": [
+        "authority",
+        "confidence",
+        "channel",
+        "risk",
+        "readiness"
+      ],
+      "identity_level": "buying_group",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "account_id",
+        "advisor_person_or_firm_id",
+        "advisor_role_basis",
+        "relationship_observed_date"
+      ],
+      "optional_supporting_fields": [
+        "advisor_firm_domain",
+        "professional_credential_or_licence",
+        "shared_client_count",
+        "advisor_portal_account_id",
+        "advisor_initiated_flag",
+        "advisor_decision_rights",
+        "advisor_specialism"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_backend",
+        "partner_feed",
+        "public_record"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Run two queries against the users and contacts you already have: which accounts have a contact whose email domain is not the customer's own, and which single external address or firm domain appears across two or more unrelated customer accounts. Then add one question to the enquiry form and to onboarding - 'does an accountant, broker, agency or consultant advise you on this?' with a name field",
+          "requires": [
+            "existing users or contacts table",
+            "one form field"
+          ],
+          "gives": "Finds the advisors already sitting inside your customer book, this week, from data you own - a firm that appears on five unrelated accounts is a channel you did not know you had"
+        },
+        {
+          "rung": 2,
+          "how": "Make the advisor a first-class object: an advisor account type with its own login, client list and permissions, so the relationship is a record rather than an anomaly in a domain column",
+          "requires": [
+            "account model that supports a non-owner party with delegated access",
+            "client-linking flow the client approves"
+          ],
+          "gives": "relationship start date, shared client counts and advisor-initiated signups, and it converts an invisible influencer into an addressable channel"
+        },
+        {
+          "rung": 3,
+          "how": "Run a formal adviser or partner programme with enrolment terms, a directory listing and referral or margin terms; the enrolment record itself becomes the signal source",
+          "requires": [
+            "programme terms",
+            "a directory",
+            "someone who owns the advisor relationship"
+          ],
+          "gives": "One advisor relationship spans many clients and persists for years, so this is an acquisition channel and a signal source at the same time - in categories such as small-business payroll, bookkeeping, insurance and specification-led construction it is frequently the dominant route to purchase and the one most sellers never instrument"
+        },
+        {
+          "rung": 4,
+          "how": "Corroborate a named advisor against lawful public sources - professional body registers, licence and registration records, public firm directories - to confirm the firm is real and practising before investing in the relationship",
+          "requires": [
+            "manual or terms-compliant lookup against a public register"
+          ],
+          "gives": "Verification of an advisor you already know about; it does not enumerate advisors for cold outreach and must not be used that way"
+        }
+      ],
+      "min_data": {
+        "min_shared_clients_for_channel_status": 2,
+        "note": "One external contact is an observation. The same firm on two or more unrelated accounts is an advisory channel, and that is the threshold worth alerting on."
+      },
+      "access_conditions": [
+        "An advisor acting for a client is usually contractually or professionally barred from sharing that client's data with you; the relationship is obtained by asking the client or the advisor, never by harvesting",
+        "Public credential registers exist to let people verify a named professional; bulk extraction for prospecting is normally outside their terms",
+        "In regulated advice - financial, legal, insurance, medical - the advisor owes duties to the client, and any incentive you offer may itself be regulated, disclosable, or prohibited",
+        "Delegated access granted by a client to an advisor is the client's to withdraw; treat the client, not the advisor, as the data subject"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Rung 4 public registers publish for verification purposes and commonly forbid systematic extraction; rung 2 delegated access is governed by the client's authorisation.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "An advisor relationship lasts years and shapes every purchase the client makes in the category, so it should be stored as a standing fact - but re-verified annually, because clients and advisors part company without telling you."
+      },
+      "false_positives": [
+        "A bookkeeper or agency contact who administers billing but has no say in what is bought",
+        "A one-off implementation contractor mistaken for a standing advisor",
+        "An employee using a personal or agency email address",
+        "An advisor named as a deflection - 'I'd have to ask my accountant' - where no such conversation will happen",
+        "A reseller registering as an advisor to claim margin on a deal they did not influence",
+        "A shared external domain that is a group holding company or shared services centre rather than an advisory firm",
+        "A former advisor whose engagement ended and whose access was never revoked"
+      ],
+      "confirmation_signals": [
+        "f14.referral_source_named",
+        "f14.buying_group_formation",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "serve_the_advisor_as_a_channel_not_as_an_obstacle",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "regulation",
+          "problem",
+          "contract_expiry",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "accounting_and_payroll",
+          "financial_services",
+          "insurance",
+          "construction",
+          "legal_services",
+          "managed_it",
+          "healthcare",
+          "agriculture"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 5 because the advisor frequently holds the decision rather than influencing it, and because the relationship predicts repeat purchases across many clients. Category-level share-of-purchase figures for advisor channels are vendor-published where they exist and none was verified this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f14.internal_approval_step",
+      "family": "F14",
+      "name": "Internal approval or procurement step reached",
+      "definition": "The buyer moves a purchase into their own authorisation machinery: requesting a formal quote addressed to finance, a supplier-onboarding or tax form, a certificate of insurance, references, a security or privacy questionnaire, a data-processing agreement, a requisition or PO number, or explicitly looping in procurement, legal, security or finance. Qualifying condition: an artefact or step whose only purpose is internal authorisation is requested, produced or dated.",
+      "question_answered": "Has this deal entered the buyer's approval process, what is the actual gating step, and what date is it gated to?",
+      "intent_dimensions": [
+        "authority",
+        "commitment",
+        "readiness",
+        "timing",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "approval_artefact_type",
+        "request_timestamp",
+        "requesting_person_id"
+      ],
+      "optional_supporting_fields": [
+        "approval_stage_name",
+        "required_by_date",
+        "approver_role",
+        "fiscal_period",
+        "requisition_or_po_number",
+        "procurement_portal_name",
+        "artefact_returned_timestamp"
+      ],
+      "source_class": [
+        "crm",
+        "support_system",
+        "first_party_backend",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Tag the requests you already receive. Every 'please send a supplier form / tax form / insurance certificate / security questionnaire / a formal quote for our finance team' arrives today in a shared inbox or ticket queue, is answered, and is then deleted. Add a ticket tag or CRM checkbox per artefact type",
+          "requires": [
+            "shared inbox or ticketing system",
+            "a five-item tag taxonomy"
+          ],
+          "gives": "The strongest late-stage signal in the family, this week, with no new systems and no instrumentation"
+        },
+        {
+          "rung": 2,
+          "how": "Instrument the artefact surfaces themselves - a trust or security page with a downloadable questionnaire pack, a 'get a formal quote' flow, a vendor-onboarding document pack - so the request becomes a timestamped event with an account attached",
+          "requires": [
+            "hosted artefacts behind an identified request"
+          ],
+          "gives": "Detects approval activity that currently happens silently, including buyers who self-serve the paperwork without emailing anyone"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the buyer's stated process on the opportunity in two structured fields the rep fills after every call: next_approval_step and required_by_date, plus approver role and fiscal period",
+          "requires": [
+            "two CRM fields and the discipline to fill them"
+          ],
+          "gives": "Beats any inferred model, because the buyer already knows the answer and will usually say it if asked; these are the fields most commonly missing from otherwise mature CRMs"
+        },
+        {
+          "rung": 4,
+          "how": "Where you sell to public sector or large enterprise, register as a supplier in the buyer's procurement portal and read the requisition, tender and PO status it emits",
+          "requires": [
+            "supplier registration",
+            "portal access under its terms"
+          ],
+          "gives": "The approval process observed directly rather than reported, including steps the champion never mentions"
+        }
+      ],
+      "min_data": {
+        "min_artefacts": 1,
+        "note": "One approval artefact is a signal on its own. Two or more within a fortnight, from different people, is the pattern that separates a live approval from routine paperwork."
+      },
+      "access_conditions": [
+        "Rung 4 requires supplier registration and is bounded by the portal's terms of use",
+        "Some buyers forbid vendors from discussing the internal approval chain; record only what the buyer volunteers",
+        "A returned questionnaire may contain the buyer's confidential security posture; storing it in a CRM field is a data-handling decision, not an admin one"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "An approval step is a dated gate that clears, stalls or dies inside a budget cycle. A questionnaire sent ninety days ago and never returned is evidence of a stall, not of intent, and should score downward rather than persist."
+      },
+      "false_positives": [
+        "Paperwork collected to satisfy a policy requiring competing quotes, where the decision already favours someone else",
+        "An annual supplier-record refresh for an existing vendor",
+        "A junior employee gathering documents speculatively with no budget behind them",
+        "A security questionnaire sent to every vendor in a category as part of a market scan",
+        "A renewal that must pass the same gates as a new purchase",
+        "A consultant running a procurement exercise for a buyer who has already chosen",
+        "A tender published to satisfy a public procurement rule with an incumbent in place"
+      ],
+      "confirmation_signals": [
+        "f06.quote_request",
+        "f08.billing_setup",
+        "f14.stakeholder_role_coverage"
+      ],
+      "recommended_action_class": "arm_the_champion_with_the_approval_pack_and_date_the_gate",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "contract_expiry",
+          "regulation",
+          "funding"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "public_sector",
+          "healthcare",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 5 on the mechanism: the artefacts have no purpose other than authorising a purchase. No verified independent measurement of conversion given an approval artefact was found this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f14.stakeholder_role_coverage",
+      "family": "F14",
+      "name": "Stakeholder role coverage on the opportunity",
+      "definition": "The set of named people attached to an open opportunity, scored against the roles the purchase actually requires - end-user champion, technical approver, security, legal, procurement, finance or economic buyer, implementation owner - together with how that coverage changes over time. Qualifying condition: contact roles are recorded against the opportunity; the signal is coverage, recency and change, not the raw number of contacts.",
+      "question_answered": "Which decision role is missing from this deal, and is the whole thing resting on one person who has gone quiet?",
+      "intent_dimensions": [
+        "authority",
+        "risk",
+        "confidence",
+        "readiness",
+        "identity_scope"
+      ],
+      "identity_level": "buying_group",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "opportunity_id",
+        "contact_id",
+        "contact_role",
+        "role_added_date"
+      ],
+      "optional_supporting_fields": [
+        "job_title",
+        "seniority",
+        "last_meaningful_interaction_per_contact",
+        "champion_flag",
+        "role_removed_date",
+        "required_role_checklist_id",
+        "reports_to_contact_id"
+      ],
+      "source_class": [
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Report on what the CRM already holds: distinct contact roles per open opportunity, and a single-threaded flag for any deal with one contact or with every contact in one department",
+          "requires": [
+            "CRM report or export"
+          ],
+          "gives": "A report, not a project - and it usually shows that a large share of open pipeline is single-threaded, which is the finding that changes behaviour"
+        },
+        {
+          "rung": 2,
+          "how": "Define a required-role checklist per deal type and make the missing role a structured field the rep must set, rather than a sentence in a note",
+          "requires": [
+            "role taxonomy agreed with sales",
+            "one picklist field"
+          ],
+          "gives": "Coverage becomes comparable across deals and across reps, so the gap is a queue rather than an anecdote"
+        },
+        {
+          "rung": 3,
+          "how": "Add per-contact engagement recency - the date of the last meaningful interaction with each named person - so a static org chart becomes a live map",
+          "requires": [
+            "activity records joined to contacts"
+          ],
+          "gives": "Detects the champion who has gone quiet, which is the most common silent loss and is invisible in a coverage count alone"
+        },
+        {
+          "rung": 4,
+          "how": "Reconcile the recorded map against reality using sources outside the CRM: attendee lists on the seller's own meetings, participants on the seller's own email threads, and the buyer's publicly stated org information",
+          "requires": [
+            "meeting and mail records joined to the account",
+            "terms-compliant use of public profile data"
+          ],
+          "gives": "Surfaces people who are involved in the decision but never filled in a form, which is where the missing economic buyer usually is"
+        }
+      ],
+      "min_data": {
+        "min_contacts_scored": 1,
+        "note": "Coverage can be computed from one contact - a lone contact is the finding. What it cannot survive is a CRM where absent roles mean absent data entry, so pair it with a fill-rate measure before trusting any trend."
+      },
+      "access_conditions": [
+        "Rung 4 uses the seller's own communication records; reading anything inside the buyer's systems is not an available source",
+        "Automated collection of job titles and reporting lines from professional profile sites is bounded by those sites' terms and is commonly prohibited outright"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Public professional-profile data is contractually restricted by the hosting platform even where it is visible without login.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 2,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "Role coverage is only as fresh as the last time a human updated the opportunity. Treat a map untouched for a month as unknown rather than as complete - the decay here is in the record, not in the buyer."
+      },
+      "false_positives": [
+        "An unmaintained CRM in which an absent role means absent data entry, not an absent person",
+        "Contact roles auto-populated by an integration and never verified by anyone",
+        "A marketing list upload inflating apparent coverage with people who have no part in the deal",
+        "Duplicate contact records counted as separate stakeholders",
+        "A recorded economic buyer who is a rubber stamp, while the real decider never appears in the system",
+        "Roles copied forward from a cloned opportunity template",
+        "A large account team on the seller's side mistaken for engagement on the buyer's side"
+      ],
+      "confirmation_signals": [
+        "f14.buying_group_formation",
+        "f14.internal_approval_step",
+        "f07.demo"
+      ],
+      "recommended_action_class": "name_the_missing_role_and_task_the_champion_with_the_introduction",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "contract_expiry",
+          "problem",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "manufacturing",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Strength reflects the diagnostic value of a missing role; reliability is deliberately low because the underlying CRM field is optional in most implementations and its fill rate, not the buyer's behaviour, determines what you see."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

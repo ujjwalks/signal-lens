@@ -1,0 +1,1558 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F12",
+  "signals": [
+    {
+      "id": "f12.declared_relocation",
+      "family": "F12",
+      "name": "Declared or publicly recorded relocation",
+      "definition": "The subject states a move - a new service address, a stated move-in or move-out date, a transfer-of-service request, a moving reason code on a cancellation - or a property transfer for an address in your service area appears in an open land or deeds register. Qualifying condition: a dated address change the subject supplied for a service purpose, or a recorded property transaction joined at address level. A changed IP geography, a one-off different shipping address, or a guess from browsing is not this signal.",
+      "question_answered": "Which customers and prospects have a move on a known date, and what will they have to buy, re-buy or transfer around it?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing",
+        "readiness",
+        "identity_scope"
+      ],
+      "identity_level": "household",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "previous_address",
+        "new_address",
+        "address_change_effective_date"
+      ],
+      "optional_supporting_fields": [
+        "declaration_source",
+        "move_direction_in_or_out",
+        "service_transfer_ticket_id",
+        "distance_between_addresses_km",
+        "dwelling_type_declared",
+        "prior_order_history",
+        "cancellation_reason_code"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "support_system",
+        "public_record",
+        "offline_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Diff the service and delivery address across consecutive orders, invoices and tickets you already store; a changed billing-and-shipping pair on one account is a candidate move. Confirm it on the next contact rather than assuming it.",
+          "requires": [
+            "an order, billing or ticket table that keeps a dated address history"
+          ],
+          "gives": "A post-sale mover list built entirely off-website from records you already hold, available this week and with no new collection at all"
+        },
+        {
+          "rung": 2,
+          "how": "Add one optional 'moving date' field to the flows where a move is already the reason for the contact - service transfer, cancellation reason, delivery reschedule, new-customer signup - and store it as a declared date, not free text.",
+          "requires": [
+            "one form or CRM field",
+            "a reason-code list on cancellations"
+          ],
+          "gives": "A dated, purpose-declared trigger with a forward timeline instead of an after-the-fact diff"
+        },
+        {
+          "rung": 3,
+          "how": "Train the offline touchpoints - counter staff, installers, field service, phone agents - to record 'moving' as a structured reason code with a date instead of a note, and sync it nightly into the same field as rung 2.",
+          "requires": [
+            "a POS, field-service or call-handling app with an editable reason list",
+            "a nightly export"
+          ],
+          "gives": "The customers who never touch the website, which is where a move is usually mentioned first"
+        },
+        {
+          "rung": 4,
+          "how": "Join publicly recorded property transactions - deed and land-registry transfers, tenancies marked let-agreed - to the addresses in your service area at LOCATION identity, and use them to time area-level activity, not to name an occupier.",
+          "requires": [
+            "a jurisdiction whose register is genuinely open",
+            "address normalisation against your own service polygons"
+          ],
+          "gives": "Prospect-side coverage - movers who are not customers yet - at address level with no person identified"
+        },
+        {
+          "rung": 5,
+          "how": "Take a mover feed from a partner whose customers opted in to being contacted about services at the new address: a utility switch, a conveyancer, a removals firm, a letting agent.",
+          "requires": [
+            "a partner contract",
+            "an opt-in whose wording names your category"
+          ],
+          "gives": "Named, consented prospects. The opt-in wording is the whole asset, and it is where this deal usually fails"
+        }
+      ],
+      "min_data": {
+        "min_address_history_depth": 2,
+        "note": "Rung 1 needs at least two dated addresses on one subject before a diff means anything."
+      },
+      "access_conditions": [
+        "Rung 4 varies wildly by jurisdiction: land registers are broadly open in the US and in England and Wales, closed or fee-gated elsewhere. Openness is a cost fact, not permission to market to a named owner.",
+        "A mover feed is only usable where the consumer's opt-in actually names your category; a generic 'offers from partners' consent will not survive a complaint.",
+        "Address history must be retained for a purpose of its own. Keeping a move history solely so it can be marketed at is the version that fails a review."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Bulk reuse of an open land register is governed by that register's own licence, which commonly forbids direct-marketing use even where access costs nothing.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "Moving demand concentrates in the weeks either side of the move date and is largely spent within three months of it; the address itself persists but stops being a trigger."
+      },
+      "false_positives": [
+        "A billing-address change that is a payment-method change, not a move",
+        "A second address added for a holiday home, a student term address or a workplace delivery",
+        "A gift order shipped elsewhere, read as the buyer's new address",
+        "A business account whose delivery address changed because a depot moved",
+        "A recorded property transfer to a landlord, investor or trust where nobody moves in",
+        "A proxy - a relative or agent - handling the move admin on someone else's behalf"
+      ],
+      "confirmation_signals": [
+        "f09.installation_scheduling",
+        "f09.delivery_preparation"
+      ],
+      "recommended_action_class": "time_an_offer_to_the_stated_move_date_and_reverify_the_address",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "life_event",
+          "household_change",
+          "property_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_services",
+          "retail",
+          "furniture",
+          "telecom",
+          "insurance",
+          "utilities",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A dated move is one of the few consumer triggers that forces a bounded list of purchases within a known window. No independent measurement is cited, so this clamps to the neutral midpoint."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "High when declared, materially lower on the address-diff path, which is the rung most companies will actually be on."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.declared_wedding_or_registry",
+      "family": "F12",
+      "name": "Declared wedding, registry, or life-celebration date",
+      "definition": "A couple, or a guest acting for them, declares a celebration with a date - a wedding, civil partnership, anniversary, naming or coming-of-age event - by entering it on a booking, quote, appointment or registry form you control, or by publishing a gift registry they deliberately made publicly searchable and opted into partner contact from. Qualifying condition: an event date the subject supplied so they could be served for that event. Marriage inferred from behaviour - ring browsing, venue searches, a change in purchase mix - is not this signal and has no entry in this catalogue.",
+      "question_answered": "Which households have a dated celebration coming up, how big is it, and what is still unbought for it?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "budget",
+        "identity_scope"
+      ],
+      "identity_level": "household",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "event_type_declared",
+        "event_date",
+        "declaration_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "guest_count_declared",
+        "event_location",
+        "registry_id",
+        "registry_items_remaining",
+        "budget_band_declared",
+        "role_declared_couple_or_guest",
+        "co_planner_contact_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "crm",
+        "partner_feed",
+        "marketplace"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Add an event-type and event-date field to the forms you already run - quote request, appointment booking, custom-order brief, enquiry form - and store the date as a first-class field instead of a sentence in a notes box.",
+          "requires": [
+            "one form field and one column"
+          ],
+          "gives": "A dated forward book you can staff, stock and price against, live this week, with no tracking of any kind"
+        },
+        {
+          "rung": 2,
+          "how": "Turn your own wish-list into a registry: let a customer name an event, set a date, share a link, and let guests mark items bought.",
+          "requires": [
+            "a wish-list feature",
+            "a shareable link and a bought/unbought state per item"
+          ],
+          "gives": "Both sides at once - the couple's dated need, and a self-selecting group of guests who arrive already intending to buy"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the event at the offline counter. Consultations, tastings, fittings and site visits all begin with a date; record it as a structured field in the booking system rather than on paper.",
+          "requires": [
+            "a booking or appointment system with an editable field",
+            "a habit, enforced at the counter"
+          ],
+          "gives": "The path for businesses whose customers never complete a web form, which is most of this category"
+        },
+        {
+          "rung": 4,
+          "how": "Join a registry or event-marketplace partner programme where the couple chose to list publicly and opted into being contacted by suppliers in your category.",
+          "requires": [
+            "a partner contract",
+            "an opt-in that names your category",
+            "your category actually being listed"
+          ],
+          "gives": "Prospect-side reach beyond your own customers, in exchange for a dependency and a supply of leads you do not control"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "A public registry is a directory for the couple's guests, not a marketing list. Registry platforms' terms almost universally prohibit harvesting, so rung 4 is a partner relationship and never a scrape.",
+        "The declaration licenses you to serve the event. It is not licence to derive a relationship-status attribute, join the two people into a couple record, or keep either fact after the event.",
+        "Where the celebrant may be a minor - proms, confirmations, coming-of-age parties - the counterparty is the parent; do not retain the child as a subject.",
+        "A cancelled event is the one case where silence is the correct behaviour. Build a stop, not a win-back."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Publicly visible registries and event listings are near-universally terms-restricted against bulk collection; treat them as partner-access-only regardless of whether they are technically readable.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "expires_on": "event_date",
+        "note": "Every purchase for the event must happen before the event. The date is the expiry, not a decay curve; the next opening is the anniversary, a year later."
+      },
+      "false_positives": [
+        "A guest, planner or parent researching on the couple's behalf, whose own intent ends with one gift",
+        "A competitor or supplier testing your quote form with a fictional date",
+        "A placeholder date - 'sometime next summer' - that was never firmed up",
+        "An event cancelled or postponed without anyone telling you",
+        "A corporate or trade event entered through a consumer wedding flow",
+        "A vendor listing themselves in a registry programme to see the leads"
+      ],
+      "confirmation_signals": [
+        "f12.gift_purchase_declared",
+        "f14.household_coordination"
+      ],
+      "recommended_action_class": "plan_capacity_to_the_declared_date_and_serve_the_guest_side_as_a_separate_motion",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "life_event",
+          "occasion",
+          "household_change"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "hospitality",
+          "events",
+          "jewellery",
+          "travel",
+          "home_furnishings",
+          "photography",
+          "food_and_drink"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A declared event date with a guest count is close to a purchase order in everything but name; the estimate is high on that reasoning alone and clamps for want of a measurement."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The date is declared, so it is accurate; what is unreliable is whether the event still happens and whether the declarer is the buyer."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.declared_trip_dates",
+      "family": "F12",
+      "name": "Declared travel dates and destination",
+      "definition": "The subject states that they will be away, or elsewhere, on specific dates: a dated itinerary already sitting in your own transaction record, travel dates entered on a form, a delivery hold they set, or a calendar or itinerary they explicitly connect for a feature they asked for. Qualifying condition: a departure or return date attached to a subject. A destination inferred from IP geography, language settings, roaming behaviour or content browsing is not this signal.",
+      "question_answered": "Who has a trip on a known date, and what do they need to buy before they leave, while they are away, and on the way back?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "channel",
+        "readiness"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "travel_start_date",
+        "travel_end_date",
+        "declaration_source"
+      ],
+      "optional_supporting_fields": [
+        "destination_country_or_region",
+        "accompanying_party_count",
+        "trip_purpose_declared",
+        "booking_reference",
+        "departure_point",
+        "transport_mode",
+        "delivery_hold_window"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "first_party_web",
+        "user_authorized_connection",
+        "partner_feed",
+        "offline_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "If you sell anything dated - a booking, a ticket, a rental, a hire, a delivery hold - the dates are already in your order table. Query it as a forward calendar of who is away when, and work backwards from each departure.",
+          "requires": [
+            "an order or booking table with start and end dates"
+          ],
+          "gives": "A post-sale trigger list from records you already own, off-website, with zero new collection"
+        },
+        {
+          "rung": 2,
+          "how": "Ask the date where it genuinely helps the customer: 'when do you travel?' on a quote form, 'hold my deliveries from' on the account page, 'when do you need this by?' at checkout.",
+          "requires": [
+            "one date pair on a form the customer already uses"
+          ],
+          "gives": "Dated intent across the pre-trip window, declared for a purpose the customer can see the point of"
+        },
+        {
+          "rung": 3,
+          "how": "Record travel taken offline - the agent call, the branch counter, the concierge desk, the WhatsApp enquiry - as the same structured date pair rather than as notes.",
+          "requires": [
+            "a shared field in the CRM or booking tool",
+            "agent training"
+          ],
+          "gives": "Phone- and branch-originated trips, which for most travel-adjacent businesses is the majority and is entirely invisible to web analytics"
+        },
+        {
+          "rung": 4,
+          "how": "Offer a connection the traveller authorises because it powers something they want: a calendar or itinerary link behind automatic delivery holds, trip reminders, roaming setup or insurance dating.",
+          "requires": [
+            "an OAuth or forwarding-address integration",
+            "explicit consent",
+            "hard purpose limitation and a short retention window"
+          ],
+          "gives": "Trips you never sold, at the price of holding travel data you must scope, minimise and delete"
+        },
+        {
+          "rung": 5,
+          "how": "Take an opted-in feed from a travel partner - a carrier, an online agency, a corporate travel desk - where the traveller consented to being served by your category at their destination.",
+          "requires": [
+            "a partner contract",
+            "an opt-in you can evidence",
+            "a destination-to-catalogue mapping"
+          ],
+          "gives": "Prospect coverage beyond your own base, with third-party dependence and a consent you must be able to prove years later"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Rungs 4 and 5 need explicit consent, not notice; the entry-level permission on this row describes rungs 1-3 only.",
+        "A connected calendar is for the feature the user asked for. Deriving anything else from it - who they meet, where they live, how often they fly, who they fly with - is a separate purpose that consent does not cover.",
+        "Travel dates disclose absence from a home address. Treat the store as a security problem, not a marketing asset, and do not expose it in any surface a third party can read.",
+        "Corporate travel data usually belongs to the employer under a contract, not to the traveller. Check whose permission is actually operative before treating the traveller as the data subject who consented."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "expires_on": "travel_end_date",
+        "note": "The pre-trip need dies at departure and two different ones open behind it - in-destination, then return. Treat the dates as three windows, not one score."
+      },
+      "false_positives": [
+        "A trip booked for someone else: a parent for a student, an assistant for an executive, a host for a visitor",
+        "A held or speculative booking that is never ticketed",
+        "A cancelled trip your record never hears about",
+        "A business trip where the employer supplies everything and the traveller buys nothing",
+        "A regular commute or a second-home stay read as a holiday",
+        "A travel agent or corporate booker whose calendar is full of other people's trips"
+      ],
+      "confirmation_signals": [
+        "f09.delivery_preparation",
+        "f05.eligibility_check"
+      ],
+      "recommended_action_class": "sequence_pre_trip_in_trip_and_return_offers_against_the_declared_dates",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "travel",
+          "occasion",
+          "life_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "travel",
+          "retail",
+          "insurance",
+          "telecom",
+          "pet_services",
+          "home_services",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Dated absence forces a small, predictable basket in adjacent categories; strength is category-dependent and no independent measurement is cited."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The date is declared and therefore accurate; the weakness is attribution - whose trip it is."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.education_enrolment_cycle",
+      "family": "F12",
+      "name": "Declared enrolment joined to an academic calendar",
+      "definition": "A subject declares an education fact - a course or programme start, an institution, a stage or year group, an exam sitting, a graduation - and that declaration is joined to the published calendar of the institution or region it belongs to, producing dated windows: term start, half-term, exam period, results, graduation. Qualifying condition: an enrolment fact supplied by the student or their parent, or a published institutional calendar joined to a declared location. Deducing that someone is a student from their browsing, email domain or purchase mix is not this signal.",
+      "question_answered": "Which customers are heading into a term start, a course start or an exam, and how many weeks before it do they actually buy?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "budget",
+        "fit"
+      ],
+      "identity_level": "individual",
+      "data_class": "calendar_join",
+      "required_raw_fields": [
+        "subject_id",
+        "declared_education_stage_or_institution",
+        "term_or_course_start_date",
+        "calendar_source_id"
+      ],
+      "optional_supporting_fields": [
+        "programme_or_course_name",
+        "year_group_declared",
+        "exam_or_assessment_dates",
+        "campus_or_region",
+        "payer_account_id",
+        "prior_year_order_history",
+        "declared_attribute_expiry_date"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "first_party_web",
+        "public_record",
+        "partner_feed",
+        "offline_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Aggregate your own order dates by week for the last two years and read off the seasonal shape your customers already have. You get a dated demand curve you can staff and stock against without knowing anything about any individual.",
+          "requires": [
+            "one year of order dates"
+          ],
+          "gives": "The whole trigger, for the whole base, from the order table - no personal data, no instrumentation, no vendor"
+        },
+        {
+          "rung": 2,
+          "how": "Maintain a small table of term start, half-term, exam, results and graduation dates for the institutions and regions you actually serve, refreshed once a year from the institutions' own published calendars, and join it to the customer's declared region.",
+          "requires": [
+            "a maintained calendar table, typically tens of rows",
+            "a declared country or region on the record"
+          ],
+          "gives": "Exact dates rather than a smoothed average, off-website and cost-free, from calendars published for everyone"
+        },
+        {
+          "rung": 3,
+          "how": "Ask once, at signup or on the account page, which stage or institution applies - 'who is this for, and which year?' - and store it as a declared attribute with an explicit expiry date so it cannot silently rot.",
+          "requires": [
+            "one optional field",
+            "an annual re-confirmation prompt"
+          ],
+          "gives": "Per-customer dates instead of market-wide ones, and a field the customer can correct"
+        },
+        {
+          "rung": 4,
+          "how": "Record enrolment at the offline touchpoint - the shop counter at back-to-school, the phone order, the parent evening stand - into the same field as rung 3.",
+          "requires": [
+            "a loyalty or account identifier used offline"
+          ],
+          "gives": "The seasonal customers who buy in person once a year and never appear in any digital stream"
+        },
+        {
+          "rung": 5,
+          "how": "Enter an institutional or campus programme: a departmental purchasing relationship, a campus reseller agreement, or a student-status verification programme the student starts themselves.",
+          "requires": [
+            "a contract with the institution or a verification partner",
+            "a student-initiated verification step"
+          ],
+          "gives": "Named cohorts with real dates, plus a B2B motion against the institution as a buyer in its own right"
+        }
+      ],
+      "min_data": {
+        "min_seasons_of_history_for_rung_1": 1,
+        "note": "One full academic year of order dates is enough to see the shape; two lets you separate the calendar from a one-off promotion."
+      },
+      "access_conditions": [
+        "Where the student is a minor the counterparty is the parent. Do not build a profile on the child, and do not retain the child's name, school or year group beyond what the transaction needs.",
+        "A published academic calendar is an institutional fact, not personal data - the join is free and lawful. The declared institution attached to a named person is personal data and needs the usual basis and the usual notice.",
+        "Student-status verification has to be initiated by the student. Inferring student status from an email domain and then treating it as verified is both a discount-fraud hole and an unfair-processing problem.",
+        "The year-group attribute is wrong by default every September. Give it an expiry rather than a last-updated timestamp nobody reads."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "The buying window around a term or course start is a few weeks wide. The underlying enrolment fact persists but must be re-confirmed annually, because year groups advance whether or not your database notices."
+      },
+      "false_positives": [
+        "A parent, grandparent or guardian buying for a student, whose own needs and price sensitivity differ",
+        "An adult learner or corporate trainee misread as part of a school cohort",
+        "A stale year group - the attribute expires silently every autumn",
+        "An institutional calendar that does not apply to this person's campus, course or country",
+        "A teacher, administrator, tutor or bookseller whose seasonality is identical to a student's",
+        "A discount-seeker claiming student status they do not have"
+      ],
+      "confirmation_signals": [
+        "f11.replenishment_due",
+        "f05.requirement_formation"
+      ],
+      "recommended_action_class": "stock_and_message_to_the_term_calendar_and_reconfirm_the_year_group_annually",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "education",
+          "occasion",
+          "life_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "education",
+          "technology",
+          "apparel",
+          "financial_services",
+          "real_estate",
+          "transport"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The calendar creates a hard deadline but a modest basket for most categories; rated mid and clamped for want of an independent measurement."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Published calendars are exact. The error is in the join - which calendar applies to this person - and in the annual rot of the year-group field."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.declared_care_episode_scheduling",
+      "family": "F12",
+      "name": "Care or service episode scheduled by the person with their own provider",
+      "definition": "A person who is already your patient, client or customer gives you a date for an episode you yourself deliver or supply - an appointment they booked with your desk, a re-supply date they set, a review date they agreed - so that you can deliver it. Qualifying condition: the date is a transactional fact created inside the service relationship and used only to run that relationship. Nothing about condition, diagnosis, treatment stage or clinical trajectory may be derived from browsing, purchase mix, content consumption, search terms or any third-party feed. That class is prohibited and is documented at restricted.health_status_inference; this row is the declared, first-party alternative and it does not extend to anyone who is not the provider.",
+      "question_answered": "Which of our own patients or clients have an episode booked that we must prepare, supply, staff or remind for, and when?",
+      "intent_dimensions": [
+        "timing",
+        "readiness",
+        "urgency",
+        "need"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "episode_date",
+        "episode_type_as_booked",
+        "booking_channel"
+      ],
+      "optional_supporting_fields": [
+        "preparation_items_required",
+        "prior_episode_date",
+        "declared_cadence_days",
+        "preferred_reminder_channel",
+        "site_or_clinic_id"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "offline_system",
+        "support_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read the forward book you already keep. The scheduling system holds dates; take a purpose-limited extract of date, site and the coarsest episode label that lets you prepare, and use it only to supply, staff and remind for that appointment.",
+          "requires": [
+            "the scheduling system you already run",
+            "an extract that is not a copy of the clinical record",
+            "a retention rule that deletes after the episode"
+          ],
+          "gives": "The entire lawful signal, this week, without touching anyone's condition or adding a single tag to a page"
+        },
+        {
+          "rung": 2,
+          "how": "Let the person set their own next date or re-supply cadence as a preference they can see, change and switch off - a next-review date, a repeat-supply interval, a reminder lead time.",
+          "requires": [
+            "a self-service preference the person controls",
+            "an unsubscribe that is honoured across every channel"
+          ],
+          "gives": "A declared cadence that keeps the person in control of the trigger, which is also the only version that survives a complaint"
+        },
+        {
+          "rung": 3,
+          "how": "Record the offline half of the book - phone bookings, walk-ins, referrals taken at the desk, home visits - as the same structured fields in the same system.",
+          "requires": [
+            "front-desk and field-staff process",
+            "one shared schema"
+          ],
+          "gives": "Coverage of the majority of episodes in most care and field-service settings, none of which originate online"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "This row covers only the party delivering or supplying the episode. If you are not that party, there is no lawful version of this signal for you and nothing here transfers - buying, licensing or inferring the same field from outside the relationship is the prohibited class.",
+        "Never derive an episode, condition or stage from web behaviour, purchase mix, content consumption, search terms or device signals. That is restricted.health_status_inference and it is excluded from this catalogue by design.",
+        "Do not export, hash, upload, segment, model or mirror this field into any advertising platform, lookalike audience, analytics product or third-party pixel. A third-party tag on a booking or symptom page is the exact fact pattern regulators have acted on.",
+        "Keep the episode type at the coarsest granularity that still lets you deliver the service, and delete it when the episode is done. A date needs no diagnosis attached to be useful.",
+        "Where a carer, parent or proxy books, the data belongs to the person receiving care, not to the booker, and reminders must go where the patient chose - not to whoever filled in the form."
+      ],
+      "availability": "user_permission",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Health, care and pharmacy records sit under sector regimes - HIPAA and state consumer-health-data statutes in the US, GDPR Art. 9 with a national health condition in the EEA and UK. A marketing use is a new purpose, not a continuation of the care purpose, and needs its own basis.",
+      "sensitivity": "high",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "expires_on": "episode_date",
+        "note": "The date is the expiry. Once the episode is delivered there is no residual profile worth keeping - delete rather than decay, because the retained version is the liability."
+      },
+      "false_positives": [
+        "A carer, parent or proxy booking on someone else's behalf, so the reminder reaches the wrong person",
+        "A cancelled or rescheduled episode that the reminder job never learns about",
+        "A routine or administrative appointment read as something clinical",
+        "A duplicate booking made across two channels by the same person",
+        "A staff or partner test booking left in the live system",
+        "A shared household contact detail, which turns a private reminder into a disclosure"
+      ],
+      "confirmation_signals": [
+        "f11.replenishment_due"
+      ],
+      "recommended_action_class": "prepare_and_remind_for_the_booked_episode_only_never_profile_never_export_to_ad_platforms",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "services",
+          "subscription",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "health",
+          "life_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "healthcare",
+          "dental",
+          "optical",
+          "veterinary",
+          "home_services",
+          "wellness"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "permission_requirement",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Washington's My Health My Data Act, chapter 19.373 RCW, governs collection and sharing of consumer health data (19.373.030) and requires a separate valid authorization to sell it (19.373.070), which is why this row is regulated_access even though the person supplied the date themselves."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A booked episode reliably drives a small, specific set of preparation purchases; the estimate is deliberately conservative and clamps."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "It is a transaction in your own book, so the fact is near-certain; the residual error is cancellation and proxy booking."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.household_consumption_rate",
+      "family": "F12",
+      "name": "Household consumption rate at a delivery address",
+      "definition": "The rate at which a household gets through a product, computed from its own repeat purchases at one delivery or service address: units per interval, and days elapsed between orders of the same item or its substitutes. Qualifying condition: at least two dated purchases of the same item by the same account or address, with a known pack quantity. The signal is about volume and timing only. Deriving who lives at the address, how many people, their ages or their relationships from consumption is prohibited and is documented at restricted.household_composition_inference. Scope: the unit of this row is a delivery or service address, because a retail order record resolves to a household and not to a person. The person-keyed and asset-keyed forms of the same projection are f11.replenishment_due. The two are kept apart because the address-keyed form is one query away from restricted.household_composition_inference and the person-keyed form is not.",
+      "question_answered": "When will this household run out, and how much do they actually get through in a month?",
+      "intent_dimensions": [
+        "timing",
+        "need",
+        "readiness",
+        "budget",
+        "identity_scope"
+      ],
+      "identity_level": "household",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "household_or_address_id",
+        "item_id",
+        "order_date",
+        "quantity",
+        "pack_size"
+      ],
+      "optional_supporting_fields": [
+        "subscription_flag",
+        "interval_variance_days",
+        "seasonal_index",
+        "substitution_history",
+        "service_visit_dates",
+        "stockout_complaint_flag",
+        "declared_usage_rate"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "offline_system",
+        "crm",
+        "user_authorized_connection",
+        "partner_feed"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute days-between-orders per item per account from the order table you already have and project the next empty date. Two orders give a first estimate; three make it usable.",
+          "requires": [
+            "order lines with dates and quantities"
+          ],
+          "gives": "A post-sale replenishment clock, built off-website from records you already own, running this week"
+        },
+        {
+          "rung": 2,
+          "how": "Multiply by pack quantity from the product catalogue so the clock is in units consumed per day rather than orders per year. That survives pack-size changes, multipacks and promotional bundles, which otherwise look like a change in behaviour.",
+          "requires": [
+            "accurate units-per-pack in the catalogue"
+          ],
+          "gives": "A rate that does not break the moment the customer buys a bigger box"
+        },
+        {
+          "rung": 3,
+          "how": "Ask the sizing question where it helps the customer - 'how many people use this?' or 'how often do you run it?' - on the subscription-tuning screen, and treat the answer as a declared, editable correction.",
+          "requires": [
+            "one optional field the customer controls"
+          ],
+          "gives": "A first-order fix for the largest error term, obtained by asking rather than by inferring anything about the household"
+        },
+        {
+          "rung": 4,
+          "how": "Join offline and phone orders, in-store loyalty scans and field-service refills to the same address key, so the clock is not blind to the consumption that never goes through the website.",
+          "requires": [
+            "a loyalty or account identifier used at the counter",
+            "address normalisation",
+            "a nightly reconciliation job"
+          ],
+          "gives": "The single biggest coverage gain available here - multi-channel households look like light users until you do this, and get the wrong offer forever"
+        },
+        {
+          "rung": 5,
+          "how": "Where the customer chooses to connect a device that counts consumption - an appliance's consumable counter, a tank or meter reading, a machine that reports usage - take the count with their consent instead of estimating it.",
+          "requires": [
+            "explicit consent",
+            "a telemetry or device integration",
+            "a fallback for the majority who never connect"
+          ],
+          "gives": "Measured consumption rather than inferred consumption, for the minority of households that opt in"
+        }
+      ],
+      "min_data": {
+        "min_orders_per_item": 2,
+        "recommended_orders_per_item": 3,
+        "min_observation_days": 90,
+        "note": "Two orders give an interval, three give a variance. Below that the projection is a guess wearing a date."
+      },
+      "access_conditions": [
+        "An address key is a household key: several people share it, and some of them never consented to anything. Keep the signal at address level and do not try to split it into individuals.",
+        "Do not derive household size, ages, dependants, relationship status or income band from consumption volume - see restricted.household_composition_inference. Where sizing matters, ask, as in rung 3.",
+        "A consumption rate for a category that is itself sensitive - medicines, continence, fertility, alcohol - inherits that sensitivity. Do not model those categories in this row at all.",
+        "Rung 5 telemetry is consented for the replenishment feature. Occupancy patterns visible in the same data are a different purpose and are not covered."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 90,
+        "note": "A consumption rate is a stable fact that drifts. Routines, seasons and pack changes move it, so re-estimate on every order rather than trusting a rate older than a quarter."
+      },
+      "false_positives": [
+        "Stockpiling on a promotion, which looks like a step change in consumption and is not",
+        "A gift shipped to the household but consumed somewhere else",
+        "An address that is a building, an office, a care setting or a parcel locker rather than a household",
+        "A customer who also buys the item in a shop you cannot see, so your clock runs permanently slow",
+        "A one-off bulk purchase for an event or a group",
+        "Substitution: they did not stop consuming, they moved to a different pack, brand or format",
+        "A reseller buying at consumer prices and moving volume you will misread as household demand"
+      ],
+      "confirmation_signals": [
+        "f11.replenishment_due",
+        "f10.product_usage"
+      ],
+      "recommended_action_class": "time_a_reorder_prompt_to_the_projected_empty_date_and_offer_the_right_pack_size",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short"
+        ],
+        "consumable_vs_durable": [
+          "consumable"
+        ],
+        "triggers": [
+          "inventory_depletion",
+          "household_change",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "grocery",
+          "cpg",
+          "pet_services",
+          "home_services",
+          "utilities"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A projected empty date is one of the few triggers that names both the product and the week; rated high on reasoning, clamped for want of a measurement."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Arithmetic on your own transactions is exact; the error is entirely in unobserved off-channel purchasing, which is large and systematically biased."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.gift_purchase_declared",
+      "family": "F12",
+      "name": "Declared gift purchase",
+      "definition": "An order the buyer explicitly marks as being for someone else: a gift message, gift wrap, a gift receipt, a registry or wish-list purchase, a gift card, or a ship-to party that differs from the billing party. Qualifying condition: an explicit gift marker on the transaction, or a purchase made against another person's published list. Guessing 'this looks like a gift' from category and season alone does not qualify, and neither does treating a different shipping address as proof on its own.",
+      "question_answered": "Which purchases are for someone else - so the buyer is a repeat giver rather than a user, and the recipient is a person we do not yet have permission to contact?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "channel",
+        "identity_scope",
+        "preference"
+      ],
+      "identity_level": "transaction",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "order_id",
+        "buyer_id",
+        "gift_marker",
+        "order_date"
+      ],
+      "optional_supporting_fields": [
+        "gift_message_present_flag",
+        "occasion_declared",
+        "recipient_address_id",
+        "registry_id",
+        "gift_wrap_sku",
+        "gift_receipt_requested",
+        "requested_delivery_date",
+        "recipient_optin_flag"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "marketplace",
+        "partner_feed"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read the markers already in your order table - gift message present, gift-wrap line, gift receipt, ship-to party different from bill-to - and set a gift flag on the order. This is a query against data you already have, not a collection project.",
+          "requires": [
+            "order and line-item tables"
+          ],
+          "gives": "A giver segment and a dated occasion pattern, retrospectively, for every order you have ever taken"
+        },
+        {
+          "rung": 2,
+          "how": "Ask the occasion at the moment the customer is already ticking 'this is a gift': one optional select - birthday, wedding, new home, new job, holiday, thank-you - stored on the order.",
+          "requires": [
+            "one field in the checkout gift block"
+          ],
+          "gives": "The occasion, which is what turns a one-off gift into an annually recurring trigger"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the offline gift: counter staff tick 'gift' and offer wrapping, and the till already knows. Write it into the same schema as the online flag rather than a separate report.",
+          "requires": [
+            "a POS field and a sync"
+          ],
+          "gives": "In-store gifting, which in most retail businesses is the larger half of gifting and is completely invisible to web analytics"
+        },
+        {
+          "rung": 4,
+          "how": "Instrument the recipient side lawfully: put a card or QR in the parcel inviting the recipient to register the gift, start a warranty, claim a return or set a preference. The recipient opts in themselves, on their own terms.",
+          "requires": [
+            "a printed insert or QR",
+            "a short registration flow that gives the recipient something real"
+          ],
+          "gives": "The recipient as a consented prospect - the only lawful way to acquire them, and the step almost every gifting programme skips"
+        },
+        {
+          "rung": 5,
+          "how": "Detect corporate and bulk gifting inside consumer order data - one payer, many ship-to addresses, an uploaded recipient list, a repeating December pattern - and route it to an account identity and a B2B motion.",
+          "requires": [
+            "payer-to-order aggregation",
+            "a sales route that can take the handoff"
+          ],
+          "gives": "A larger, contractable deal shape that is usually already in the data and is being served as if it were dozens of consumer orders"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "The recipient's address arrived for one purpose: delivering that parcel. It is not marketing permission. Do not profile the recipient and do not contact them until they opt in themselves at rung 4.",
+        "Gift-message text is other people's personal data and is frequently emotionally loaded. Do not mine it for sentiment, relationships, life events or names; store presence, not content, unless you need content to print it.",
+        "Do not join recipients back to givers to build a relationship graph or a household model - see restricted.household_composition_inference.",
+        "A gift that was returned or exchanged should quietly reduce confidence in the giver-to-recipient link, not trigger a follow-up to either party."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "That an order was a gift never stops being true, and the occasion behind it usually recurs. The useful re-trigger is eleven months later, not next week - and treating the giver as a user of the product is the classic mis-segmentation this row exists to prevent."
+      },
+      "false_positives": [
+        "Someone using gift wrap or a gift receipt for themselves, often as a returns hedge",
+        "A ship-to address that is a workplace, a holiday address or a parcel locker rather than a recipient",
+        "A reseller or drop-shipper generating many ship-to addresses from one account",
+        "A self-purchase from a wish-list the buyer created for themselves",
+        "An obligation gift that predicts nothing about the giver's own taste or future spend",
+        "A gift returned or exchanged, meaning the recipient never used the product at all",
+        "A corporate bulk order misread as many independent consumer gifts"
+      ],
+      "confirmation_signals": [
+        "f12.declared_occasion_date",
+        "f12.declared_wedding_or_registry"
+      ],
+      "recommended_action_class": "treat_the_buyer_as_a_giver_on_an_annual_cycle_and_acquire_the_recipient_only_by_their_own_optin",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "occasion",
+          "life_event",
+          "desire"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "ecommerce",
+          "hospitality",
+          "experiences",
+          "jewellery",
+          "food_and_drink",
+          "florists"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Moderate: it changes who you are talking to more than how much they will spend. Clamped for want of an independent measurement."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "An explicit gift marker is a declaration, so the fact is about as reliable as first-party data gets; the inference from ship-to alone is not, and should not be treated as the same field."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f12.declared_occasion_date",
+      "family": "F12",
+      "name": "Declared occasion date and reminder",
+      "definition": "A recurring date the subject enters for a stated purpose - a birthday or anniversary they ask to be reminded about, a 'need it by' date, an annual order they want repeated - together with the lead time they want, or a published calendar of fixed public occasions joined to the subject's declared market. Qualifying condition: a date the subject supplied, or a published public-calendar date joined at market level. A date reconstructed from what someone buys, or a religious, ethnic or cultural affiliation inferred from which occasions they buy for, is not this signal - see restricted.affiliation_inference_from_occasion_behaviour.",
+      "question_answered": "What dated occasions is this customer buying for, how many days ahead do they actually act, and when should we be in front of them?",
+      "intent_dimensions": [
+        "timing",
+        "need",
+        "urgency",
+        "preference",
+        "channel"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "occasion_type",
+        "occasion_date",
+        "reminder_lead_days"
+      ],
+      "optional_supporting_fields": [
+        "recipient_label_as_entered",
+        "preferred_channel",
+        "last_year_order_id",
+        "budget_band_declared",
+        "reminder_optin_status",
+        "declared_market_for_calendar_join"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "first_party_web",
+        "crm",
+        "offline_system",
+        "public_record"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Offer the reminder the customer actually wants: a date, a label of their choosing and a lead time - 'tell me two weeks before this' - on the account page and in the post-purchase email. They own it, can edit it and can delete it.",
+          "requires": [
+            "one table of subject, label, date, lead days",
+            "a scheduled send and a working delete"
+          ],
+          "gives": "A dated, consented, annually recurring trigger live this week, with the customer's own lead time attached"
+        },
+        {
+          "rung": 2,
+          "how": "Maintain a table of fixed public occasions for the markets you sell into - public holidays, civil and cultural observances, school terms, tax and renewal deadlines - and join it to the customer's declared country or region, deriving lead time from your own historical order curve.",
+          "requires": [
+            "a small per-market calendar table",
+            "the customer's declared market"
+          ],
+          "gives": "Dated demand for every customer, free and off-website, while holding nothing personal at all - the join is to a market, never to a belief"
+        },
+        {
+          "rung": 3,
+          "how": "Derive the anniversary from your own order record: the date they bought for the same occasion last year, plus the lead time they actually used, predicts better than the occasion date itself.",
+          "requires": [
+            "one year of order history with gift or occasion markers"
+          ],
+          "gives": "A per-customer lead time rather than a market average - the field most teams never compute, and the one that decides whether the reminder is useful or late"
+        },
+        {
+          "rung": 4,
+          "how": "Capture the date offline, on the same terms: loyalty signup at the counter, the appointment card, the reminder a phone agent offers to set. Same schema, same opt-in, same delete.",
+          "requires": [
+            "a counter or agent flow that can write to the same table"
+          ],
+          "gives": "The customers who never log in, who in occasion-driven categories are a large share of the best ones"
+        }
+      ],
+      "min_data": {
+        "min_years_of_order_history_for_rung_3": 1,
+        "note": "Rung 3 needs one prior cycle of the same occasion; before that, use the market lead time from rung 2."
+      },
+      "access_conditions": [
+        "A reminder is a service the customer asked for. Use the date for that reminder and nothing else, and make deleting it as easy as setting it.",
+        "The public-calendar join in rung 2 needs no personal permission because it holds nothing personal - it attaches a date to a market. This is the clearest case in the family where free and lawful coincide, and it is coincidence, not a rule.",
+        "Do not infer religion, ethnicity, national origin or political affiliation from which occasions a person buys for. Selling into a festival is ordinary; attaching a faith to a named customer because they bought for it is prohibited - see restricted.affiliation_inference_from_occasion_behaviour.",
+        "Dates of birth are identity-theft-grade data and are also how you accidentally discover a child. Store day and month, not year, unless the year is needed for age gating."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "explicit_consent",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "An occasion date recurs annually. What decays is the lead time and the relationship behind it, so re-confirm the reminder rather than re-deriving the date."
+      },
+      "false_positives": [
+        "A date entered once and never maintained, for a relationship that may have ended",
+        "A public holiday that does not apply to this customer's country, region or community",
+        "A one-off 'need it by' date read as an annual occasion",
+        "A reminder set by someone who has since changed how, or whether, they buy for that occasion",
+        "Placeholder dates - 01/01 and similar - entered to get past a required field",
+        "A shared account where two people's occasions are stored as one person's"
+      ],
+      "confirmation_signals": [
+        "f12.gift_purchase_declared",
+        "f11.reorder_cadence_pattern"
+      ],
+      "recommended_action_class": "send_the_reminder_at_the_customers_own_lead_time_and_prefill_last_years_order",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "occasion",
+          "desire",
+          "life_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "ecommerce",
+          "hospitality",
+          "food_and_drink",
+          "experiences",
+          "florists",
+          "travel"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A single occasion is a small basket, but the date is exact and the cycle repeats; rated mid and clamped for want of an independent measurement."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Declared and stable. The failure mode is staleness rather than error - nobody deletes a reminder when a relationship ends."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

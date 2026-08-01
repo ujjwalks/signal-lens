@@ -1,0 +1,1609 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F13",
+  "signals": [
+    {
+      "id": "f13.rfp_or_tender_issued",
+      "family": "F13",
+      "name": "RFP, tender, or formal procurement process opened",
+      "definition": "A buying organisation opens a documented procurement process for a category you sell into - an RFI, RFP, RFQ, ITT, framework call-off, or public tender - with a named scope and a stated closing date. Qualifying condition: a procurement document or notice exists that carries an issuing organisation, a scope description, and a submission deadline, whether it arrived in your own inbox, was published on a procurement portal, or was disclosed to you by a participating stakeholder.",
+      "question_answered": "Is there a funded, time-boxed buying process running for our category right now, and are we inside it or outside it?",
+      "intent_dimensions": [
+        "readiness",
+        "urgency",
+        "timing",
+        "authority",
+        "requirements",
+        "commitment"
+      ],
+      "identity_level": "account",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "issuing_organisation_id_or_name",
+        "notice_or_document_reference",
+        "scope_or_category_text",
+        "submission_deadline",
+        "issue_date"
+      ],
+      "optional_supporting_fields": [
+        "estimated_contract_value",
+        "classification_code",
+        "incumbent_supplier",
+        "award_criteria_weighting",
+        "contract_start_date_and_term",
+        "framework_or_lot_reference",
+        "named_contacts_and_roles",
+        "prior_award_history_for_this_buyer",
+        "how_we_learned_of_it"
+      ],
+      "source_class": [
+        "public_record",
+        "first_party_backend",
+        "crm",
+        "partner_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Make the RFPs you already receive a logged record. Every inbound RFP, RFQ or ITT that lands in a sales inbox becomes a structured entry - issuer, scope, closing date, how you heard of it - including the ones you decline",
+          "requires": [
+            "an inbox",
+            "four fields on an existing CRM object"
+          ],
+          "gives": "The only source of private-sector RFPs that exists, plus a base rate for how many arrive and how many you never saw coming"
+        },
+        {
+          "rung": 2,
+          "how": "Subscribe to the public procurement notice portals covering your jurisdictions, filtered to your classification codes, and route the daily digest to a named owner",
+          "requires": [
+            "a free portal account",
+            "your CPV / NAICS / UNSPSC codes"
+          ],
+          "gives": "Notices you were not invited to, at the moment the process opens rather than when a buyer chooses to contact you"
+        },
+        {
+          "rung": 3,
+          "how": "Poll the portal's notice API or bulk daily download into your own store, deduplicate amendments against originals, and match issuing bodies to your account list",
+          "requires": [
+            "a scheduled job per portal",
+            "an entity-matching step"
+          ],
+          "gives": "Same-day alerting, plus each buyer's award history - who won last time and at what value"
+        },
+        {
+          "rung": 4,
+          "how": "Register on the buyer-side supplier portals, frameworks and dynamic purchasing systems your prospects buy through, so you are on the invited list for processes that are never publicly advertised",
+          "requires": [
+            "pre-qualification effort",
+            "sometimes an accreditation or insurance threshold"
+          ],
+          "gives": "Access to closed processes no feed can see - which, in most private-sector categories, is nearly all of them"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Private-sector RFPs are not published anywhere. If you are not on the invitation list you will not learn of them from any feed at any price. That is a coverage ceiling, not a budget problem, and it is the single most important thing to say about this row.",
+        "Public portals differ by jurisdiction in threshold, format and publication lag; below-threshold procurements are usually not advertised at all.",
+        "Several portals require registration and restrict bulk redistribution of notice text - check the reuse licence before storing the document body."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Portal reuse licences vary: some publish notices as open data, others permit inspection but not bulk redistribution, and several impose rate limits or require an account before search.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The closing date is a hard boundary. Before it the signal is actionable; after it the process is decided and the only live question is when the resulting contract comes up for renewal."
+      },
+      "false_positives": [
+        "A compliance RFP issued only to satisfy a three-quote policy while the incumbent has already effectively won",
+        "A re-bid whose purpose is to reprice an existing contract rather than to change supplier",
+        "A consultant or procurement agent issuing on behalf of an unnamed client - a proxy researcher, so the buying organisation in the notice is not the buyer",
+        "A framework or panel refresh that renews a supplier list without releasing any new spend",
+        "A process cancelled after budget withdrawal, which frequently never gets a cancellation notice",
+        "The same notice republished after amendment and counted as a second opportunity",
+        "An existing customer running a mandatory market test they intend to end with you"
+      ],
+      "confirmation_signals": [
+        "f14.buying_group_formation",
+        "f06.quote_request",
+        "f13.funding_or_capital_event"
+      ],
+      "recommended_action_class": "qualify_the_process_and_make_a_bid_no_bid_decision",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "services",
+          "project_based",
+          "subscription",
+          "saas",
+          "transaction_based",
+          "reseller"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "contract_expiry",
+          "regulation",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "public_sector",
+          "construction",
+          "healthcare",
+          "professional_services",
+          "manufacturing",
+          "facilities_management",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "availability",
+          "source_url": "https://ted.europa.eu/en/",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "The EU's official procurement supplement publishes notices with free basic, advanced and expert search, browse by classification code and place of performance, email alerting, and a separate developer channel for data reuse - establishing that the rung 2 and rung 3 paths exist at zero licence cost in at least one large jurisdiction."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f13.customer_inventory_depletion",
+      "family": "F13",
+      "name": "Customer inventory or consumable depletion",
+      "definition": "An account's on-hand stock of something you supply is projected to fall below its reorder point. Qualifying condition: (units supplied minus units estimated consumed since supply) crosses the account's reorder threshold, or the account, its stock system, or the equipment consuming the item reports a level below that threshold. The estimate must rest on a measured reorder interval, a declared consumption rate, or a reported count - not on an assumed category average.",
+      "question_answered": "Which existing customers are about to run out of what we sell, and when - early enough that we reorder for them instead of them shopping?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "readiness",
+        "category"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "sku_or_product_id",
+        "quantity_supplied",
+        "supply_or_shipment_date",
+        "reorder_interval_or_declared_consumption_rate"
+      ],
+      "optional_supporting_fields": [
+        "site_or_asset_id",
+        "declared_par_level_and_safety_stock",
+        "consumption_driver_value",
+        "prior_reorder_intervals",
+        "lead_time_days",
+        "contracted_committed_volume",
+        "seasonality_index",
+        "meter_or_counter_reading",
+        "returns_and_scrap_quantity"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "crm",
+        "user_authorized_connection",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute a per-account, per-SKU reorder interval from your own order or shipment history - the median gap between orders of the same item by the same account - and flag accounts that have passed their interval by more than a set fraction",
+          "requires": [
+            "the order or despatch table you already invoice from",
+            "one scheduled query"
+          ],
+          "gives": "A working depletion list on day one for every repeat account with three or more prior orders - and the more valuable list underneath it: accounts whose interval has quietly lengthened, which is share loss, not depletion"
+        },
+        {
+          "rung": 2,
+          "how": "Replace the inferred interval with a declared one. At onboarding or at the next review, ask how much they hold, what their reorder point is, and what drives consumption - headcount, machine hours, covers served, beds occupied, jobs completed - then project from units supplied rather than from order rhythm",
+          "requires": [
+            "two fields on the account record",
+            "one question added to a conversation you already have"
+          ],
+          "gives": "Correct projections for accounts with too few orders to fit a curve, plus a driver you can watch independently of ordering"
+        },
+        {
+          "rung": 3,
+          "how": "Take a consumption or stock feed directly: a customer-authorised inventory export, an EDI product-activity transmission, a vendor-managed-inventory count sheet, or a consumable counter read from the equipment itself",
+          "requires": [
+            "a data-sharing agreement per account",
+            "one connector per format"
+          ],
+          "gives": "Actual on-hand levels instead of a model, and enough lead time to ship before the customer notices they are low"
+        },
+        {
+          "rung": 4,
+          "how": "Put the count where the stock is: scan-to-reorder labels on the shelf, a weighed bin or level sensor, or a stock-count screen the customer's own storekeeper fills in",
+          "requires": [
+            "hardware or a small app",
+            "customer adoption at the site, not just at head office"
+          ],
+          "gives": "Site- and asset-level depletion rather than account-level, which is the level a multi-site customer actually orders against"
+        }
+      ],
+      "min_data": {
+        "minimum_orders_per_account": 3,
+        "minimum_history_days": 180,
+        "minimum_accounts_for_a_fitted_model": 500,
+        "note": "Below three prior orders of the same item the interval is an assumption rather than a measurement; fall back to the declared consumption rate or the contracted volume, and say which one you used. A model fitted across fewer than a few hundred ordering accounts cannot separate account behaviour from category seasonality."
+      },
+      "access_conditions": [
+        "Your shipment history measures only what you supplied. In a dual-sourced account it systematically overstates time-to-depletion, and no amount of modelling repairs that - only a declared or measured consumption rate does.",
+        "Inventory and EDI feeds are negotiated per customer. They are a commercial arrangement, not a product you can buy.",
+        "If you sell through distribution, quantity shipped is a distributor's stocking decision, not an end user's consumption. Model the tier you can actually see and label it as such."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "none",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The window closes at the projected stock-out date, or at the moment they order from anyone else, whichever comes first. A depletion alert acted on after the reorder has been placed elsewhere is worth nothing."
+      },
+      "false_positives": [
+        "The account is dual-sourced and topped up from a second supplier, so your history understates their stock",
+        "Consumption stopped rather than continued - a site closed, a line was shut for the season, or the product was designed out",
+        "The last order was a forward buy ahead of an announced price rise, not a consumption-driven order",
+        "The goods were returned, scrapped, damaged in transit, or recalled and never consumed",
+        "A distributor or reseller bought for onward sale, so quantity shipped is their stocking policy and not any end user's usage",
+        "An internal or sample order placed by your own team against the customer's account",
+        "The customer ran a deliberate inventory-reduction programme and will now order smaller quantities more often, which reads as depletion every time"
+      ],
+      "confirmation_signals": [
+        "f11.replenishment_due",
+        "f10.product_usage",
+        "f13.capacity_pressure"
+      ],
+      "recommended_action_class": "trigger_a_replenishment_offer_before_the_projected_stockout",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "transaction_based",
+          "subscription",
+          "reseller",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable"
+        ],
+        "triggers": [
+          "inventory_depletion",
+          "business_event",
+          "contract_expiry"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "wholesale_distribution",
+          "manufacturing",
+          "foodservice",
+          "healthcare",
+          "facilities_management",
+          "laboratory",
+          "print",
+          "construction",
+          "veterinary"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f13.capacity_pressure",
+      "family": "F13",
+      "name": "Operational capacity pressure against a purchased limit",
+      "definition": "An account's consumption of capacity it has already bought - seats, licences, storage, compute, throughput, service hours, floor space, fleet or appointment slots - is approaching or exceeding the limit it holds, or its operational load is growing faster than that capacity. Qualifying condition: measured utilisation crosses a stated fraction of entitlement (80% is the common threshold) and the trailing growth rate implies the limit is reached before the current term ends. Scope: this is the operational-trigger form. It requires a contract end date and a trailing growth rate, so the output is a date by which the limit binds, and its upper rungs reach accounts you do not meter at all - through their own published lead times, new sites and operational hiring. Where the only evidence is a metered utilisation ratio on your own product, that is f10.product_usage; this row is not a second copy of it.",
+      "question_answered": "Which accounts are about to outgrow what they bought, and how long is there before they either expand with us or start shopping?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing",
+        "readiness",
+        "budget",
+        "value"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "contracted_entitlement_or_limit",
+        "measured_consumption",
+        "measurement_period",
+        "contract_end_date"
+      ],
+      "optional_supporting_fields": [
+        "utilisation_trend_slope",
+        "overage_or_blocked_action_events",
+        "seats_provisioned_vs_active",
+        "queue_depth_or_wait_time",
+        "support_tickets_mentioning_limits",
+        "admin_invitations_sent",
+        "site_headcount_or_throughput",
+        "prior_expansion_history",
+        "published_lead_time_or_waitlist"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "product_analytics",
+        "crm",
+        "support_system",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Join the entitlement table you invoice from to the metering table you already keep, and rank accounts by consumed-over-contracted with a trailing slope beside it",
+          "requires": [
+            "billing or entitlement records",
+            "any usage counter you already store"
+          ],
+          "gives": "An expansion list today, at account level, with no new instrumentation of any kind"
+        },
+        {
+          "rung": 2,
+          "how": "Instrument the moment the limit bites, not just the ratio: the blocked action, the overage warning shown, the invitation that failed because seats were full, the job that queued, the click on 'contact us to raise this limit'",
+          "requires": [
+            "product-side or backend events"
+          ],
+          "gives": "The difference between an account near a limit and an account being hurt by one - which is the difference between a forecast and a trigger"
+        },
+        {
+          "rung": 3,
+          "how": "For physical or service capacity, use the operational measures the relationship already generates: lead times you quote them, service-hour utilisation, appointment wait times, shift patterns, sites added, deliveries per week",
+          "requires": [
+            "a query against scheduling, dispatch, field-service or ERP systems"
+          ],
+          "gives": "The same signal for a business with no software telemetry at all - which is most of the economy"
+        },
+        {
+          "rung": 4,
+          "how": "Corroborate from off-website public sources so the signal works on prospects and not only on customers: the account's own published lead times or waiting lists, a permit for a new site, a step change in operational job postings (shift, warehouse, driver, clinician, technician), a facility or expansion announcement",
+          "requires": [
+            "the public feeds already described elsewhere in this family"
+          ],
+          "gives": "Capacity pressure in accounts you do not meter - the version of this signal that generates new business rather than expansion"
+        }
+      ],
+      "min_data": {
+        "minimum_measurement_periods": 8,
+        "note": "At least eight consecutive periods, so the trend is a slope rather than two points. A single crossing of 80% inside a seasonal peak is not capacity pressure; it is a peak."
+      },
+      "access_conditions": [
+        "Entitlement must be recorded as a number somewhere machine-readable. Where the limit lives only in a signed contract PDF, this row cannot fire until someone types it into a field - that is the real blocker, and it is a data-entry problem rather than an engineering one.",
+        "Usage measured at the tenant level tells you nothing about which team inside the account is under pressure; expansion is usually approved by whoever owns that team's budget."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "Pressure that is not relieved is resolved some other way - by a workaround, by a competitor, or by the account simply living at the ceiling. Roughly a month after the crossing, the fact that they were at 85% stops predicting anything."
+      },
+      "false_positives": [
+        "A one-off migration, backfill or bulk import inflated the period's consumption",
+        "A seasonal peak that will subside without any purchase - year-end close, a campaign, a harvest, a school term",
+        "A runaway integration, retry loop or bot consuming the entitlement rather than people",
+        "A trial or pilot team inside the account whose usage will disappear when the pilot ends",
+        "Deliberate over-provisioning: the account is content to bounce off the ceiling and has no intention of paying to raise it",
+        "The pressure comes from the account's own customers in a reseller or multi-tenant arrangement, so the buying decision sits with a party you cannot see",
+        "The account is running your product and a replacement in parallel during a migration away from you - high usage immediately before churn",
+        "An internal load test or capacity rehearsal run by their engineering team"
+      ],
+      "confirmation_signals": [
+        "f11.subscription_renewal_window",
+        "f14.internal_approval_step",
+        "f10.product_usage"
+      ],
+      "recommended_action_class": "route_to_the_account_owner_with_a_sized_expansion_offer",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "transaction_based",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "capacity_pressure",
+          "business_event",
+          "contract_expiry",
+          "hiring"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "logistics",
+          "manufacturing",
+          "healthcare",
+          "professional_services",
+          "data_infrastructure",
+          "facilities_management"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f13.permit_or_licence_filed",
+      "family": "F13",
+      "name": "Construction, operating, or trade permit filed",
+      "definition": "A business or property owner applies for, or is granted, a permit, planning consent, operating licence, or inspection approval in a jurisdiction you serve, of a class that implies work you supply. Qualifying condition: a record exists in a public register carrying a site address or parcel identifier, a work or licence classification, a filing or issue date, and an applicant, owner or contractor.",
+      "question_answered": "Which sites and businesses in our service area have just committed to work that needs what we sell - before they have searched for anyone?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "category",
+        "readiness"
+      ],
+      "identity_level": "location",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "permit_or_application_reference",
+        "jurisdiction",
+        "site_address_or_parcel_id",
+        "work_type_or_licence_class",
+        "filed_or_issued_date"
+      ],
+      "optional_supporting_fields": [
+        "applicant_or_contractor_name",
+        "declared_valuation",
+        "floor_area_or_unit_count",
+        "owner_entity_name",
+        "contractor_licence_number",
+        "inspection_milestone_dates",
+        "permit_expiry_date",
+        "linked_business_licence",
+        "geocoded_coordinates",
+        "decision_status_and_conditions"
+      ],
+      "source_class": [
+        "public_record",
+        "licensed_dataset",
+        "news_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Download this week's permit or planning list for the one jurisdiction that contains most of your revenue. Most municipal, county and planning authorities publish issued permits or a weekly list of applications received and decided, as a web list, a CSV, or an open-data table. Read it by hand and call the ten records that match your work type",
+          "requires": [
+            "a browser and an hour a week",
+            "a rough map from their work-type codes to your products"
+          ],
+          "gives": "A named site, a work classification, a party and a date - a lead that exists before the buyer has typed anything into a search engine"
+        },
+        {
+          "rung": 2,
+          "how": "Automate the same pull for every jurisdiction in your service area, normalise work-type codes to your product map, geocode the site, and deduplicate revisions and amendments against the original record",
+          "requires": [
+            "one scheduled fetch per portal - they do not share a format",
+            "an address normaliser"
+          ],
+          "gives": "Full service-area coverage and a weekly volume you can staff against rather than react to"
+        },
+        {
+          "rung": 3,
+          "how": "Track the sequence rather than the event: follow the inspection and milestone records attached to each permit so the alert fires at the stage of the build where your product is actually bought",
+          "requires": [
+            "the inspection or decision endpoints on the same portals"
+          ],
+          "gives": "Timing. The commonest way to waste a permit lead is to arrive six months early, and the milestone trail is the only free fix"
+        },
+        {
+          "rung": 4,
+          "how": "Licence an aggregated multi-jurisdiction permit dataset where your service area crosses more portals than you can maintain",
+          "requires": [
+            "budget",
+            "a matching step back to your own account and territory model"
+          ],
+          "gives": "Breadth. It does not give freshness - the aggregate is generally behind the source portal, sometimes by weeks"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Coverage is a function of which authorities publish, not of what you pay. There is no complete national permit feed in most countries; small authorities are frequently PDF-only, and some are still paper.",
+        "Publication does not create a reuse licence. Some registers are explicitly open data; others permit inspection but not bulk extraction or direct marketing. Check the licence before you store the record, and especially before you store a natural person's name.",
+        "This row resolves to a site and an entity. Resolving a permit to a named individual and marketing to them at their home is a different processing purpose with a different lawful basis, and it is not covered here.",
+        "Where the applicant or owner named on the permit is a natural person rather than a company, this row holds consumer personal data obtained from a source other than the individual, and a transparency notice is owed within a short statutory period in the EEA and UK, with a legitimate-interests balancing test behind it. The site-and-entity form of this row carries no such duty; the named-applicant form does, and they are not the same signal. availability stays public_cost_free because the record is free to obtain - that says nothing about whether you may use it."
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Register reuse terms vary by authority and by jurisdiction. Publication for transparency purposes does not by itself authorise bulk reuse for marketing, particularly where applicant or owner names are those of natural persons.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "The useful window is not the permit date; it is the point in the build sequence where your product is specified. Site preparation, structural, fit-out and occupancy each sit months apart, so set the half-life from where you sit in that sequence rather than from the filing."
+      },
+      "false_positives": [
+        "A permit filed speculatively to preserve an entitlement or a planning consent, with no build intended in the near term",
+        "A general contractor has already sourced the whole package, so the buying decision was made before the permit appeared",
+        "The owner bought the equipment first and is permitting the installation - you are late, not early",
+        "A revision, extension or amendment of an existing permit counted as new work",
+        "Demolition, remediation or make-safe permits that imply no purchase in your category",
+        "The applicant is a permit expediter or agent filing on behalf of an undisclosed client, so the named party is not the buyer",
+        "The site belongs to an existing customer and the work is already on your order book",
+        "Duplicate records for the same project split across trade-specific sub-permits"
+      ],
+      "confirmation_signals": [
+        "f13.job_posting_signal",
+        "f13.rfp_or_tender_issued",
+        "f02.search_query"
+      ],
+      "recommended_action_class": "route_to_local_territory_owner_with_site_and_stage_context",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "project_based",
+          "transaction_based",
+          "reseller"
+        ],
+        "purchase_motion": [
+          "local",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "business_event",
+          "property_relocation",
+          "regulation",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "construction",
+          "hvac",
+          "roofing",
+          "solar",
+          "electrical",
+          "equipment_rental",
+          "commercial_real_estate",
+          "hospitality",
+          "foodservice",
+          "healthcare",
+          "waste_management"
+        ],
+        "industry_exclude": [
+          "software"
+        ]
+      },
+      "evidence": [
+        {
+          "claim": "availability",
+          "source_url": "https://www.planning.data.gov.uk/",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "A national government platform publishing planning and land datasets with map exploration, bulk search and download, and an API, under an open government licence - evidence that free, machine-readable planning data exists at national scale in at least one jurisdiction. It is not evidence that every authority publishes; the access_conditions state the opposite."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "family": "F13",
+      "name": "Job posting implying a purchase",
+      "definition": "A target organisation publishes a role whose content implies a capability it must buy, a function it is standing up, or growth that outgrows the tooling it holds. Qualifying condition: a public posting exists that names a tool, process, certification, or function within your scope, or the count of open roles in a named department crosses a threshold relative to that organisation's size.",
+      "question_answered": "Which organisations are building the team, capability or process our product exists to serve - and are they buying the tool before, alongside, or after the hire?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "timing",
+        "readiness",
+        "requirements",
+        "authority"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "organisation_domain_or_id",
+        "posting_id",
+        "posting_title",
+        "posting_body_text",
+        "first_seen_date"
+      ],
+      "optional_supporting_fields": [
+        "department_and_function",
+        "seniority_level",
+        "location_and_remote_flag",
+        "employment_type",
+        "named_tools_or_certifications_in_body",
+        "salary_band",
+        "hiring_manager_title",
+        "last_seen_date",
+        "open_requisition_count_by_department",
+        "organisation_headcount_band"
+      ],
+      "source_class": [
+        "news_feed",
+        "marketplace",
+        "licensed_dataset"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Watch the careers pages of your named target accounts. An applicant tracking system almost always exposes a company's open roles at a stable public URL, usually with a machine-readable board endpoint or feed beside the human page, and postings commonly carry JobPosting structured data in the page source. Check fifty accounts a week by hand or in a feed reader",
+          "requires": [
+            "your target account list with domains"
+          ],
+          "gives": "The highest-precision version of this signal, because you are reading the employer's own words rather than an aggregator's copy of them"
+        },
+        {
+          "rung": 2,
+          "how": "Poll those same public board endpoints on a schedule, store each snapshot, and diff three states: requisition added, requisition changed, and the one everyone forgets - requisition removed",
+          "requires": [
+            "a scheduled fetch",
+            "somewhere to keep snapshots"
+          ],
+          "gives": "Dated first-seen and last-seen, which is what converts a posting from a description into a timed trigger. A role that vanished was filled, and the buyer now exists by name"
+        },
+        {
+          "rung": 3,
+          "how": "Parse the posting body against a dictionary you maintain: your own category, competitor products named as required experience, adjacent tooling, certifications, and the department the role reports into",
+          "requires": [
+            "a keyword map you own and revise",
+            "a review loop when it misfires"
+          ],
+          "gives": "'They are standing up the function' and 'they run the incumbent' as separate, separately actionable states"
+        },
+        {
+          "rung": 4,
+          "how": "Licence a normalised job-postings dataset when you need whole-market coverage rather than a named account list",
+          "requires": [
+            "budget",
+            "firmographic matching back to your accounts"
+          ],
+          "gives": "Breadth and history, at the cost of freshness, of the employer's exact wording, and of agency duplicates you must then de-duplicate"
+        }
+      ],
+      "min_data": {
+        "minimum_accounts_watched": 50,
+        "minimum_observation_history_days": 60,
+        "note": "Below roughly fifty watched organisations the posting stream is too sparse to tell a hiring trend from noise, and without a couple of months of history you cannot tell a new requisition from an evergreen one. Watch a named account list before you attempt the whole market."
+      },
+      "access_conditions": [
+        "The employer's own board endpoint is the source of record. Large aggregator boards commonly prohibit automated collection in their terms, and their copies are stale, duplicated across agencies, and stripped of the wording that carried the signal.",
+        "Honour robots.txt and rate limits; fetch on a cadence measured in days, not minutes.",
+        "Postings name people. Store the organisation, the role and the requirement - the signal does not need the recruiter's identity, so do not collect it."
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Aggregator job boards typically forbid automated collection and redistribution; employer-hosted board endpoints are published for public consumption but still carry rate limits and terms worth reading.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A posting predicts a purchase while the role is open and shortly after it is filled. Once the hire has been in post a quarter, the purchase has usually already happened - or the new hire has become a different signal entirely, owned by the buying-group family."
+      },
+      "false_positives": [
+        "An evergreen or pipeline posting that is never closed and never funded",
+        "An agency or staffing firm posting on behalf of an undisclosed client, so the hiring organisation named is not the buyer",
+        "A consultancy hiring the skill to deliver it to its own clients rather than to use your product itself",
+        "A backfill for a departing employee, which changes nothing about their tooling",
+        "The posting names your category because they already own it, or because they are replacing you",
+        "A recruiter pasted a template job description, so the named tools reflect the template author's stack and not theirs",
+        "Subsidiary or franchise postings attributed to the parent, inflating the requisition count",
+        "Machine-generated bulk listings, which have made raw requisition counts materially noisier than they were"
+      ],
+      "confirmation_signals": [
+        "f13.funding_or_capital_event",
+        "f13.technology_stack_change"
+      ],
+      "recommended_action_class": "add_to_named_account_watchlist_and_time_contact_to_the_hire",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "project_based",
+          "transaction_based"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "hiring",
+          "business_event",
+          "capacity_pressure",
+          "funding"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "manufacturing",
+          "healthcare",
+          "financial_services",
+          "logistics",
+          "construction"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "capability_ladder",
+          "source_url": "https://schema.org/JobPosting",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "A standards-body vocabulary defines JobPosting with hiringOrganization, datePosted, validThrough, employmentType, jobLocation, skills and experienceRequirements, and the type is in use across a very large number of domains - so rung 1 parsing has a stable, machine-readable target rather than bespoke scraping of every careers page."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f13.funding_or_capital_event",
+      "family": "F13",
+      "name": "Funding, budget, or capital event",
+      "definition": "A target organisation obtains new spendable capital or a new budget line: an equity round, a debt facility, a grant or subsidy award, a public contract award, a budget appropriation, or a completed acquisition. Qualifying condition: a statutory filing, award record, or first-party disclosure names the organisation, the instrument or event type, and a date. An amount is desirable but frequently absent and must not be required.",
+      "question_answered": "Which accounts have just acquired money to spend, what kind of money is it - and therefore what may lawfully or practically be spent on us - and how long is the spending window open?",
+      "intent_dimensions": [
+        "budget",
+        "readiness",
+        "timing",
+        "urgency",
+        "authority"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "organisation_identifier",
+        "event_type",
+        "event_date",
+        "source_reference"
+      ],
+      "optional_supporting_fields": [
+        "amount_or_amount_band",
+        "instrument_type",
+        "investor_lender_or_awarding_body",
+        "round_stage",
+        "stated_use_of_proceeds",
+        "spending_deadline_or_fiscal_year_end",
+        "filing_id_and_filing_type",
+        "prior_event_history",
+        "headcount_at_event",
+        "parent_or_filing_entity_relationship"
+      ],
+      "source_class": [
+        "public_record",
+        "news_feed",
+        "licensed_dataset",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Subscribe to the free alerting your target accounts already emit: their own newsroom or blog feed, and the company registry's own alert or follow service for the entities on your list",
+          "requires": [
+            "your account list",
+            "each account's registry identifier, which is free to look up once"
+          ],
+          "gives": "Same-week notice of capital events at the accounts you have already decided to care about, with no engineering at all"
+        },
+        {
+          "rung": 2,
+          "how": "Poll the statutory sources rather than the press: exempt-offering notices filed with the securities regulator, share-allotment and charge filings at the national company registry, award records in public grant and contract registers, and published budget appropriations for public-sector buyers",
+          "requires": [
+            "a scheduled job against each register's free API or bulk index",
+            "an entity-matching step from registry number to your account record"
+          ],
+          "gives": "The event weeks before any press release, plus the large share of events that are never announced at all"
+        },
+        {
+          "rung": 3,
+          "how": "Classify the money rather than just the event: instrument, amount band, awarding body, stated use of proceeds, and any spending deadline attached to it",
+          "requires": [
+            "a parse of the filing or award record",
+            "a small taxonomy you maintain"
+          ],
+          "gives": "The distinction that decides whether this is a lead at all - discretionary capital versus ring-fenced money that cannot be spent on your category, and grant money with a use-it-or-lose-it date, which is the strongest timing signal in this row"
+        },
+        {
+          "rung": 4,
+          "how": "Licence a normalised funding database where your market is wider than the registers you can maintain, or where private-round coverage matters and the registers do not carry it",
+          "requires": [
+            "budget",
+            "deduplication against your own register feed"
+          ],
+          "gives": "Breadth and an investor graph, at the cost of lag and of the same round counted more than once"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Registers are per-country. A multi-country market means one connector per registry, and the filing that reveals a raise in one jurisdiction often has no equivalent instrument in another.",
+        "Free registry APIs generally require a registration key and impose rate limits; several restrict bulk redistribution of the data even though access is free.",
+        "The operating company you sell to is frequently not the entity that files. Match on registry identifier and group structure, not on trading name."
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Registry and award-register data is usually free to access under a registration key, but reuse and redistribution terms differ by jurisdiction and several prohibit bulk republication.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 90,
+        "note": "Discretionary capital is spent over quarters, so the window is long but soft. Ring-fenced money behaves differently - a grant or appropriation with a fiscal deadline is a hard expiry and should be modelled as one rather than as a decay."
+      },
+      "false_positives": [
+        "An exempt-offering filing covering a round that was announced months earlier, counted twice",
+        "A re-closing, extension or second tranche of the same round appearing as a new event",
+        "Debt raised to refinance existing debt, which releases no new spending capacity",
+        "A grant ring-fenced to a purpose your category cannot be charged to",
+        "An announcement timed for recruitment or public-relations reasons long after the money actually landed",
+        "Capital raised to fund an acquisition already agreed, so it is committed before it arrives",
+        "A fund, holding company or special-purpose vehicle filing under a name similar to the operating company",
+        "An award to a consortium in which your account is a minor member"
+      ],
+      "confirmation_signals": [
+        "f13.job_posting_signal",
+        "f13.rfp_or_tender_issued"
+      ],
+      "recommended_action_class": "prioritise_the_account_and_time_contact_to_the_spending_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "project_based",
+          "transaction_based",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "funding",
+          "business_event",
+          "hiring",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "biotech",
+          "manufacturing",
+          "construction",
+          "public_sector",
+          "professional_services",
+          "energy"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "availability",
+          "source_url": "https://developer.company-information.service.gov.uk/",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "A national company registry publishes a public developer portal for retrieving company information, and states the data returned is live and real-time - establishing that rung 2 rests on a first-party government API rather than on a data broker, in at least one jurisdiction."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f13.technology_stack_change",
+      "family": "F13",
+      "name": "Technology or supplier stack change at a target organisation",
+      "definition": "An organisation adds, removes, replaces or visibly upgrades a component of its publicly observable stack - the software serving its website, its mail and DNS configuration, its published integrations, its developer-facing endpoints, its named suppliers - where that component is a prerequisite for, a complement to, or the incumbent of what you sell. Qualifying condition: two dated observations of the same organisation differ on a named component.",
+      "question_answered": "Which accounts have just changed the platform our product plugs into, or dropped the incumbent we replace - and how fresh is that change?",
+      "intent_dimensions": [
+        "fit",
+        "category",
+        "requirements",
+        "timing",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "organisation_domain",
+        "observation_date",
+        "component_name_or_class",
+        "observed_state",
+        "prior_observation_date_and_state"
+      ],
+      "optional_supporting_fields": [
+        "dns_mx_ns_and_txt_records",
+        "http_response_headers",
+        "third_party_script_hosts",
+        "cms_or_framework_generator_meta",
+        "certificate_transparency_entries",
+        "published_integration_listings",
+        "public_changelog_or_status_entries",
+        "developer_documentation_endpoints",
+        "requisitions_naming_the_tool",
+        "detection_confidence"
+      ],
+      "source_class": [
+        "marketplace",
+        "news_feed",
+        "licensed_dataset",
+        "partner_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Fetch the public surface of your named accounts once a week and write down what you see: the homepage HTML (script hosts, generator meta, embedded widget domains), the response headers, and the public DNS records - MX for mail, TXT and SPF for the services allowed to send as them, NS and CNAME for hosting and delivery",
+          "requires": [
+            "an HTTP client and a DNS resolver",
+            "your account list with domains"
+          ],
+          "gives": "An incumbent-and-complement inventory across your whole target list in one afternoon, entirely off your own website and with no vendor involved"
+        },
+        {
+          "rung": 2,
+          "how": "Diff it. Keep every snapshot and alert on the difference: an SPF include added, an MX moved, a script host that disappeared, a new subdomain surfacing in the public certificate-transparency logs",
+          "requires": [
+            "storage for snapshots",
+            "a scheduled comparison job"
+          ],
+          "gives": "The change, dated. The inventory alone is a list; only the difference is a signal, and the certificate logs surface new systems before the marketing site mentions them"
+        },
+        {
+          "rung": 3,
+          "how": "Add the surfaces the target publishes on purpose: their listing appearing in or disappearing from an app or integration marketplace, their public changelog and status page, their developer documentation, their engineering blog, and requisitions that name a tool",
+          "requires": [
+            "one fetcher per source class"
+          ],
+          "gives": "Confirmation from a second independent surface, which is what stops you acting on a tag that has outlived its contract"
+        },
+        {
+          "rung": 4,
+          "how": "Licence a technographics dataset where you need market-wide coverage rather than a watched account list",
+          "requires": [
+            "budget"
+          ],
+          "gives": "Breadth and history. It does not give certainty: detection products disagree with each other and with the live site, and none of them can see whether a detected tool is paid for, in use, or merely left behind"
+        }
+      ],
+      "min_data": {
+        "minimum_prior_observations": 2,
+        "minimum_observation_interval_days": 7,
+        "note": "A stack change is the difference between two dated observations. One observation is an inventory, not a signal - so start the baseline before you need the alert, and treat the first sweep as producing no signals at all."
+      },
+      "access_conditions": [
+        "Everything at rungs 1 to 3 is a public server answering a public request. Fetch politely, honour robots.txt, and never attempt anything that requires authentication or evades a block - that changes the legal character of the collection entirely.",
+        "Presence is not purchase and absence is not churn. A tag can outlive a contract by a year, and a server-side integration leaves no client-side trace at all, so this row is blind to an entire class of adoption.",
+        "Detection at the apex domain misses regional sites, acquired brands and internal systems, which is where a large organisation's real stack decisions usually show up first."
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Automated collection of a third party's public web pages is governed by their terms and robots directives and, in some jurisdictions, by computer-misuse rules once access controls are involved. DNS and certificate-transparency logs are designed for open query and carry no such constraint.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "The buying window is the period between changing the platform and finishing the purchases that surround it. Roughly two months out, the surrounding decisions have usually been made by someone."
+      },
+      "false_positives": [
+        "A tag left in place after the contract ended - presence long outlives payment",
+        "A change made by their agency across every client it serves, which is the agency's decision and not the account's",
+        "A delivery network or reverse proxy masking or misattributing the true origin stack",
+        "A single team's trial or pilot detected and read as an organisation-wide switch",
+        "A regional or localised domain differing from the main one, so the same account appears to hold two contradictory stacks",
+        "A rebrand or replatform that changes everything at once and buries the specific component you cared about",
+        "Two detection sources disagreeing, logged as a change when nothing changed",
+        "A subsidiary or newly acquired domain attributed to the parent"
+      ],
+      "confirmation_signals": [
+        "f13.job_posting_signal",
+        "f05.compatibility_check",
+        "f04.product_comparison"
+      ],
+      "recommended_action_class": "route_to_the_account_owner_with_the_dated_change_and_the_displaced_component",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "contract_expiry",
+          "product_failure",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "ecommerce",
+          "data_infrastructure",
+          "security",
+          "marketing_services",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "capability_ladder",
+          "source_url": "https://certificate.transparency.dev/",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Certificate transparency logs are publicly available, append-only and monitorable by anyone, recording which certificates were issued, when, and for which domains - so rung 2's new-subdomain detection rests on an open, free, standards-backed log rather than on a commercial dataset."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f13.regulatory_compliance_deadline",
+      "family": "F13",
+      "name": "Regulatory or standards compliance deadline applying to an account",
+      "definition": "A rule carrying a dated obligation applies to a class of organisations you serve - a regulation taking effect, a standard version being withdrawn, a licence or certification expiring, a mandated migration, a reporting or audit date. Qualifying condition, both halves required: a dated obligation exists, AND the account carries the attributes named in that obligation's scope test - jurisdiction, sector, size band, licence held, data processed, or market a product is placed on. The date alone is news; the date joined to in-scope accounts is the signal.",
+      "question_answered": "Which of our accounts and prospects must do something by a specific date that we can supply - and when does their procurement have to start for that to be possible?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing",
+        "requirements",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "calendar_join",
+      "required_raw_fields": [
+        "obligation_id",
+        "obligation_effective_date",
+        "scope_criteria",
+        "account_id",
+        "account_attributes_matching_scope_criteria"
+      ],
+      "optional_supporting_fields": [
+        "in_force_date_vs_enforcement_start_date",
+        "transition_or_grace_period_end",
+        "regulator_or_standards_body",
+        "penalty_regime",
+        "superseded_standard_version",
+        "account_certification_expiry_date",
+        "account_declared_scope_confirmation",
+        "estimated_procurement_lead_time",
+        "prior_compliance_purchases",
+        "exemption_and_threshold_notes"
+      ],
+      "source_class": [
+        "public_record",
+        "news_feed",
+        "crm"
+      ],
+      "collection_method": "upload",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Build the calendar by hand. List the ten to twenty dated obligations that bind the kind of organisation you sell to, and write each one's scope test as attributes you actually hold - jurisdiction, sector code, size band, licence type, market placed on. Join it to your CRM",
+          "requires": [
+            "a spreadsheet",
+            "one day reading the regulators' own published timetables",
+            "the account attributes already in your CRM"
+          ],
+          "gives": "A dated, defensible target list per obligation - and, just as valuable, the list of accounts you cannot classify, which is a CRM gap you can go and fix"
+        },
+        {
+          "rung": 2,
+          "how": "Work backwards from the deadline instead of forwards from the announcement. Set each obligation's activation date to deadline minus implementation time minus their procurement time, and let the row fire then",
+          "requires": [
+            "two duration estimates per product"
+          ],
+          "gives": "Contact at the only moment they can still act - instead of the two useless windows on either side of it, which is where almost all compliance marketing lands"
+        },
+        {
+          "rung": 3,
+          "how": "Automate the calendar's upkeep from official sources: the regulator's or legislature's published register filtered to your sector's document classes, the standards body's withdrawal schedule, and the public licence registers that carry each account's own expiry date",
+          "requires": [
+            "one scheduled fetch per source",
+            "a named person who reads the output"
+          ],
+          "gives": "New obligations, and more importantly deferrals and repeals - a deadline that moved turns your target list into a liability until you notice"
+        },
+        {
+          "rung": 4,
+          "how": "Hold the account's own compliance state: certification held and its expiry, last audit date, and the obligations they have told you they are in scope for",
+          "requires": [
+            "asking them",
+            "a field to store the answer and a date to re-ask"
+          ],
+          "gives": "The join stops guessing. A declared scope outranks any inferred one and is the only version you can safely quote back to the account"
+        }
+      ],
+      "min_data": {
+        "required_account_attributes": [
+          "jurisdiction",
+          "sector_or_activity_code",
+          "employee_or_revenue_band"
+        ],
+        "minimum_obligations_modelled": 5,
+        "note": "Without at least jurisdiction and sector on the account record this join produces a mailing list rather than a signal. An account whose attributes are unknown must stay unmatched - never default an unclassified account into scope, because the resulting claim is both wrong and quotable."
+      },
+      "access_conditions": [
+        "This row tells you a dated obligation exists and which accounts share the attributes in its scope test. It does not establish that an account is legally in scope - that determination turns on exemptions and thresholds you will not hold data for. What you say to the account must be 'this may apply to you', never 'this applies to you'.",
+        "Deadlines move. A calendar built once and never maintained keeps firing against obligations that were deferred, amended or repealed, and that is worse than not firing at all.",
+        "Sector and size attributes decay. Re-derive them on a schedule or the join silently drifts out of scope."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "none",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "monthly",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The obligation date is a hard boundary, but the useful window opens at deadline minus the account's procurement lead time and closes at the deadline. After it passes, this stops being a purchase-readiness signal and becomes a remediation one, which is a different conversation with a different buyer."
+      },
+      "false_positives": [
+        "The account is exempt under a threshold or derogation you did not model - size, turnover, volume, or transitional relief",
+        "They are already compliant: bought last year, or the obligation is handled centrally by a parent or a group function",
+        "The obligation was deferred, amended or repealed after you built the list, which happens often and quietly",
+        "Their existing supplier satisfies it at no extra cost, so the deadline creates no purchase",
+        "An in-house team handles it and always has",
+        "The obligation binds their supplier or their customer rather than them, and the account is only indirectly affected",
+        "The same rule counted twice - once as a supranational instrument and once as its national implementation",
+        "The scope test matched on a stale sector or size attribute that has since changed"
+      ],
+      "confirmation_signals": [
+        "f13.rfp_or_tender_issued",
+        "f05.requirement_formation",
+        "f01.explicit_need_statement"
+      ],
+      "recommended_action_class": "activate_at_deadline_minus_procurement_lead_time_with_a_may_apply_framing",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "project_based",
+          "transaction_based",
+          "reseller"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "regulation",
+          "business_event",
+          "contract_expiry"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "financial_services",
+          "healthcare",
+          "food_and_beverage",
+          "construction",
+          "transport",
+          "energy",
+          "manufacturing",
+          "security",
+          "public_sector",
+          "legal_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

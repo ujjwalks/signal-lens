@@ -5,6 +5,1144 @@
   "shard": "restricted",
   "signals": [
     {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "family": "F06",
+      "name": "Inferred ability to pay used to set price, terms, or offer",
+      "definition": "Estimating what a person can afford - their means, income, creditworthiness or price tolerance - from behaviour they did not offer for that purpose (device, browsing, coupon-seeking, cart abandonment, payment-failure history, neighbourhood, purchase patterns, or a purchased affluence score), and using that estimate to decide which price, discount, payment term or offer that person is shown. The prohibited act is the pricing decision taken on an inferred means attribute. Targeting a person identified as being in financial difficulty is a different and also prohibited class - see restricted.financial_distress_inference.",
+      "question_answered": "None that this tool will help you answer. The class is named so it can be excluded from a price-sensitivity model, not detected. Two lawful neighbours do the work people reach for this to do: f06.price_sensitivity, which observes behaviour toward YOUR prices and never estimates means, and f06.budget_allocation, where the buyer declares a budget for this purchase.",
+      "intent_dimensions": [
+        "budget",
+        "value"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "first_party_web",
+        "licensed_dataset"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Where the inference is bought in, data-licence terms routinely forbid using the attributes for credit, insurance, housing or employment eligibility - the exact uses that make the inference valuable and the exact uses that trigger consumer-reporting law.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "The prohibition does not rest on special-category status - inferred means is not special-category data - which is exactly why it slips past a sensitivity check and has to be named. It rests on three things. First, the pricing act itself: the FTC's surveillance-pricing 6(b) study documents intermediaries setting individualised prices from consumer characteristics and behaviours, a growing number of jurisdictions now require disclosure when a price is set using a person's data, and under GDPR the estimate is a new personal data point the subject could not anticipate, so a price or term decided on it can amount to automated decision-making with legal or similarly significant effects. Second, proxy discrimination: neighbourhood, device, name and shopping-pattern inputs reproduce protected-class distinctions without naming a protected attribute, which is disparate impact under equal-credit and fair-housing rules and is not cured by the absence of intent. Third, where the estimate is used to decide eligibility for or the terms of credit, insurance, housing or employment it performs the function of a consumer report, and assembling it outside that framework strips the accuracy duties, permissible-purpose limits, adverse-action notice and dispute rights the framework exists to provide. Independent of all of it, the failure mode is the point: the error is charging more to the people least able to pay, invisibly, with no route to see the estimate, contest it, or know it exists. The lawful variant is a budget the buyer states for this purchase, or observed behaviour toward your own published prices - neither of which requires estimating anyone's means.",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Deliberate economising by someone with ample means - thrift is a preference at least as often as it is a constraint",
+        "A shared, borrowed or workplace device carrying several people's behaviour under one identifier",
+        "A coupon or price-comparison browser extension producing discount-seeking behaviour with no person behind it",
+        "Someone buying on behalf of an employer, a client or a relative, whose budget is not their own",
+        "A single expensive period - a house move, a new child, a redundancy - read as a permanent financial position"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "desire",
+          "replacement",
+          "life_event",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/news-events/news/press-releases/2025/01/ftc-surveillance-pricing-study-indicates-wide-range-personal-data-used-set-individualized-consumer",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC staff perspective on the surveillance-pricing 6(b) study, 17 January 2025, fetched and read this session: it reports that behaviours 'ranging from mouse movements on a webpage to the type of products that consumers leave unpurchased in an online shopping cart can be tracked and used by retailers to tailor consumer pricing'. The anti-discrimination and consumer-reporting limbs above are statutory and were not independently fetched this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "restricted.affiliation_inference_from_occasion_behaviour",
+      "family": "F12",
+      "name": "Inferred religious, ethnic, or political affiliation from occasion behaviour",
+      "definition": "Deriving a person's religion, ethnicity, national origin, sexual orientation or political affiliation from which occasions, festivals, observances or dietary categories they buy for, from the timing of their orders against a religious or cultural calendar, or from the language and location signals attached to those orders - and then storing or activating the derived attribute. Joining a published occasion calendar to a market, with no attribute attached to any person, is a different thing and is a normal lawful entry.",
+      "question_answered": "None that this tool will help you answer. Sell into the occasion; do not attach a belief to the customer.",
+      "intent_dimensions": [
+        "preference",
+        "timing",
+        "identity_scope"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "commerce_platform",
+        "first_party_web"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "restricted",
+      "prohibition_basis": "GDPR Art. 9(1) prohibits processing of personal data revealing racial or ethnic origin, political opinions, religious or philosophical beliefs, and data concerning sex life or sexual orientation, unless an Art. 9(2) condition applies; recital 51 explains that such data merit specific protection because the context of their processing could create significant risks to fundamental rights and freedoms. An attribute derived from shopping behaviour has no such condition, because the person was never asked and cannot object to a label they cannot see. US state privacy statutes classify religion, ethnicity, national origin and sexual orientation as sensitive data requiring opt-in, and civil-rights law reaches the outcome - a differential offer, price or eligibility attached to a protected characteristic - regardless of how the characteristic was obtained. The consequences are also not evenly distributed: in some jurisdictions, and for some people in every jurisdiction, a stored inference about religion, ethnicity or sexual orientation is a physical safety risk to the person it describes, realised the moment the record is breached, subpoenaed or sold. Selling into a festival is ordinary commerce. Attaching a faith to a named person because they bought for it is not, and the two are separated by exactly one decision: whether the join is to a market or to a person.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_CA",
+          "US_CT"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. The stored label outlives the business that created it, which is the point at which it becomes someone else's data."
+      },
+      "false_positives": [
+        "Buying for friends, colleagues or in-laws who observe an occasion the buyer does not",
+        "Curiosity, cooking, travel, a school project or a dinner party",
+        "A caterer, retailer, teacher or event professional buying for work",
+        "A household of more than one faith, or of none, sharing a single account",
+        "A dietary category chosen for health, cost or ethics rather than belief"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_join_the_calendar_to_the_market_not_to_the_person",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "occasion",
+          "life_event",
+          "desire"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "GDPR Art. 9(1) and recital 51, verified against the consolidated EUR-Lex text of Regulation (EU) 2016/679."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.bereavement_and_relationship_dissolution_inference",
+      "family": "F12",
+      "name": "Inferred bereavement, separation, or divorce",
+      "definition": "Deriving that a household has suffered a death, or that a relationship has ended - from a cancelled joint subscription, a halved consumption rate, a name dropped from an account, a changed delivery pattern, probate or divorce filings, obituary and funeral-notice feeds, or any other behavioural proxy - and using it to target, time or price an approach. This class covers acquisition targeting. It does not cover acting on a bereavement or separation that the household reports to you directly, which is a service obligation to be honoured immediately and across every channel. Complements restricted.life_event_inference_from_consumption, which names the cadence-break mechanism; this entry additionally covers the public-record and notice-feed sourcing route - probate, court filings, obituaries and funeral notices - and states the suppression-path obligation that sits alongside the prohibition.",
+      "question_answered": "None that this tool will help you answer. The only lawful posture here is a suppression path the household controls.",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "identity_scope"
+      ],
+      "identity_level": "household",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "commerce_platform",
+        "public_record",
+        "news_feed"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Obituary, probate and court-listing feeds are commonly redistributed under licences that permit republication but not direct-marketing use; free access to a court register is not a marketing permission.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "There is no consent available in this class and no route to obtaining one: the person whose status is inferred is, by construction, not the person who told you. In the EEA and UK such profiling fails the Art. 5(1)(a) fairness and transparency test before any lawful basis is reached, and where the death or separation is entangled with illness, care or reproductive events it becomes Art. 9 special-category processing with no available condition. Under US state sensitive-data rules the same inference frequently resolves back to health data and inherits an opt-in requirement the inference cannot satisfy. The consumer-protection exposure is the vulnerability itself: marketing timed to a known moment of distress is the paradigm case of an unfair practice, and the FTC's study of the data-broker industry documented life-event attributes being assembled and traded without the knowledge of the people described. The harm needs no statute to be legible - a mailing addressed to someone who has died, or an offer timed to a separation the recipient has told nobody about, is a wound delivered by an automated system with no one to appeal to. The correct and better-performing alternative is subtractive: make it trivially easy for a household to tell you once, act on it in one step everywhere, and never reconstruct the fact yourself.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_CA"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. A wrong inference here is not corrected by time; it is repeated by every scheduled job that reads the flag."
+      },
+      "false_positives": [
+        "A cancelled joint account that is a switch to a cheaper supplier, not a separation",
+        "A halved consumption rate caused by a child leaving for university, a diet change or a second home",
+        "A probate, obituary or court record matched to the wrong household by name and postcode",
+        "An estate or trust transaction handled by a solicitor where no occupier changed at all",
+        "A name removed from an account for fraud, admin or convenience reasons"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_offer_a_one_step_suppression_path",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "life_event",
+          "household_change",
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "GDPR, Art. 5(1)(a) fairness and Art. 9 special categories; recital 51 states that data of these kinds merit specific protection because the context of their processing could create significant risks to fundamental rights and freedoms."
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/reports/data-brokers-call-transparency-accountability-report-federal-trade-commission-may-2014",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC report documenting consumer attributes assembled from online and offline sources largely without consumers' knowledge, with a recommendation for statutory transparency and consumer control."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.biometric_attribute_inference",
+      "family": "F08",
+      "name": "Attributes inferred from identity documents or biometrics",
+      "definition": "Deriving attributes about a person - age, sex, ethnicity, nationality, immigration status, appearance or health - from the identity documents, facial images, voice samples or biometric templates collected during a verification step, and using them for segmentation, targeting, scoring or pricing rather than for the regulated verification the person submitted them for. Includes retaining or re-using a biometric template outside that purpose.",
+      "question_answered": "None that this tool will help you answer. The class is named so that f08.identity_verification can carry the state of the check and nothing else, and so that the reason for that restraint is written down rather than assumed.",
+      "intent_dimensions": [
+        "identity_scope",
+        "readiness"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "source_class": [
+        "first_party_backend"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Verification providers' processing agreements enumerate permitted purposes exhaustively and prohibit secondary use; the underlying anti-money-laundering and age-assurance obligations impose purpose and retention limits that a commercial agreement cannot widen.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Biometric data processed to identify a person uniquely is special-category data under GDPR Art. 9 and requires an Art. 9(2) condition that a marketing or segmentation purpose cannot supply. The documents themselves routinely disclose nationality, and in some cases immigration status, race or ethnic origin, each separately protected. In the United States, biometric identifiers are governed by dedicated statutes - Illinois' Biometric Information Privacy Act requires informed written release before collection, bans selling or otherwise profiting from biometric identifiers, and carries a private right of action; Texas and Washington impose comparable duties through their attorneys general. The record is also held under a regulatory mandate whose purpose is exhaustively specified, so re-use for commercial segmentation is a purpose change the original obligation does not authorise - and it usually cannot be cured by consent, because consent asked for at a mandatory verification step the customer cannot refuse is not freely given. Finally, the accuracy failure is not symmetric: automated age, sex and ethnicity estimation from a document photograph is wrong at different rates for different groups, and the person it describes has no way to see the estimate, contest it, or know it was made.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_IL",
+          "US_TX",
+          "US_WA"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "A document belonging to somebody acting for another person - a guardian, an agent, a company officer",
+        "Automated demographic estimation that is systematically wrong for some groups and cannot be audited by the person it describes",
+        "A verification run for account recovery or periodic re-screening rather than for any purchase",
+        "A document held for a regulated retention period long after the customer relationship ended"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "marketplace",
+          "subscription",
+          "services",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "regulation",
+          "business_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The statutory basis above is stated from black-letter law, not from a source fetched this session: the Illinois General Assembly's statute site was unreachable from this environment, so no URL is cited rather than one being asserted unverified. Verify 740 ILCS 14/15 and 14/20, Texas Bus. & Com. Code s.503.001, Wash. Rev. Code 19.375 and GDPR Art. 9 before relying on this text."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "restricted.body_measurement_health_inference",
+      "family": "F05",
+      "name": "Body-geometry capture and health inference from measurement change",
+      "definition": "Deriving a person's body geometry from a photograph, video, or scan in order to size or fit a product, and inferring from those measurements - or from how they change over successive orders - a pregnancy, a body-composition or weight trajectory, a disability, an eating disorder, or any other health state. The lawful variant is the measurement a person types in themselves for the stated purpose of fit; this entry is the variant where the measurement is taken from them and read for something other than fit.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected. For the declared-measurement signal, see f05.measurement_taken.",
+      "intent_dimensions": [
+        "fit",
+        "requirements"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "first_party_web"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "A sizing flow's consent to be measured is not consent to be profiled, and in the jurisdictions that regulate biometric capture the capture itself needs its own written release before the first frame is taken.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "A scan of face or body geometry is a biometric identifier under Illinois' Biometric Information Privacy Act, which requires a written release before capture and carries a private right of action with statutory damages per violation; the Texas and Washington biometric statutes impose comparable duties without the private right. Under GDPR Article 9, biometric data processed to uniquely identify a person and data concerning health are both special categories, and a sizing flow supplies no Article 9(2) condition for either. Washington's My Health My Data Act defines consumer health data to include data derived or extrapolated from non-health information by any means including algorithms, so a pregnancy or body-composition inference drawn from measurement drift is regulated health data no matter how ordinary its inputs were. The harm is specific rather than abstract: measurement drift across repeat orders is one of the shortest paths from a fit form to a pregnancy or eating-disorder inference, and the people most damaged by acting on it are the ones least able to correct the record.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_IL",
+          "US_TX",
+          "US_WA",
+          "US_MD",
+          "US_CT",
+          "US_NV"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "A shared account on which one person orders for several members of a household",
+        "A person measuring a garment or an object rather than themselves",
+        "A tailor, carer, or parent recording someone else's measurements",
+        "A measurement changed because the intended recipient of the item changed"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "health",
+          "occasion",
+          "desire"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://gdpr-info.eu/art-9-gdpr/",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373&full=true",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "restricted.breach_exposure_victim_targeting",
+      "family": "F15",
+      "name": "Targeting individuals identified from breached or leaked data",
+      "definition": "Assembling, buying or enriching a list of people identified as exposed in a security incident - from credential dumps, leak-site postings, criminal marketplaces, or a copy of a notification register keyed to named individuals - in order to market a remedy to them, including attaching a derived 'exposed' or 'breached' attribute to records you already hold.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected.",
+      "intent_dimensions": [
+        "need",
+        "risk",
+        "urgency"
+      ],
+      "identity_level": "individual",
+      "data_class": "external_feed",
+      "source_class": [
+        "licensed_dataset",
+        "public_record"
+      ],
+      "collection_method": "licensed",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Obtaining the material at all may constitute an offence independently of any data-protection analysis.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "There is no lawful basis for processing personal data taken from a criminal breach. It fails the fairness limb of GDPR Art. 5(1)(a) on its face, and no Art. 6 basis survives contact with material the controller knows to be stolen - a data subject cannot consent to it, and a legitimate-interests balance cannot be met where the individual's rights were violated to create the dataset. Dumps routinely contain authentication credentials and special-category data, engaging Art. 9 and the Art. 32 security duty as soon as they are copied. Retrieving the material from a leak site or marketplace can independently constitute unauthorised access or handling of criminally obtained property in several jurisdictions, and paying for it may fund the offence. The harm is direct rather than theoretical: unsolicited 'your data was exposed' outreach is the exact pretext that follow-on fraud uses, so the practice degrades the one cue victims rely on to recognise a genuine notification, and it re-contacts people at the moment they are most exploitable. The lawful route carries no person-level list at all - monitor the entity-level public disclosure the provider or the regulator publishes, and let the affected person come to you.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_CA",
+          "US_WA",
+          "US_MD"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Records in a dump that were fabricated, duplicated from an older breach, or padded to inflate the seller's claimed volume",
+        "An address or identifier belonging to someone other than the person now holding it - recycled accounts and shared family addresses",
+        "Test, honeypot and staff accounts harvested alongside real ones",
+        "A person who was notified, remediated and has no remaining need, contacted months later as though the exposure were live"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "subscription",
+          "services",
+          "saas"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable"
+        ],
+        "triggers": [
+          "problem",
+          "product_failure",
+          "business_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Stated from the text of the general data-protection duties rather than from a single enforcement action; no URL is cited because none was verified in the session that authored this entry."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.eligibility_route_special_category_inference",
+      "family": "F05",
+      "name": "Protected status inferred from an eligibility route",
+      "definition": "Retaining or acting on the fact that a person took an eligibility path only taken by applicants with a particular protected characteristic - a disability or medical concession, a hardship or benefits route, a pregnancy or bereavement exemption, an immigration or religious-observance pathway - and turning that route into an attribute, a segment, an audience, or a suppression list, rather than using it once as the servicing decision it was collected to make.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded. The lawful signal is f05.eligibility_check, which records only pass, fail, or refer.",
+      "intent_dimensions": [
+        "readiness",
+        "fit"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "source_class": [
+        "first_party_web"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "The person consented to be assessed against a rule. That is not consent to be described by the rule they matched.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Which concession route a person takes reveals health status, disability, religious belief, or family circumstance - all special categories under GDPR Article 9, for which no Article 9(2) condition is created by the fact that the person had to disclose them to be served. Article 5(1)(b) forbids further processing incompatible with the purpose of collection, and an eligibility rule is collected to operate the rule. Washington's My Health My Data Act treats data derived or extrapolated from non-health information as consumer health data requiring separate opt-in consent and a separate authorisation before any sale, which a route-derived disability segment cannot satisfy. Independently of privacy law, retaining protected status as a marketing attribute creates direct exposure under equality and anti-discrimination regimes, because the segment is by construction defined on the protected characteristic. Keep the verdict, discard the route.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_MD",
+          "US_CT",
+          "US_NV"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "An adviser, carer, or family member completing the check on someone else's behalf",
+        "A person testing several routes to find which one they qualify for",
+        "A route taken in error and abandoned",
+        "An organisation applying on behalf of the individual who holds the entitlement"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "local_services",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "health",
+          "regulation",
+          "life_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://gdpr-info.eu/art-5-gdpr/",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373&full=true",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.environmental_health_vulnerability_inference",
+      "family": "F15",
+      "name": "Inferred medical vulnerability to an environmental condition",
+      "definition": "Deriving that a specific person or household is medically susceptible to an environmental condition - asthma, allergy, respiratory or cardiac illness, immune status, pregnancy, or age-related heat vulnerability - from how they respond to pollen counts, air-quality indices, heat, cold or storm events, or from purchases and content consumption that co-occur with those conditions, and then holding that derived susceptibility as an attribute in order to time offers to them.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected.",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "public_record",
+        "first_party_web"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Regulated as consumer health data in several US states regardless of how ordinary the underlying weather feed is.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Weather targeting is lawful at the level of a place and becomes health data at the level of a person. A pollen-, heat- or air-quality-triggered audience is commercially interesting only because its members are believed to have a condition, and that belief is precisely the inference the law treats as health data: Washington's My Health My Data Act defines consumer health data to include data 'derived or extrapolated from nonhealth information (such as proxy, derivative, inferred, or emergent data by any means, including algorithms or machine learning)', requires consent for collection for a specified purpose, and requires a separate signed authorization to sell, backed by a private right of action. Under GDPR Art. 9 data concerning health is special category, and a behavioural inference supplies no Art. 9(2) condition. The harm is also asymmetric and concrete: the shared address or shared device that makes a household weather-targetable makes a condition disclosure visible to everyone living in it. The lawful route is the ordinary catalogue entry for weather at location level, which carries no person-level susceptibility attribute; where condition-specific timing genuinely matters, the person must declare the condition for that purpose under the ordinary special-category rules, and a declaration made for one purpose does not license the inference for another.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_MD",
+          "US_NV",
+          "US_CT"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Buying a remedy, filter or air purifier for a child, parent, patient or tenant rather than for oneself",
+        "Occupational exposure - a groundskeeper, cleaner or site worker reacting to conditions at work, not a diagnosis",
+        "A shared household or shared device where the person responding to the condition is not the person profiled",
+        "A one-off severe-weather season producing category-wide behaviour that is meteorological, not medical"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "weather",
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373&full=true",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Statute text verified this session: chapter 19.373 RCW includes inferred and extrapolated data in the definition of consumer health data, requires consent for collection for a specified purpose, and requires a separate authorization to sell."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.financial_distress_inference",
+      "family": "F13",
+      "name": "Inferred financial distress or vulnerability of the person behind a business",
+      "definition": "Deriving that a natural person - a sole trader, partner, director, personal guarantor, or a member of their household - is in financial difficulty, and using that inference to select, time, price, or target an approach. The class covers distress or vulnerability scores assembled from consumer-credit-derived data or credit headers, from arrears and payment-failure patterns, or from court, judgment and insolvency records attached to a named individual, whether purchased, collected, or modelled in-house. It does not cover the entity-level fact.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected.",
+      "intent_dimensions": [
+        "budget",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "individual",
+      "data_class": "external_feed",
+      "source_class": [
+        "licensed_dataset",
+        "public_record"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Data assembled to judge a person's financial standing is regulated as a consumer report in the US regardless of what the buyer calls it, and credit-reference data everywhere carries contractual use restrictions that marketing use does not satisfy.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Under the Fair Credit Reporting Act a consumer reporting agency may furnish a consumer report only for the purposes enumerated in 15 U.S.C. 1681b(a) - 'under the following circumstances and no other'. General prospecting and marketing are not among them; the only prospecting route Congress allowed is the tightly conditioned firm-offer-of-credit-or-insurance prescreen with its own opt-out machinery. Assembling distress or vulnerability inferences about a named individual for targeting therefore sits outside any permissible purpose, and calling the output a 'signal' rather than a 'report' does not change what it is. In the UK and EEA the same practice engages fairness and transparency obligations under the GDPR - inference from credit-reference data for a purpose the person never contemplated fails the compatibility test - alongside conduct rules on the treatment of customers in vulnerable circumstances. Beyond the legal exposure the harm is direct and documented: targeting people at the point of financial difficulty is the delivery mechanism for predatory lending, advance-fee and debt-advice fraud, and high-pressure refinancing. The lawful variant is the entity-level fact and only the entity-level fact: a company's own published insolvency, administration or winding-up notice in an official gazette, used as a business event about an organisation, with no inference drawn about any natural person behind it.",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "US",
+          "EEA",
+          "UK"
+        ],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. Note that the underlying records outlive the difficulty by years, so the inference is stale long before it is deleted."
+      },
+      "false_positives": [
+        "A business paying late because of its own accounts-payable process rather than any difficulty",
+        "A director sharing a name and approximate age with a different person entirely",
+        "A satisfied judgment or a discharged insolvency still present in the record",
+        "A failed payment caused by an expired card, a bank migration or a fraud block",
+        "A dormant entity kept on the register deliberately"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "subscription",
+          "transaction_based",
+          "project_based"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "funding"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.law.cornell.edu/uscode/text/15/1681b",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "15 U.S.C. 1681b(a) enumerates the circumstances in which a consumer report may be furnished and states that it may be furnished under those circumstances 'and no other'. Direct marketing and general prospecting are absent from the list; the prescreened firm-offer route in subsection (c) is the only marketing-adjacent path and carries its own conditions and consumer opt-out."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.granted_access_secondary_inference",
+      "family": "F07",
+      "name": "Secondary inference from a granted connection",
+      "definition": "Reading data reached through an access grant a subject made for a stated purpose - a connected mailbox, calendar, file store, banking, utility, or clinical record, or an advertising or analytics account - in order to derive attributes they did not grant it for: health status, life events, household composition, financial distress, religious or political affiliation, or private information about the third parties whose data happens to sit inside the connected store.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded. The lawful signal is f07.consent_and_access_granting, which scores the act of granting and its scope, not the contents behind it.",
+      "intent_dimensions": [
+        "commitment",
+        "readiness"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "source_class": [
+        "user_authorized_connection"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Platform API programmes impose limited-use terms that survive the user's consent; a user cannot consent you out of the platform's contract, and losing the connection wholesale is the usual consequence of trying.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "GDPR Article 5(1)(b) requires that data collected for a specified purpose is not further processed in a manner incompatible with it, and an access grant made to configure or evaluate a product does not extend to profiling. Where the derived attribute is health, sex life, religious or political belief it is special-category data under Article 9, which behavioural inference cannot supply a condition for. Beyond the grantor: a connected mailbox, calendar, or file store contains the personal data of people who never met you, so a lawful basis obtained from the account holder is not a lawful basis for everyone inside their inbox, and no consent screen the grantor sees can create one. Platform limited-use policies bind the processing independently of consent, and this is the class where a technically trivial capability - the token already works - is separated from lawfulness by nothing except restraint, which is exactly why it is written down here instead of being left to judgement.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_MD",
+          "US_CT",
+          "US_NV",
+          "US_CA"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "An agency or managed-service provider whose connected account belongs to a client, so every attribute derived describes the wrong party",
+        "A shared or role mailbox used by several people",
+        "Content forwarded into the store by someone other than the account holder",
+        "Automated messages and system notifications mistaken for the account holder's own activity"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "technology_change",
+          "life_event",
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://gdpr-info.eu/art-5-gdpr/",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://gdpr-info.eu/art-9-gdpr/",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
       "id": "restricted.health_status_inference",
       "family": "F12",
       "name": "Inferred health status or clinical journey stage",
@@ -104,6 +1242,589 @@
           "source_url": "https://www.ftc.gov/legal-library/browse/cases-proceedings/2023062-goodrx-holdings-inc",
           "as_of": "2026-08-01",
           "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.household_composition_inference",
+      "family": "F12",
+      "name": "Inferred household composition",
+      "definition": "Deriving who lives at an address - the number of occupants, the presence and ages of children, cohabitation or relationship status, dependants and carers, or a household income band - from purchase mix, consumption volume, delivery patterns, device co-occurrence, shared identifiers or an identity graph, rather than from what the household itself declared for a stated purpose. Asking a customer how many people use a product, and letting them change the answer, is a different thing and is a lawful field on a normal entry. Complements restricted.household_graph_inference, which covers the relationship graph reconstructed from shared devices and identity co-occurrence; this entry covers the composition attributes derived from what an address consumes - occupant counts, children and their ages, dependants, income band - which is the inference a replenishment or consumption model is one query away from producing.",
+      "question_answered": "None that this tool will help you answer. The lawful version of this question is asked, not modelled.",
+      "intent_dimensions": [
+        "identity_scope",
+        "need",
+        "budget"
+      ],
+      "identity_level": "household",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "commerce_platform",
+        "licensed_dataset"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Household-composition attributes are typically obtained from data brokers whose contracts warrant lawful sourcing they cannot actually evidence; the warranty transfers the paperwork, not the exposure.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Household composition is not one attribute but a bundle whose components are separately regulated and separately harmful. Inferring the presence and age of a child manufactures knowledge that brings the processing inside children's-data regimes: the FTC's COPPA Rule attaches on actual knowledge that personal information is being collected from a child under 13, and building a 'child aged 2-4 in household' attribute creates exactly that knowledge, while GDPR Art. 8 and the UK Age Appropriate Design Code impose their own duties on top. Inferred cohabitation, relationship status, dependants and carer roles reveal family life and, frequently, health and sexual orientation, which GDPR Art. 9 places under a prohibition that behavioural inference cannot lift. An inferred income band drives differential pricing and eligibility outcomes that consumer-protection and anti-discrimination law reaches regardless of how the band was derived. The FTC's study of the data-broker industry documented these household attributes being assembled and traded largely without consumers' knowledge, and recommended statutory transparency and consumer control precisely because the people described cannot see or correct them. The operational objection is separate and on its own sufficient: an address is shared, the inference is silently wrong for lodgers, carers, adult children, house shares and care settings, and the people it is wrong about never learn that a decision was made about them.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_CA"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. Composition attributes are also the fastest-rotting data in any broker file, which is a reason not to buy them as well as a reason not to build them."
+      },
+      "false_positives": [
+        "A shared address that is a house share, a care setting, a hostel, an office or a parcel locker",
+        "Bulk buying for a club, a team, a congregation or an office",
+        "A carer, adult child or neighbour buying for a different household entirely",
+        "One person buying large pack sizes for storage, price or dietary reasons",
+        "A short-term let or student address whose occupants change every few months"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_ask_instead",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "household_change",
+          "life_event",
+          "inventory_depletion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC summary of 16 CFR Part 312: COPPA imposes requirements on operators of sites or services directed to children under 13, and on operators with actual knowledge that they are collecting personal information from a child under 13."
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/reports/data-brokers-call-transparency-accountability-report-federal-trade-commission-may-2014",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC report on the data-broker industry, which found consumer attributes collected from online and offline sources largely without consumers' knowledge and recommended statutory transparency and consumer control."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.household_graph_inference",
+      "family": "F14",
+      "name": "Inferred household or family composition from behaviour",
+      "definition": "Reconstructing who lives with, is related to, or shares a household with a person - partner, children, dependants, cohabitants, carers - from shared devices, shared IP addresses, delivery-address matches, cross-device identity graphs, or co-occurrence patterns, rather than from a relationship those people declared for this purpose.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected. The lawful variant is f14.household_coordination, in which the people involved declare the relationship themselves.",
+      "intent_dimensions": [
+        "identity_scope",
+        "authority"
+      ],
+      "identity_level": "household",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "first_party_web",
+        "licensed_dataset"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Cross-device and household identity graphs are supplied under licence terms that commonly forbid re-identification and household reconstruction, and the identifiers they are built from are terminal-equipment access requiring consent in the EEA and UK.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "A household graph built from behaviour attaches one person's activity to another person who never disclosed the relationship and who cannot see, correct or withdraw it. Under GDPR the inferred link is personal data of every person in the graph, and co-occurrence supplies no lawful basis of its own; where the inference reaches family circumstances, a child, or a person's absence from home it engages Art. 9 special-category protection and child-protection duties, and the ePrivacy regime treats the device identifiers it is assembled from as terminal-equipment access requiring consent. Under US state privacy law the same construction is a sale or share of personal information, and an inference naming a minor is opt-in territory. The harms are documented rather than theoretical: shared devices expose one person's browsing to everyone else in the home, and household linkage has disclosed pregnancy, sexuality, separation and refuge addresses to exactly the people the subject was hiding them from. There is a lawful route to the same commercial value, and it is cheaper: ask, and let the people involved declare the relationship.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_CA",
+          "US_CO",
+          "US_CT"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Flatmates, colleagues, students or hotel and public-network users sharing one address or connection",
+        "A shared family device used by people with different needs and different privacy expectations",
+        "A delivery address used for gifts, for a workplace, or for a parcel locker",
+        "A previous occupant of an address, or a recycled phone number or device",
+        "A carer, lodger, contractor or short-term guest read as a household member"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "household_change",
+          "life_event",
+          "occasion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Primary text of Regulation (EU) 2016/679 verified this session; Art. 9 governs special categories of personal data, including data inferred rather than supplied."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "restricted.life_event_inference_from_consumption",
+      "family": "F01",
+      "name": "Inferred life event or personal circumstance from a change in consumption",
+      "definition": "Deriving that a person has undergone a life event or a change in personal circumstances - pregnancy or fertility treatment, illness, bereavement, separation or divorce, job loss, a change in who lives in the home - from a change in what they buy, how much, how often, or what they have stopped doing, rather than from a fact they stated for this purpose. Complements restricted.health_status_inference, which covers the clinical case, and restricted.financial_distress_inference, which covers the financial one; this entry names the mechanism, which is the cadence break itself.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected. Where the person declares the event for this purpose - a stated move date, a registry, a declared change of circumstances - that is a different and lawful signal.",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Where the inferred circumstance is health-related it is regulated consumer health data in several US states regardless of the behavioural source, and special-category data in the EEA and UK.",
+      "prohibition_basis": "The inference is only commercially interesting when it is intimate: pregnancy, illness, bereavement, separation and job loss are the events that change buying, and they are the events people most want to control the disclosure of. Under GDPR Art. 9 an inference about health, sex life or family circumstances is special-category data, and behavioural inference supplies no Art. 9(2) condition. Washington's My Health My Data Act (RCW 19.373) regulates inferred consumer health data with opt-in consent, a separate authorization to sell and a private right of action, with comparable Nevada and Connecticut provisions. The FTC's actions against prescription and cycle-tracking apps charged precisely the practice of building audience segments from inferred sensitive signals. The harm is documented and it is domestic: a retailer acting on an inferred pregnancy disclosed it inside a family before the person had chosen to, and the same mechanism applied to bereavement, illness or an abusive household is worse. The operational form of the same measurement is lawful and useful - a cadence break at account, asset or site level is f01.routine_disruption - and it stops being lawful at the moment it is used to name what happened in someone's life.",
+      "sensitivity": "restricted",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_NV",
+          "US_CT",
+          "US_MD"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored."
+      },
+      "false_positives": [
+        "Buying for someone else - a relative, a friend, a client, a food bank",
+        "A household sharing one account, so the pattern belongs to several people at once",
+        "A holiday, a diet, a house move or a stock-up that mimics the shape of a life event",
+        "Work or study - a nurse, a carer, a journalist, a student, a researcher",
+        "A single gift or one-off purchase read as the start of a trajectory",
+        "A payment method or loyalty card lent to another person"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "life_event",
+          "household_change",
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Chapter 19.373 RCW verified this session: consumer health data privacy policy, consent for collection and sharing, separate valid authorization to sell, geofence restrictions, and enforcement through the Consumer Protection Act."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.medical_and_assistive_device_replacement_inference",
+      "family": "F10",
+      "name": "Inferred ownership of a medical, assistive or mobility device as a replacement trigger",
+      "definition": "Deriving that a person uses a medical, assistive, mobility, or reproductive-health device - and is therefore due a repair, upgrade or replacement - from records about the asset rather than from a registration or service arrangement the person entered for that purpose. The class covers serial-level repair and fault histories, consumable and spare-part reorder patterns, device telemetry, resale, trade-in and disposal listings, warranty and asset registers, and any third-party installed-base file, wherever the ownership fact was assembled rather than given. It is the asset-record route into the same conclusion that restricted.health_status_inference blocks on the behavioural route; naming it separately matters because a replacement model in this family is built from serial numbers and service tickets, not from browsing, and a team reading only the behavioural prohibition would not recognise itself.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded from every replacement model in this family, not detected.",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency"
+      ],
+      "identity_level": "asset",
+      "data_class": "transactional_record",
+      "source_class": [
+        "offline_system",
+        "partner_feed",
+        "licensed_dataset"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Service and warranty records for a medical device are frequently held under health-sector contracts and, where a covered entity or its business associate is involved, under HIPAA terms that no marketing purpose satisfies. An installed-base file offered by a third party does not carry a lawful basis with it merely because it was sold.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "That a person uses a medical, assistive or mobility device is information about their health and disability status, and it does not stop being so because it arrived as an asset record. Under GDPR Art. 9(1) data concerning health and data revealing disability are special category; recital 51's protection follows the substance of what the data reveals, not the system it was drawn from, and no Art. 9(2) condition is created by assembling the fact from repair tickets, telemetry or a purchased installed-base file. Under Washington's My Health My Data Act and the comparable Nevada and Connecticut provisions, consumer health data expressly includes bodily functions, health-related conditions and supplies or services used to treat them, and it reaches the inference itself rather than only the clinical record - which is precisely what a serial-to-owner replacement model produces. In the United States a device serviced through a covered entity or its business associate carries HIPAA obligations that marketing use does not meet. Independently of privacy law, a replacement-marketing model built on this class segments people by disability, which is a protected characteristic in every jurisdiction this catalogue is written for, and the failure mode is concrete: an unsolicited approach about a wheelchair, hearing aid, CPAP or fertility device discloses the owner's condition to whoever else opens the post, answers the door, or shares the device. The lawful variant already exists and needs no inference: an owner who registers a device, takes a service plan, or opts into a replacement reminder has declared the fact for that purpose, and that declared basis is what f10.lifecycle_stage and f10.trade_in_activity are authored on. Serve the people who asked; do not derive the ones who did not.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_NV",
+          "US_CT",
+          "US_MD"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. Its persistence is part of the harm: an asset record ages into a permanent disability flag on a person."
+      },
+      "false_positives": [
+        "An asset serviced or traded on behalf of an employer, a care provider, a school or a rental fleet, where the owner of the record is not the user of the device",
+        "A clinician, technician, carer or family member arranging service for someone else",
+        "A device bought second-hand, borrowed, or held as a spare and never used by the registered owner",
+        "A general-purpose product recorded under a medical category by a service desk that had nowhere else to put it"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "health"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "GDPR Art. 9(1) special-category scope, as cited in restricted.health_status_inference against the same consolidated EUR-Lex text. The US state consumer-health-data statutes and the HIPAA point are stated from the statutes themselves and were not fetched in this session; treat them as pointers to be re-verified against current text, not as citations."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "restricted.pregnancy_and_early_parenthood_inference",
+      "family": "F12",
+      "name": "Inferred pregnancy, fertility stage, or early-parenthood timing",
+      "definition": "Deriving that a person is pregnant, is trying to conceive, has recently given birth, has lost a pregnancy, or has a child of a given age - from purchase mix, browsing, search terms, cycle-tracking behaviour, delivery-address or basket changes, or any other behavioural proxy - rather than from a fact they knowingly gave for that purpose. The declared alternative is that a person tells you directly, for a stated purpose, and can withdraw it; that is a different thing and it is not obtained by modelling. Complements restricted.health_status_inference, which covers the clinical case generally, and restricted.life_event_inference_from_consumption, which names the cadence-break mechanism; this entry exists separately because pregnancy and early parenthood are the class most often built deliberately, marketed as a commercial win, and defended as merely predictive.",
+      "question_answered": "None that this tool will help you answer. This entry exists so the class can be named and excluded, not detected.",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "source_class": [
+        "first_party_web",
+        "commerce_platform"
+      ],
+      "collection_method": "inference",
+      "availability": "should_not_be_collected",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "The major advertising platforms' own policies also prohibit pregnancy and family-status targeting in several markets, so the prohibition is not only statutory - the activation surfaces refuse it too.",
+      "sensitivity": "restricted",
+      "prohibition_basis": "Pregnancy and fertility status are health data. Under GDPR Art. 9 they are special-category data, and a behavioural inference supplies no Art. 9(2) condition - the person was never asked, so there is no explicit consent and no other condition applies. In the US they are consumer health data under Washington's My Health My Data Act, chapter 19.373 RCW, which conditions collection and sharing on opt-in consent, requires a separate valid authorization to sell, and is enforceable by consumers directly through the state's Consumer Protection Act; Nevada and Connecticut carry comparable provisions and Maryland restricts the sale of sensitive data regardless of consent. The FTC's action against Flo Health concerned exactly this data class: a fertility-tracking app that shared users' sensitive health data with third-party analytics providers after promising it would be kept private. The harm is also concrete and asymmetric in a way an accuracy metric cannot capture. An inferred pregnancy surfaced on a shared device, a joint account or a household-addressed mailing discloses the fact to people the person has not told; the same inference applied after a loss keeps re-injuring the household for months, through a system with nobody to appeal to. There is no accuracy threshold that makes this safe, because the failure is the disclosure, not the error rate.",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [
+          "EEA",
+          "UK",
+          "US_WA",
+          "US_MD",
+          "US_NV",
+          "US_CT"
+        ],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 1,
+      "reliability": 1,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "Not applicable - this class is excluded, not scored. Note that the retained inference outlives the situation that produced it, which is precisely the problem."
+      },
+      "false_positives": [
+        "Buying for a pregnant friend, relative, or for a baby shower",
+        "A midwife, doula, paediatric professional or retail buyer researching for work",
+        "A shared household device, browser profile or loyalty account",
+        "A pregnancy that ended, where every downstream inference is not merely wrong but actively harmful",
+        "Fertility treatment that did not succeed, which looks identical in the data to one that did"
+      ],
+      "confirmation_signals": [],
+      "recommended_action_class": "exclude_and_suppress",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "health",
+          "life_event",
+          "household_change"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://www.ftc.gov/legal-library/browse/cases-proceedings/192-3133-flo-health-inc",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC matter 192 3133. The Commission's own case summary: Flo Health settled allegations that it shared users' health information with outside data analytics providers after promising such information would be kept private."
+        },
+        {
+          "claim": "prohibition_basis",
+          "source_url": "https://app.leg.wa.gov/RCW/default.aspx?cite=19.373",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Chapter 19.373 RCW, the Washington My Health My Data Act: 19.373.030 governs collection and sharing of consumer health data, 19.373.070 requires a separate valid authorization to sell it, and 19.373.090 routes enforcement through the Consumer Protection Act."
         }
       ],
       "sourcing_verified_at": "2026-08-01",

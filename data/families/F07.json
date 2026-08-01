@@ -1,0 +1,1382 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F07",
+  "signals": [
+    {
+      "id": "f07.trial",
+      "family": "F07",
+      "name": "Trial",
+      "definition": "The subject begins using the product itself under a time- or scope-limited arrangement - a self-serve free trial, a workspace created for evaluation, a sandbox or test key, or a sales-provisioned pilot or proof of concept. Qualifying condition: a trial or pilot instance is provisioned against a named account with a start timestamp and either an end date or a stated conversion condition.",
+      "question_answered": "Is this buyer evaluating with the product rather than about it, and is the evaluation actually progressing?",
+      "intent_dimensions": [
+        "commitment",
+        "fit",
+        "readiness",
+        "confidence"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "trial_start_at",
+        "trial_end_at_or_conversion_condition",
+        "plan_or_scope",
+        "provisioning_source"
+      ],
+      "optional_supporting_fields": [
+        "activation_milestone_reached_at",
+        "days_active_in_trial",
+        "seats_invited",
+        "inviter_role",
+        "trial_extension_count",
+        "card_on_file_flag"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "product_analytics",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read the trial rows you already hold. Your auth or billing system already stores trial_start and trial_end - emit trial_started and trial_expiring as events keyed on the account, with no new instrumentation anywhere",
+          "requires": [
+            "read access to the billing or auth database"
+          ],
+          "gives": "A dated trial population and an expiry queue, today, for free"
+        },
+        {
+          "rung": 2,
+          "how": "Add exactly one activation milestone - the first in-product event that separates accounts that stay from accounts that leave - and count days active inside the trial window. A trial with zero activation is a lead, not a signal, and should be scored as one",
+          "requires": [
+            "product event tracking and one agreed milestone definition"
+          ],
+          "gives": "Separates real evaluation from a signup, which is the difference that makes this signal worth acting on"
+        },
+        {
+          "rung": 3,
+          "how": "Record seat invitations and the role of whoever sent them, so the trial stops being one person's experiment and becomes an observation about a buying group",
+          "requires": [
+            "invitation events and a role or title field"
+          ],
+          "gives": "Authority and group evidence from data the product already generates"
+        }
+      ],
+      "min_data": {
+        "note": "An activation milestone chosen on fewer than roughly 200 converted trials is a guess dressed as a threshold; until then use days-active rather than a milestone."
+      },
+      "access_conditions": [
+        "This is your own service record about your own service; no third party gates any rung",
+        "Using in-product behaviour to drive sales outreach is a secondary purpose. It must appear in the notice the trial user accepted, and it should not extend to inspecting the content the user put into the product"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The trial has a stated end date and the signal expires with it. After expiry without conversion the account becomes a lapsed-evaluation record, which is a different and much weaker thing."
+      },
+      "false_positives": [
+        "A competitor evaluating your product, which in software is routine rather than exceptional",
+        "A student, hobbyist, or job applicant using the trial to learn the tool",
+        "An agency or consultant trialling on behalf of a client who is the real buyer and may never appear",
+        "An existing customer's employee spinning up a second workspace because they cannot get access to the first",
+        "Serial trial accounts created to keep using the free window rather than to evaluate",
+        "Automated signups, disposable-domain registrations, and LLM agents completing signup flows",
+        "Internal staff testing after a release"
+      ],
+      "confirmation_signals": [
+        "f07.time_investment_escalation",
+        "f07.consent_and_access_granting",
+        "f08.payment_preparation",
+        "f14.buying_group_formation"
+      ],
+      "recommended_action_class": "coach_to_the_activation_milestone_then_qualify",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "contract_expiry",
+          "business_event",
+          "technology_change"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "media_subscription",
+          "fitness_and_membership"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.sample_request",
+      "family": "F07",
+      "name": "Sample request",
+      "definition": "The subject asks for a specimen of the product to assess before committing - a swatch, material or finish sample, tester, trial size, test print, spec sample, sample kit, or a scoped data extract standing in for the full product. Qualifying condition: a sample request or zero-value order record exists carrying the requested item identifiers and a fulfilment destination.",
+      "question_answered": "Which buyers have specified far enough to want the physical article in hand, and which items did they choose?",
+      "intent_dimensions": [
+        "commitment",
+        "preference",
+        "fit",
+        "timing"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "sample_item_ids",
+        "request_timestamp",
+        "fulfilment_destination_type"
+      ],
+      "optional_supporting_fields": [
+        "sample_paid_flag",
+        "sample_count",
+        "repeat_request_count",
+        "trade_vs_consumer_flag",
+        "project_reference",
+        "sample_to_order_days"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "crm",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Label the sample SKUs you already ship as a sample class in the catalogue. The orders are already in your commerce system; they are invisible only because a swatch and a sofa sit in the same order table with nothing distinguishing them",
+          "requires": [
+            "a catalogue attribute and a one-off back-classification of existing SKUs"
+          ],
+          "gives": "A countable sample population and the specific items each subject chose, retrospectively as well as going forward"
+        },
+        {
+          "rung": 2,
+          "how": "Record whether the sample was paid for and where it was sent - trade counter, site address, or residential. A paid sample and a free one are different commitments, and a sample sent to a site address is a live project",
+          "requires": [
+            "destination classification on the fulfilment record"
+          ],
+          "gives": "Splits the collectors from the specifiers without asking anyone a question"
+        },
+        {
+          "rung": 3,
+          "how": "Join sample orders to subsequent full orders on the same subject or project reference to measure your own sample-to-order lag, then set the follow-up window to that distribution rather than to a round number somebody guessed",
+          "requires": [
+            "a subject or project key shared between sample and order records"
+          ],
+          "gives": "A measured follow-up window, and the per-item conversion rates that tell you which samples to stop sending"
+        }
+      ],
+      "min_data": {
+        "note": "A sample-to-order lag computed on fewer than roughly 100 matched pairs is noise; until then follow up on the item, not on a modelled window."
+      },
+      "access_conditions": [
+        "The whole path is inside systems you already run. The constraint is cost of goods and postage, not access"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "Sample requests run on the project's clock, not the browsing session's; in interiors and construction the meaningful window is months, in consumables it is days."
+      },
+      "false_positives": [
+        "Freebie collectors, who are the single largest contaminant of any free-sample programme and who request across your whole range rather than within one project",
+        "A competitor obtaining product for teardown, price benchmarking, or specification copying",
+        "Students and course participants requesting materials for portfolios, which is a very large share of sample volume in architecture, interiors, and design",
+        "A specifier or designer sampling on behalf of a client who may never buy, and who may specify a competitor",
+        "Press, reviewers, and content creators",
+        "An existing customer checking a new batch or dye lot against something already installed",
+        "Automated or scripted submissions harvesting free items"
+      ],
+      "confirmation_signals": [
+        "f05.measurement_taken",
+        "f06.quote_request",
+        "f07.consultation"
+      ],
+      "recommended_action_class": "follow_up_on_the_sampled_item_within_the_observed_lag",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "property_or_relocation",
+          "desire",
+          "replacement",
+          "business_event",
+          "occasion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "building_products",
+          "furniture_and_interiors",
+          "apparel_and_textiles",
+          "food_and_beverage",
+          "print_and_packaging",
+          "chemicals_and_coatings"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.demo",
+      "family": "F07",
+      "name": "Demo",
+      "definition": "The subject commits calendar time to a seller-led walkthrough of the product - a scheduled demo or live product tour, a showroom or in-store appointment, a test drive, or a site visit hosted by the seller. Qualifying condition: a held slot exists against the subject with a scheduled start, and the attendance outcome is recorded as held, no-show, rescheduled, or cancelled.",
+      "question_answered": "Which buyers have spent their own diary time on a seller-led evaluation, who came with them, and did they actually turn up?",
+      "intent_dimensions": [
+        "commitment",
+        "readiness",
+        "authority",
+        "timing"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "booking_created_at",
+        "scheduled_start_at",
+        "attendance_status"
+      ],
+      "optional_supporting_fields": [
+        "booking_lead_time_days",
+        "reschedule_count",
+        "attendee_count",
+        "attendee_roles_or_email_domains",
+        "actual_duration_minutes",
+        "recording_viewed_by_count",
+        "demo_type"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_web",
+        "first_party_backend",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Write the outcome of every booked slot, not only the booking: held, no-show, rescheduled, cancelled. The scheduling tool already records the booking; the attendance field is the one almost always missing, and it is the field that carries the signal",
+          "requires": [
+            "one status field on the meeting record and a rep habit or calendar sync to set it"
+          ],
+          "gives": "Separates a demo from a diary entry, and produces a no-show recovery queue that did not exist before"
+        },
+        {
+          "rung": 2,
+          "how": "Store booking lead time and reschedule count. A slot booked for tomorrow and a slot booked five weeks out are different signals wearing the same name, and two reschedules is a negative signal that currently reads as neutral",
+          "requires": [
+            "created-at and scheduled-at both retained"
+          ],
+          "gives": "Urgency, at no cost, from two timestamps you already have"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the attendee roster and map domains and titles to roles, so a demo becomes an observation about the buying group - who else came, whether anyone senior joined, and whether the champion brought a technical evaluator",
+          "requires": [
+            "calendar attendee data and a role mapping"
+          ],
+          "gives": "Authority and group evidence, which is the difference between a demo and a decision meeting"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Attendee email addresses supplied by the organiser are personal data about people who never contacted you; store role and domain rather than building a contact record for every attendee by default",
+        "Recording a demo is a separate consent question from holding one, in both one-party and two-party consent jurisdictions"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "A held demo is at its most actionable in the days immediately after it; a booking that has not yet happened is a promise, not a commitment, and should not be scored as one."
+      },
+      "false_positives": [
+        "A competitor booking under a plausible name and domain, which is routine in software and in any category with hidden pricing",
+        "A third bid taken only to satisfy a procurement rule where the winner is already chosen",
+        "An analyst, journalist, or researcher gathering material",
+        "A job applicant preparing for an interview with you",
+        "An existing customer's team who want training and booked the demo form because it was the fastest route to a human",
+        "A prospective partner or reseller scoping a commercial relationship rather than a purchase",
+        "A student or a curious individual with no purchasing role",
+        "Bookings made by an assistant on behalf of someone who never attends"
+      ],
+      "confirmation_signals": [
+        "f07.consultation",
+        "f07.seller_inventory_allocation",
+        "f06.quote_request",
+        "f14.buying_group_formation"
+      ],
+      "recommended_action_class": "confirm_attendance_and_recover_no_shows",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local_services"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "contract_expiry",
+          "replacement",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "automotive",
+          "industrial_equipment",
+          "professional_services",
+          "real_estate"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.reservation",
+      "family": "F07",
+      "name": "Reservation",
+      "definition": "The subject takes a specific unit, slot, seat, or quantity off the market for themselves ahead of paying in full - a hold or waitlist deposit, a pre-order, a held appointment or delivery slot, a unit reserved at a dealership or showroom, or a cart backed by a reserved-inventory timer. Qualifying condition: a named inventory object enters a held state attributable to the subject, with a stated expiry or release condition.",
+      "question_answered": "Has this buyer taken a specific unit off the market for themselves, and when does that hold expire?",
+      "intent_dimensions": [
+        "commitment",
+        "timing",
+        "readiness",
+        "channel"
+      ],
+      "identity_level": "transaction",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "reservation_id",
+        "subject_id_or_contact",
+        "reserved_item_id",
+        "hold_created_at",
+        "hold_expires_at"
+      ],
+      "optional_supporting_fields": [
+        "deposit_amount_band",
+        "deposit_refundable_flag",
+        "hold_extension_count",
+        "cancelled_at",
+        "waitlist_position",
+        "channel"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "marketplace"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Expose the hold expiry as a field rather than leaving it inside the scheduler. Nearly every booking, pre-order, and inventory-hold system stores the reservation and treats the expiry as an internal housekeeping detail - the expiry is the signal, because it is the only thing in this family that gives you a deadline to act against",
+          "requires": [
+            "read access to the reservation or hold table"
+          ],
+          "gives": "An expiring-hold queue, ranked by time remaining, from data you already have"
+        },
+        {
+          "rung": 2,
+          "how": "Band the deposit and record whether it is refundable. A refundable nominal hold and a non-refundable percentage deposit are different commitments and currently score identically",
+          "requires": [
+            "the payment record joined to the hold"
+          ],
+          "gives": "The single strongest discriminator inside this signal, at the cost of one join"
+        },
+        {
+          "rung": 3,
+          "how": "Reconcile holds against fulfilment to learn your own hold-to-purchase rate by channel and item, then treat holds in the segments that convert below that rate as the outreach queue and the rest as noise",
+          "requires": [
+            "reservation and order records sharing a key"
+          ],
+          "gives": "Stops you working every hold equally, which is how reservation programmes usually fail"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Where the reservation is made on a marketplace rather than your own surface, the hold record and the buyer's contact details belong to the marketplace and are usually withheld; treat marketplace reservations as an aggregate demand signal, not a contactable one"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Marketplace and platform terms routinely prohibit using reservation data to contact the buyer off-platform, independently of any privacy law.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The hold states its own expiry. After it lapses the signal is not weaker, it is over - and a lapsed hold is a distinct and useful negative observation."
+      },
+      "false_positives": [
+        "Speculative holds where holding costs nothing - multiple restaurant or appointment bookings for the same evening, or several units held while a decision is made",
+        "Resellers and scalpers reserving limited-release inventory to flip, and the bots that do it at scale",
+        "A hold placed purely to lock a price during an internal approval that may never come through",
+        "An assistant or family member holding a slot on someone else's behalf",
+        "Duplicate holds by the same person across channels, which inflate demand counts",
+        "A hold created by staff to protect stock for a walk-in customer who has not asked for it"
+      ],
+      "confirmation_signals": [
+        "f08.payment_preparation",
+        "f08.identity_verification",
+        "f07.seller_inventory_allocation",
+        "f09.delivery_preparation"
+      ],
+      "recommended_action_class": "work_the_expiring_hold_queue",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket",
+          "local_services"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "occasion",
+          "travel",
+          "desire",
+          "supply_disruption",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "automotive",
+          "hospitality_and_travel",
+          "events_and_ticketing",
+          "consumer_electronics",
+          "local_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.consultation",
+      "family": "F07",
+      "name": "Consultation",
+      "definition": "The subject takes part in a scoped advisory session about their own situation rather than about the product - a discovery call, survey or site visit, design or fitting consultation, technical scoping session, or a paid assessment. Qualifying condition: a session takes place in which the subject supplies details of their own circumstances, and a written output exists against their record: notes, a scope, a drawing, a survey, or an estimate.",
+      "question_answered": "Has the buyer let us into their actual situation, and did the session produce a scope we can quote against?",
+      "intent_dimensions": [
+        "commitment",
+        "requirements",
+        "fit",
+        "authority"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "session_at",
+        "session_type",
+        "outcome_artifact_created_flag"
+      ],
+      "optional_supporting_fields": [
+        "paid_consultation_flag",
+        "site_visit_flag",
+        "participant_roles",
+        "scope_value_band",
+        "follow_up_scheduled_at",
+        "session_duration_minutes"
+      ],
+      "source_class": [
+        "crm",
+        "offline_system",
+        "first_party_backend",
+        "support_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Record two fields on the sessions you already run: did it happen, and did it produce an artifact. A consultation with no scope, drawing, or estimate attached is a conversation, and separating those two populations needs no integration at all - a checkbox in the diary or CRM will do it",
+          "requires": [
+            "the diary or CRM your team already books into"
+          ],
+          "gives": "The distinction that matters most in this signal, obtainable this week even with a paper diary"
+        },
+        {
+          "rung": 2,
+          "how": "Add whether the subject paid for the session and whether it happened on their site. A paid consultation and a site visit both cost the buyer something real and both predict very differently from a free phone call",
+          "requires": [
+            "a payment flag and a location type on the session record"
+          ],
+          "gives": "Sorts genuine scoping from free advice without asking the buyer anything"
+        },
+        {
+          "rung": 3,
+          "how": "Connect the field-service, survey, or diary system so sessions held away from the office arrive as structured records rather than as a rep's memory, and carry the participant roles with them",
+          "requires": [
+            "an export or connector from the field or scheduling system"
+          ],
+          "gives": "Coverage of the sessions that matter most in services businesses, which are exactly the ones no CRM currently sees"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Consultation notes are the most common route by which special-category detail enters a CRM as free text - a home survey records who lives there and how they live. Score the structured outcome fields and keep raw note text out of the scoring and audience path entirely",
+        "A site visit puts your staff in someone's home or premises; the record of that visit carries obligations that a web event does not, including retention limits and the occupant's rights over notes about them"
+      ],
+      "availability": "integration",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A scope goes stale as the buyer's circumstances move; in services the useful window is the time it takes them to collect the other two quotes."
+      },
+      "false_positives": [
+        "Free consultations used as free advice - the buyer wanted the answer, not the service, and this is the dominant contaminant wherever consultations are free",
+        "A mandated second or third quote where the incumbent has already won",
+        "A tenant, occupant, or facilities contact who cannot authorise or fund the work",
+        "An insurance, warranty, or landlord-funded assessment where the person in the room is not paying",
+        "A competitor booking a consultation to learn your process, questions, and pricing structure",
+        "A homeowner gathering evidence for a claim or a dispute rather than a purchase",
+        "A session logged by a rep to show activity, with no artifact and no real meeting"
+      ],
+      "confirmation_signals": [
+        "f05.measurement_taken",
+        "f06.quote_request",
+        "f07.seller_inventory_allocation",
+        "f09.installation_scheduling"
+      ],
+      "recommended_action_class": "convert_the_scope_into_a_quote",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "saas",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "local_services",
+          "high_ticket",
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "property_or_relocation",
+          "problem",
+          "product_failure",
+          "business_event",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_improvement",
+          "construction",
+          "professional_services",
+          "financial_advice",
+          "healthcare_services",
+          "furniture_and_interiors"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.consent_and_access_granting",
+      "family": "F07",
+      "name": "Consent and access granting",
+      "definition": "The subject gives the seller standing access to something of theirs so the evaluation can proceed - an authorised connection to a system they run, read access to a data or advertising account, a scoped API key, a guest login to their environment, a supplied export, or documented site access for a survey. Qualifying condition: an access grant is recorded against the subject with a scope, a grant timestamp, and a revocation state.",
+      "question_answered": "Has this buyer done the internally expensive thing of giving us access to their own systems, and is that access still live?",
+      "intent_dimensions": [
+        "commitment",
+        "readiness",
+        "authority",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "grant_type",
+        "scopes_granted",
+        "granted_at",
+        "revoked_at_or_null"
+      ],
+      "optional_supporting_fields": [
+        "granter_role",
+        "hours_from_request_to_grant",
+        "admin_approval_required_flag",
+        "scope_breadth",
+        "second_grant_flag",
+        "connection_health_status"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "user_authorized_connection",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Log the act of granting as a first-class event with its scope and timestamp. Every integration stores the resulting token and almost none store the grant - yet the grant, the delay before it, and the revocation are the signal, and the token is not",
+          "requires": [
+            "one event write in the authorisation callback you already run"
+          ],
+          "gives": "A commitment event and a revocation event from code that already executes"
+        },
+        {
+          "rung": 2,
+          "how": "Record who granted it and whether an administrator had to unlock it. A grant that required an admin to intervene is evidence of internal authority and of a real evaluation, not of one curious user",
+          "requires": [
+            "the granting identity and any approval step retained"
+          ],
+          "gives": "Authority evidence that no amount of web tracking will produce"
+        },
+        {
+          "rung": 3,
+          "how": "Monitor connection health and revocation as a suppression signal. A revoked or broken grant that the subject does not restore is one of very few reliable negative signals a seller ever receives, and it should stop outreach rather than trigger it",
+          "requires": [
+            "a periodic connection check and a route into suppression"
+          ],
+          "gives": "The negative half of the signal, which is usually discarded"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Use data reached through a granted connection only for the purpose the subject was told about. Deriving unrelated attributes from it is a purpose-limitation breach and, for special-category attributes, a prohibited class - see restricted.granted_access_secondary_inference",
+        "Platform API programmes impose limited-use terms that survive the user's consent. The user cannot consent you out of the platform's contract, and the platform's approval is a separate gate from the user's",
+        "A connected mailbox, file store, or calendar contains other people's personal data. A lawful basis for the grantor is not a lawful basis for everyone whose data sits inside what they granted",
+        "Take the narrowest scope that answers the question, and revoke it yourself when the evaluation ends"
+      ],
+      "availability": "user_permission",
+      "permission_requirement": "explicit_consent",
+      "terms_constrained": true,
+      "terms_note": "Platform limited-use policies and API terms constrain what may be done with granted data independently of the user's consent, and breach of them is a contractual and access risk rather than only a privacy one.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "The grant is a state, not an event: it stays true until revoked. The intent it evidenced decays but the access does not, so score the recency of the grant separately from the current state of the connection."
+      },
+      "false_positives": [
+        "A technical evaluator granting read-only access with genuine curiosity and no budget or authority",
+        "An agency or managed-service provider connecting a client's account, so the grantor is a proxy and the buyer is elsewhere",
+        "A grant made solely to obtain a free audit or report, with the connection revoked as soon as the report arrives",
+        "An existing customer reconnecting after a token expiry, which reads as a new grant and is not new intent",
+        "A partner or integrator connecting for their own build or certification testing",
+        "Internal staff connecting a test account",
+        "A grant made by one team while another team has already selected a different supplier"
+      ],
+      "confirmation_signals": [
+        "f07.trial",
+        "f07.time_investment_escalation",
+        "f08.account_verification",
+        "f14.internal_approval_step"
+      ],
+      "recommended_action_class": "act_within_the_granted_scope_and_watch_revocation",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local_services"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "technology_change",
+          "contract_expiry",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "marketing_services",
+          "financial_services",
+          "energy_and_home_efficiency",
+          "logistics_and_delivery"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "access_conditions",
+          "source_url": "https://gdpr-info.eu/art-5-gdpr/",
+          "as_of": "2026-08-01",
+          "independence": "independent"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f07.seller_inventory_allocation",
+      "family": "F07",
+      "name": "Seller inventory allocation",
+      "definition": "The seller commits scarce resource of its own to one named buyer - stock ring-fenced, a production or installation slot booked, a specialist or engineer assigned, a bespoke sample or prototype made, a quote priced by a human rather than a calculator, or a discount approval consumed. Qualifying condition: an internal record shows a scarce resource reserved, assigned, or spent against a named opportunity, with a release or expiry condition.",
+      "question_answered": "Which opportunities has our own organisation already spent scarce capacity on, and is that capacity about to be released?",
+      "intent_dimensions": [
+        "commitment",
+        "readiness",
+        "timing",
+        "value"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "opportunity_or_account_id",
+        "resource_type",
+        "allocated_at",
+        "release_or_expiry_condition"
+      ],
+      "optional_supporting_fields": [
+        "resource_cost_band",
+        "approver_role",
+        "allocation_count",
+        "allocation_released_flag",
+        "bespoke_work_hours",
+        "discount_approval_level"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Count the human hours your own organisation has already spent on the opportunity, using records that already exist: a quote priced by a person rather than generated, a discount approval raised, a bespoke drawing produced. One weekly export of these against the opportunity id is enough to rank a pipeline by what you have already invested in it",
+          "requires": [
+            "a weekly export from the quoting, approval, or job system"
+          ],
+          "gives": "The seller's own revealed belief, which no buyer-side signal can substitute for, at the cost of one report"
+        },
+        {
+          "rung": 2,
+          "how": "Add the physical allocations - stock held, a slot in the production or installation schedule, an engineer assigned - and record the release condition alongside each",
+          "requires": [
+            "the inventory or scheduling system joined to the opportunity id"
+          ],
+          "gives": "A release queue: capacity you are holding for deals that are not moving"
+        },
+        {
+          "rung": 3,
+          "how": "Band the cost of each allocation so a two-hour quote and a fortnight of engineering do not score the same, and require an explicit release so stale allocations stop inflating both the forecast and this signal",
+          "requires": [
+            "a cost band per resource type and a release step someone owns"
+          ],
+          "gives": "Makes the signal survive contact with a sales team, which is where it usually dies"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "This is the seller's own operational data about itself, so no privacy permission gates it; the cost is entirely integration effort into systems that were never built to be read this way",
+        "Allocation records are commercially sensitive internally - a discount approval level exposed to the buyer becomes a negotiating position"
+      ],
+      "availability": "integration",
+      "permission_requirement": "none",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "Where the allocation carries an explicit release date, treat that date as a hard expiry instead; the decay here covers the common case of allocations that nobody ever formally releases."
+      },
+      "false_positives": [
+        "Speculative allocation by a representative protecting a forecast, which is pipeline theatre rather than evidence about the buyer",
+        "Standing allocations that belong to an existing customer's running contract and were never intended as a new-deal signal",
+        "Resource assigned to a support escalation or a warranty claim rather than to a sale",
+        "Allocation made at a partner's or distributor's request when the end buyer has not asked for anything",
+        "Stale records - capacity held for a deal that died months ago and that nobody released",
+        "Internal builds, demonstration units, and trade-show stock recorded against a placeholder account",
+        "Allocation driven by a supply constraint - stock held because it is scarce, not because a buyer is close"
+      ],
+      "confirmation_signals": [
+        "f07.reservation",
+        "f07.consultation",
+        "f06.quote_request",
+        "f06.negotiation"
+      ],
+      "recommended_action_class": "prioritise_or_release_the_allocated_capacity",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "marketplace",
+          "ecommerce",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "high_ticket",
+          "considered",
+          "local_services"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "business_event",
+          "capacity_pressure",
+          "supply_disruption",
+          "contract_expiry",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "manufacturing",
+          "distribution_and_wholesale",
+          "construction",
+          "automotive",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f07.time_investment_escalation",
+      "family": "F07",
+      "name": "Time investment escalation",
+      "definition": "The effort a subject spends on the seller's surfaces steps up relative to that subject's own prior baseline, rather than merely being high. Qualifying condition: a declared effort measure - session minutes, documentation depth, meeting minutes held, thread length, or distinct participants - rises by a stated multiple over the subject's own trailing baseline within a stated window. A subject who has always been heavily engaged does not qualify; a threshold crossed is not an escalation.",
+      "question_answered": "Is this buyer accelerating, and did the acceleration start before or after we touched them?",
+      "intent_dimensions": [
+        "commitment",
+        "urgency",
+        "timing",
+        "confidence"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "effort_measure_type",
+        "effort_measure_value",
+        "period_start",
+        "period_end"
+      ],
+      "optional_supporting_fields": [
+        "baseline_window_days",
+        "distinct_participants",
+        "meeting_minutes_total",
+        "thread_message_count",
+        "documentation_pages_read",
+        "seller_initiated_flag"
+      ],
+      "source_class": [
+        "product_analytics",
+        "crm",
+        "first_party_web",
+        "support_system"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute the escalation on one measure you already hold - logged-in session minutes, or distinct documentation pages read per week - and compare each subject against its own trailing eight-week median rather than against a global threshold. The comparison is the work; the data is already there",
+          "requires": [
+            "eight weeks of per-subject history on one measure"
+          ],
+          "gives": "An acceleration list rather than a most-active list, which are different populations"
+        },
+        {
+          "rung": 2,
+          "how": "Add the human-time measures your CRM already stores and nobody aggregates: meeting minutes held, email thread depth, distinct people involved. Human minutes cost the buyer far more than page views and should be weighted accordingly",
+          "requires": [
+            "meeting and activity records with durations"
+          ],
+          "gives": "Effort measured in the buyer's scarcest resource instead of in clicks"
+        },
+        {
+          "rung": 3,
+          "how": "Attribute the escalation: flag whether it began within N days of a seller-initiated touch, so you can distinguish demand from the echo of your own campaign",
+          "requires": [
+            "outbound touch timestamps joined to the same subject"
+          ],
+          "gives": "The only rung that stops this signal measuring your own marketing back to you"
+        }
+      ],
+      "min_data": {
+        "history_days": 56,
+        "min_periods_per_subject": 3,
+        "min_subjects_for_baseline": 500,
+        "note": "Without a per-subject baseline this degenerates into an engagement score. Below roughly 500 subjects with three observed periods each, the multiple cannot be distinguished from ordinary week-to-week variance and should not be published as a signal."
+      },
+      "access_conditions": [
+        "Session-replay and on-site-search implementations are the specific behavioural-telemetry patterns drawing wiretapping-style claims in the US; prefer aggregate duration and page-count measures over replay for this signal",
+        "Compute the escalation on aggregates. This signal needs the shape of a subject's effort over time, not a transcript of what they read"
+      ],
+      "availability": "integration",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 2,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "An acceleration is only news while it is still accelerating; a sustained new level is a baseline, not a signal, and should be re-based rather than re-scored."
+      },
+      "false_positives": [
+        "Your own campaign creating the escalation you then read as demand - the dominant failure of this signal and the reason rung 3 exists",
+        "An existing customer with a support problem generating heavy engagement that looks identical to buying behaviour",
+        "One power user changing habits, mistaken for an account moving",
+        "Calendar effects hitting every subject at once - quarter close, budget season, a conference week - which raise the whole population and register as many simultaneous escalations",
+        "Crawlers, scrapers and LLM agents inflating page and session counts on documentation",
+        "A competitor or analyst conducting a deep review over a short period",
+        "A new employee at the account onboarding themselves through your material",
+        "Renewal-season activity by an account that is leaving and is reading the exit documentation"
+      ],
+      "confirmation_signals": [
+        "f07.demo",
+        "f07.consent_and_access_granting",
+        "f06.quote_request",
+        "f14.buying_group_formation"
+      ],
+      "recommended_action_class": "verify_with_a_hard_signal_before_escalating",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "contract_expiry",
+          "capacity_pressure",
+          "competitor_failure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "industrial_equipment"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

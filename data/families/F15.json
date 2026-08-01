@@ -1,0 +1,1416 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F15",
+  "signals": [
+    {
+      "id": "f15.competitor_disruption",
+      "family": "F15",
+      "name": "Competitor change or disruption",
+      "definition": "A specific competing product or provider undergoes a dated, publicly observable change that degrades the status quo for its own customers: a list-price rise or plan restructure, a feature moved behind a higher tier, an end-of-life or sunset notice, a market or region exit, an acquisition or insolvency, a sustained or repeated service outage, or the withdrawal of a support tier. Qualifying condition: the event is dated, attributable to a named competing product or provider, affects a class of that provider's customers rather than one account, and can be joined to a first-party record of which of your accounts or lost deals use that provider.",
+      "question_answered": "Has something just happened to a competitor that gives their customers a reason to switch this quarter, and which of our open deals, lost deals and churned accounts are exposed to it?",
+      "intent_dimensions": [
+        "need",
+        "value",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "competitor_id",
+        "event_type",
+        "event_date",
+        "account_incumbent_vendor",
+        "account_id"
+      ],
+      "optional_supporting_fields": [
+        "affected_plan_or_sku",
+        "effective_date",
+        "grandfathering_terms",
+        "account_renewal_date",
+        "closed_lost_reason_code",
+        "source_document_url",
+        "incumbent_field_last_verified_at"
+      ],
+      "source_class": [
+        "news_feed",
+        "public_record",
+        "crm",
+        "partner_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Make the exposure join exist before you watch anything. Populate a structured current_solution / incumbent_vendor field on every open opportunity, every closed-lost record and every churned account by back-filling from call notes and closed-lost free text, and make it a required discovery field going forward",
+          "requires": [
+            "CRM admin access",
+            "an afternoon of back-filling"
+          ],
+          "gives": "The audience half of the signal. Without it a competitor event has no addressable population and the whole family is inert - this is the step that is skipped, not the monitoring"
+        },
+        {
+          "rung": 2,
+          "how": "Watch the competitor set yourself on a schedule: subscribe to each competitor's status page, changelog and release-notes feed, snapshot their pricing, plan and end-of-life pages weekly and diff the extracted text, and watch their public support forum for a rising complaint theme",
+          "requires": [
+            "a weekly scheduled job",
+            "stored page snapshots for diffing",
+            "review of each target's terms and robots directives before automated retrieval"
+          ],
+          "gives": "Dated, attributable, first-party-observed events at no licence cost, typically days before trade press picks them up"
+        },
+        {
+          "rung": 3,
+          "how": "Add company-level event feeds: a business news API filtered to your competitor list, the corporate registry or insolvency-notice gazette for their legal entities, and securities-filing full-text search for the ones that file publicly",
+          "requires": [
+            "a news API key, usually free tier",
+            "a list of competitor legal entity names, not just brand names"
+          ],
+          "gives": "Ownership, funding and solvency events that never appear on a product page"
+        },
+        {
+          "rung": 4,
+          "how": "Close the post-sale loop: instrument the win/loss interview and the churn interview so displaced-competitor reason codes flow back into the same incumbent field, and ask channel partners and resellers to report competitor SKU sunsets and support withdrawals they hear first",
+          "requires": [
+            "a win/loss process someone owns",
+            "a partner or reseller channel"
+          ],
+          "gives": "Events that are never published at all, plus continuous repair of the incumbent field that rung 1 created"
+        }
+      ],
+      "min_data": {
+        "min_accounts_with_incumbent_field": 50,
+        "note": "Below roughly fifty records carrying a verified incumbent, the exposed audience for any single competitor event is too small to run and too self-selected to measure lift against."
+      },
+      "access_conditions": [
+        "The public half of this signal is free; the signal is inert without a first-party record of which accounts use which incumbent, and that record is the part nobody builds",
+        "Automated retrieval of a competitor's pages is governed by their terms of use, robots directives and rate limits, and by anti-circumvention rules where content sits behind a login - authenticated areas are out of scope for this entry",
+        "An incumbent field older than about twelve months should be treated as unverified rather than false; stale exposure joins are the main source of wasted outreach here"
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Observing published prices, notices and status pages is ordinary competitive research; scraping at a rate that burdens the source, or retrieving material behind authentication, is not, and the distinction is contractual rather than technical.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "The switching window opens at announcement and closes when the change takes effect and the affected customers have either absorbed it or already moved. An end-of-life notice is the exception - its window is the length of the announced support runway and should be carried on the account as a dated fact."
+      },
+      "false_positives": [
+        "A price rise announced with grandfathering, so existing customers - the only ones you can address - are unaffected",
+        "A status-page incident confined to a region or plan tier none of your prospects use",
+        "Scheduled maintenance or a rebrand of an existing plan read by a diffing job as a substantive change",
+        "An acquisition that changes nothing operationally for a year or more, well past your outreach window",
+        "Trade-press coverage of a rumour, or an analyst note recycled by several outlets and counted as several events",
+        "A competitor A/B testing its pricing page, producing a diff that reverts within days",
+        "A stale incumbent field: the account moved off that competitor two years ago and nobody updated the record",
+        "An existing customer of yours who also runs the competitor for an adjacent use case and is not in market at all"
+      ],
+      "confirmation_signals": [
+        "f04.product_comparison",
+        "f10.migration_preparation",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "route_exposed_accounts_to_a_switching_conversation_before_the_effective_date",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "competitor_failure",
+          "contract_expiry",
+          "business_event",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecommunications",
+          "insurance",
+          "financial_services",
+          "utilities",
+          "logistics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated high because the event supplies both a reason and a date to a population that has already chosen the category; unevidenced, so it should clamp to the neutral midpoint rather than be read as measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The event itself is documentary and near-certain; reliability is held at 3 because the exposure join, not the event, is where this signal is usually wrong."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f15.weather_trigger",
+      "family": "F15",
+      "name": "Weather and seasonal condition trigger",
+      "definition": "An observed or forecast atmospheric or seasonal condition crosses a threshold that measurably changes demand for the category in a defined service area: a first-frost or freeze forecast, a run of days above a set temperature, cumulative rainfall or snowfall, a named storm track, a drought stage, a wind or hail event, or an accumulated growing-degree-day count. Qualifying condition: the variable, the threshold and the geography are declared in advance from the seller's own demand history, and the trigger fires on a forecast or observation from a meteorological source rather than on a correlation read after the fact.",
+      "question_answered": "Which service areas are about to generate demand for this category in the next few days, and should we move crews, stock, appointment capacity or spend there before the phone rings?",
+      "identity_level": "location",
+      "data_class": "external_feed",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing"
+      ],
+      "required_raw_fields": [
+        "location_key",
+        "weather_variable",
+        "threshold_value",
+        "observation_or_forecast_value",
+        "valid_time"
+      ],
+      "optional_supporting_fields": [
+        "forecast_probability",
+        "lead_time_hours",
+        "historical_order_volume_by_location_and_date",
+        "service_area_polygon",
+        "crew_or_stock_capacity_by_location",
+        "station_distance_km",
+        "installed_base_by_location"
+      ],
+      "source_class": [
+        "public_record",
+        "licensed_dataset",
+        "first_party_backend"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Back-test with data you already own before buying anything: join two or more years of your own orders, jobs, tickets or bookings by date and postcode to the free daily observation history published by the national meteorological service for the nearest station, and find which variable and which threshold actually moved your volume - and by how many days of lead",
+          "requires": [
+            "an export of dated orders with a postcode or site",
+            "a spreadsheet or a short script"
+          ],
+          "gives": "An answer to whether this signal exists for your business at all, plus the specific variable, threshold and lead time - which no vendor can tell you and every vendor will assume"
+        },
+        {
+          "rung": 2,
+          "how": "Poll the free public forecast API for each service-area coordinate on a schedule and raise an internal alert when the fitted threshold is forecast inside your operational lead time; route the alert to the person who books crews or allocates stock, not to a dashboard",
+          "requires": [
+            "a list of service-area coordinates",
+            "a scheduled job and an alert destination"
+          ],
+          "gives": "A trigger that fires early enough to change what happens, at no licence cost"
+        },
+        {
+          "rung": 3,
+          "how": "Upgrade the feed only where the free one demonstrably loses jobs: sub-postcode grid resolution, hourly refresh, probabilistic and ensemble forecasts, lightning and hail swath data, and historical reanalysis for back-testing in markets with sparse stations",
+          "requires": [
+            "a commercial weather data licence",
+            "a measured gap from rung 2, not an assumption"
+          ],
+          "gives": "Resolution and cadence, and derived products such as hail swaths that public feeds do not publish"
+        },
+        {
+          "rung": 4,
+          "how": "Push the trigger into the systems that act off the website: crew rostering and shift call-outs, depot stock allocation, appointment-slot release, geo bid modifiers on paid media, and an outbound message to existing customers at affected addresses whose asset or last service makes them exposed",
+          "requires": [
+            "write access to a rostering, inventory or campaign system",
+            "an address-level customer or installed-base record"
+          ],
+          "gives": "The rung where this becomes revenue rather than a chart - and the one that is skipped, because weather signals are almost always built as reporting"
+        }
+      ],
+      "min_data": {
+        "min_history_days": 730,
+        "min_locations": 20,
+        "note": "Fit a threshold on at least two full cycles of the same season across enough locations to hold one out. A single season plus a national feed will find a threshold in pure noise, and it will hold for exactly one year."
+      },
+      "access_conditions": [
+        "Public meteorological APIs typically require an identifying user-agent and enforce rate limits; the constraint is courtesy and throttling rather than cost",
+        "Commercial weather licences commonly restrict redistribution and public display of derived forecasts - check before putting the number in a customer-facing message",
+        "The signal is authored at the level of a place. Attaching a person-level susceptibility to a weather condition - who reacts badly to pollen, heat or air quality - is a different and prohibited class; see the restricted shard"
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "The weather data itself is usually open; the customer address you join it to sits under whatever basis you already hold it for, and using it for outbound marketing is governed by direct-marketing rules that are independent of the weather feed's terms.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "hourly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 3,
+        "note": "The usable window is the gap between the forecast and the impact. After the event the signal is worth only what your capacity can still serve, and a trigger delivered the morning after is a report, not a signal."
+      },
+      "false_positives": [
+        "A forecast that does not verify - the storm turns, the freeze arrives a week late - which is why the threshold should carry a probability and the action a cost of being wrong",
+        "Demand pulled forward rather than created: the same customers who would have bought next month, which shows up as a flat quarter after a great week",
+        "A weather station tens of kilometres from the actual service area, or on the wrong side of a coastal or elevation gradient",
+        "Confounded seasonality - payday, school holidays, a promotion or a competitor's outage running in the same week as the cold snap",
+        "Regional media coverage of severe weather driving search and enquiry volume from people outside the service area entirely",
+        "Severe weather suppressing demand rather than creating it: customers cannot travel, crews cannot work safely, and the correct action is to stand down, not to spend",
+        "A threshold fitted on one season of noise and never tested out of sample",
+        "Insurance-driven enquiries that are claims administration rather than purchase intent"
+      ],
+      "confirmation_signals": [
+        "f01.routine_disruption",
+        "f02.search_query",
+        "f07.reservation"
+      ],
+      "recommended_action_class": "reallocate_capacity_stock_and_spend_to_the_affected_area_before_impact",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "ecommerce",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "local",
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "weather",
+          "problem",
+          "product_failure",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_services",
+          "construction",
+          "agriculture",
+          "insurance",
+          "retail",
+          "hospitality",
+          "utilities",
+          "logistics",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "acquisition_path",
+          "source_url": "https://www.weather.gov/documentation/services-web-api",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Verified this session: a national meteorological service publishes gridded forecasts, observations and active alerts by latitude and longitude as an open, no-fee API requiring only an identifying user-agent. Equivalent national services exist in most markets; the entry is written to the source class, not to this instance."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Held at the middle of the scale because weather sets timing and volume for a population, not intent for a person; unevidenced and should clamp."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f15.infrastructure_change",
+      "family": "F15",
+      "name": "Local infrastructure or built-environment change",
+      "definition": "A dated, geographically bounded change to physical or network infrastructure alters what is possible, required or attractive at an address or along a route: a granted planning or building permit, a road, rail or utility scheme, a fibre or mobile-network build-out reaching a postcode, a grid connection or substation upgrade, a charging or metering installation, a water or sewer renewal, the opening or closure of a store, depot, school or clinic, or a scheduled withdrawal of a service. Qualifying condition: the change is attached to an address, parcel, postcode or route, carries a published date or status transition, and precedes the purchase it triggers by a lead time the seller has measured. Scope: this row is a change to shared infrastructure around an address - a third party's scheme, build-out, opening or withdrawal that alters what an occupier may, must or can now buy. A permit filed by the prospective buyer themselves, for work you supply, is f13.permit_or_licence_filed. Both rows can read the same planning register; the difference is whose work the record describes.",
+      "question_answered": "Which addresses or areas have just become eligible, obliged or newly attractive for what we sell, and can we reach them inside the lead time before the incumbent or the main contractor locks the work in?",
+      "intent_dimensions": [
+        "need",
+        "fit",
+        "requirements",
+        "timing"
+      ],
+      "identity_level": "location",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "address_or_parcel_id",
+        "change_type",
+        "status",
+        "status_date"
+      ],
+      "optional_supporting_fields": [
+        "declared_works_value",
+        "work_category_code",
+        "applicant_role",
+        "expected_completion_date",
+        "geocoded_point",
+        "service_area_polygon",
+        "matched_order_lead_time_days",
+        "prior_permits_at_same_address"
+      ],
+      "source_class": [
+        "public_record",
+        "partner_feed",
+        "news_feed",
+        "first_party_backend"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Measure the lead time by hand before automating anything: take one week of your own completed jobs with their addresses, look each address up in the free municipal planning or building-permit portal, and record how many days before the order the permit was granted. If there is no gap there is no signal for your trade; if there is, you now know the exact window",
+          "requires": [
+            "addresses on your own jobs",
+            "an afternoon on a public portal"
+          ],
+          "gives": "The lead time and the work categories that actually precede your orders - the two parameters every automated version needs and none supply"
+        },
+        {
+          "rung": 2,
+          "how": "Automate the two or three jurisdictions that matter: most municipal open-data portals publish planning and building permits as a downloadable dataset or a simple query API; poll weekly, filter on the work-category codes and declared values you found in rung 1, geocode into your service polygons and drop the matches into the same queue your sales team already works",
+          "requires": [
+            "an open-data portal or a records request",
+            "a geocoder",
+            "a weekly job"
+          ],
+          "gives": "Address-level, dated demand ahead of any advertising response, in the jurisdictions that carry most of your revenue"
+        },
+        {
+          "rung": 3,
+          "how": "Add network and utility availability registers: national broadband and mobile coverage maps, grid connection queues and capacity registers, metering and charging installation registers, and scheduled roadworks and street-works notices - then join them to your own address list and to your installed base",
+          "requires": [
+            "address-normalised customer records",
+            "register access, usually free or by request"
+          ],
+          "gives": "Eligibility changes - the address that could not buy last month and can now - which permits never show"
+        },
+        {
+          "rung": 4,
+          "how": "Where your service area spans more authorities than you can maintain feeds for, take a normalised multi-jurisdiction permit feed from a partner or licensed aggregator; and open a trade-counter, merchant or main-contractor channel that tells you which sites have just taken delivery of materials, which is earlier than any public record",
+          "requires": [
+            "a commercial agreement",
+            "a partner willing to share site-level activity"
+          ],
+          "gives": "Breadth across authorities, and an earlier signal than the public record for the sites that matter most"
+        }
+      ],
+      "min_data": {
+        "min_matched_records": 100,
+        "min_history_days": 365,
+        "note": "Permit-to-order conversion differs enough between authorities, work categories and trades that a rate borrowed from another jurisdiction is misleading. Match at least a hundred of your own orders to records in the same jurisdiction before you model anything."
+      },
+      "access_conditions": [
+        "Coverage is jurisdiction-dependent: some authorities publish a machine-readable dataset, some a search page, and some only scanned documents - the practical unit of work is one authority at a time, ranked by your revenue",
+        "Bulk retrieval from a public portal may still be rate-limited or governed by the portal's terms; a records request is often faster and more complete than scraping",
+        "Author this at address level. Permit and property records frequently name the owner or applicant, and resolving that named person converts a low-sensitivity location signal into personal data with a notification duty attached",
+        "Buying precise-geolocation data to determine which individuals are present at an affected site is out of scope for this entry and should be treated as prohibited, not as a higher rung"
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "A record being public does not make outbound contact to the person named in it lawful; direct-marketing rules for calls, mail and email apply independently, and where the record carries personal data collected from a source other than the individual, a transparency notice is owed within a short statutory period.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "The window is the gap between the record's status date and the point at which the trade you serve is specified. It closes when the main contractor or incumbent supplier is chosen, which for most trades is weeks, not months."
+      },
+      "false_positives": [
+        "A permit filed speculatively - to test a valuation or to keep an option open - and never built, which is a large fraction of grants in many authorities",
+        "An application later refused, withdrawn, or lapsed on expiry, where the portal never updates the status you cached",
+        "A retrospective permit regularising work that is already finished",
+        "Amended or duplicate records for one project counted as several projects, inflating volume and skewing conversion",
+        "The address on the record being the agent's, architect's or applicant's office rather than the site",
+        "The property being owned by a landlord or a fund that will not spend, or by a developer with a framework supplier already in place",
+        "A permit whose timing suits a different trade entirely - the groundworks window is not the fit-out window - so the signal is real but months early for you",
+        "A network availability record that marks an address as passed rather than connectable, which is not the same thing"
+      ],
+      "confirmation_signals": [
+        "f13.permit_or_licence_filed",
+        "f05.eligibility_check",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "queue_the_address_for_outreach_inside_the_measured_lead_time",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "marketplace",
+          "subscription",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "local",
+          "high_ticket",
+          "considered"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "property_or_relocation",
+          "business_event",
+          "regulation",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "construction",
+          "home_services",
+          "building_materials",
+          "telecommunications",
+          "utilities",
+          "real_estate",
+          "commercial_furnishing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "A granted permit is a strong intent proxy for some trades and nearly worthless for others; the single number is a placeholder for a distribution and should clamp."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Held at 3 because record status is frequently stale in public portals and speculative filings are common."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f15.supply_scarcity",
+      "family": "F15",
+      "name": "Scarcity, allocation and lead-time extension",
+      "definition": "The available quantity of an item, slot or capacity, or the time required to obtain it, tightens far enough that waiting now carries a cost: days of stock cover fall below the replenishment lead time, a manufacturer moves from filling orders to allocating them, a supplier-confirmed ship date slips past the date promised to the buyer, remaining capacity for a dated period falls below a set threshold, or a held price or availability guarantee is about to expire. Qualifying condition: the tightening is measured against that item's own baseline and is a fact the seller could state to the buyer truthfully without qualification.",
+      "question_answered": "Which buyers now face a real deadline created by scarcity that we can tell them about honestly, and where is our own lead time about to become longer than the buyer's need date?",
+      "intent_dimensions": [
+        "urgency",
+        "timing",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "asset",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "item_or_slot_id",
+        "on_hand_or_remaining_capacity",
+        "committed_or_reserved_quantity",
+        "trailing_demand_rate",
+        "replenishment_lead_time_days",
+        "as_of_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "supplier_confirmed_ship_date",
+        "promised_date_to_customer",
+        "back_in_stock_subscriber_count",
+        "waitlist_needed_by_date",
+        "quote_validity_expiry",
+        "substitute_item_ids",
+        "allocation_notice_reference",
+        "backorder_quantity"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "offline_system",
+        "marketplace",
+        "partner_feed"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute days of cover per item from data you already have: nightly export of on-hand quantity from the commerce or stock system divided by the trailing four-week median sales rate, flagged wherever cover falls below the replenishment lead time. It is one export and one division, and it identifies the items where a scarcity message would be true",
+          "requires": [
+            "an inventory export",
+            "a sales history export"
+          ],
+          "gives": "A truthful, item-level scarcity state today, with no new instrumentation and no vendor"
+        },
+        {
+          "rung": 2,
+          "how": "Stop discarding the demand you already generate: turn every out-of-stock view, every unavailable-for-your-date result and every sold-out slot into a recorded back-in-stock or waitlist request carrying the item, the quantity and the needed-by date, and store it as a first-party record rather than a mailing-list tag",
+          "requires": [
+            "a capture form or app event on the unavailable state",
+            "somewhere to store the request with its needed-by date"
+          ],
+          "gives": "The highest-intent record in this family - a named buyer, a specific item and a deadline - built from traffic you are already paying for and currently throwing away"
+        },
+        {
+          "rung": 3,
+          "how": "Pull supplier-side truth from the back office: order acknowledgements, confirmed ship dates, allocation notices and advance-ship notices arrive as purchase-order confirmations, structured trading messages or supplier-portal exports; parse the confirmed date and compare it with the date you promised the customer",
+          "requires": [
+            "access to purchasing or accounts-payable systems",
+            "a parser for the acknowledgement format you actually receive"
+          ],
+          "gives": "Scarcity that has not reached your stock levels yet, weeks before the shelf shows it - and it is already sitting in an inbox"
+        },
+        {
+          "rung": 4,
+          "how": "Add category-level scarcity from outside your own four walls: distributor stock-availability feeds, listing counts and availability states for the item across marketplaces, and published price or freight indices for the input commodity",
+          "requires": [
+            "a distributor relationship or a licensed feed",
+            "marketplace access under its terms"
+          ],
+          "gives": "Whether the tightness is yours alone or the whole category's - which decides whether the right message is urgency or apology"
+        }
+      ],
+      "min_data": {
+        "min_selling_weeks_per_item": 8,
+        "note": "Days of cover computed on a mean rather than a median, or on fewer than about eight selling weeks, is dominated by single bulk orders and will manufacture scarcity that does not exist. Items below that threshold should be excluded, not estimated."
+      },
+      "access_conditions": [
+        "This signal may only be activated as a statement of fact. A countdown, a remaining-units figure or a lead-time warning that is not derived from the actual measurement is a deceptive practice in most consumer-protection regimes, independent of any privacy analysis",
+        "Distributor and marketplace availability feeds are contractual: redistribution of a partner's stock position to end customers is usually prohibited even when you may act on it internally",
+        "Waitlist and back-in-stock records are direct-marketing permissions with a stated purpose; using them for unrelated campaigns is the fastest way to lose the most valuable list in the catalogue",
+        "Rung 2 is the only rung that touches a visitor's device. It is on-device collection from unauthenticated visitors and needs consent in the EEA and UK, not the notice the rest of this row runs on. Rungs 1, 3 and 4 are back-office records and carry no terminal-equipment access at all; if you cannot obtain consent, create the demand record server-side from the render decision instead of from a client event."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Consumer-protection law treats a false or unverifiable scarcity claim as an unfair practice in its own right; the constraint on this signal is truthfulness in activation rather than lawfulness in collection.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "Scarcity resolves in one of two ways - it is replenished, or the buyer solves the problem elsewhere - and both close the window. A waitlist request carrying an explicit needed-by date should use that date rather than this half-life."
+      },
+      "false_positives": [
+        "A stockout caused by a receiving, counting or forecasting error rather than by demand, which produces a scarcity message customers can disprove",
+        "One bulk or wholesale order distorting the trailing demand rate for a normally slow item",
+        "A seasonal ramp read as structural tightening",
+        "A marketplace showing few listings because sellers delisted or repriced, not because units sold",
+        "A supplier declaring allocation as a negotiating posture ahead of a price review",
+        "Scarcity suppressing rather than accelerating: told the lead time, the buyer abandons or goes to a substitute, so the correct action is to offer the dated alternative, not to press",
+        "Resellers, scalpers and bots populating waitlists, whose demand is real but is not end-customer intent and distorts allocation",
+        "Internal transfers, samples or staff purchases counted as sales in the trailing rate",
+        "An existing customer joining a waitlist to monitor price rather than to buy"
+      ],
+      "confirmation_signals": [
+        "f08.payment_preparation",
+        "f07.reservation",
+        "f11.replenishment_due"
+      ],
+      "recommended_action_class": "state_true_availability_and_offer_a_dated_alternative_or_reservation",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "inventory_depletion",
+          "capacity_pressure",
+          "supply_disruption",
+          "occasion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "wholesale_distribution",
+          "manufacturing",
+          "hospitality",
+          "automotive",
+          "building_materials",
+          "consumer_electronics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated high because rung 2 produces a named buyer, a specific item and a deadline in one record; unevidenced and should clamp."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated high because the underlying records are transactional and first-party rather than inferred - unusual in this family."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f15.policy_incentive_change",
+      "family": "F15",
+      "name": "Policy, incentive or regulatory-deadline change",
+      "definition": "A government, regulator or scheme administrator changes the after-subsidy price, the legality or the deadline attached to the category: a grant, rebate, tax credit or feed-in rate opens, changes rate or expires; a duty or tariff changes; a standard, ban or phase-out acquires a compliance date; an inspection, certification or registration becomes mandatory; or a scheme opens or closes to applications or exhausts its budget. Qualifying condition: the change names an instrument, carries a published effective or expiry date, and defines an eligible population that can be joined to your own records by a field the applicant declares.",
+      "question_answered": "Is there a dated, externally imposed reason for this buyer to act before a specific day, are they inside the eligible population, and which of our open deals gain or lose their subsidy when it lands?",
+      "intent_dimensions": [
+        "budget",
+        "value",
+        "requirements",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "instrument_id",
+        "instrument_status",
+        "effective_date",
+        "expiry_or_deadline_date",
+        "eligibility_criteria",
+        "account_declared_eligibility"
+      ],
+      "optional_supporting_fields": [
+        "incentive_value_or_rate",
+        "administering_body",
+        "jurisdiction",
+        "remaining_scheme_budget",
+        "application_lead_time_days",
+        "account_open_opportunity_value",
+        "quote_validity_expiry",
+        "grandfathering_terms"
+      ],
+      "source_class": [
+        "public_record",
+        "news_feed",
+        "partner_feed",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Build the instrument register you already half-know: list the three to five schemes, credits, tariffs or compliance dates that govern your category, each with its effective date, its expiry date, its eligible population in one plain sentence, and the single field in your own records that says whether a given account or property qualifies. Then add that one eligibility question to your quote form so the field starts filling",
+          "requires": [
+            "an hour with whoever answers these questions on sales calls",
+            "one new field on a form and in the CRM"
+          ],
+          "gives": "A queryable deadline per deal instead of tribal knowledge in a sales deck - and the declared eligibility field, which is the only lawful way to build the eligible population"
+        },
+        {
+          "rung": 2,
+          "how": "Subscribe to the official publication channels rather than the trade press: the government gazette or daily rules journal filtered to your agency and topic, the regulator's consultation and decision feeds, the scheme administrator's update list, and your trade association's briefing; poll weekly and diff for changes to your register's instruments",
+          "requires": [
+            "a scheduled job or a mailbox rule",
+            "someone who reads the diff"
+          ],
+          "gives": "Weeks of warning on rate changes and closures, from the primary source, before the category's marketing catches up"
+        },
+        {
+          "rung": 3,
+          "how": "Turn the register into a countdown that acts: stamp the applicable instrument and its deadline onto every open opportunity so the CRM can compute days-until-lapse, set quote validity to expire before the deadline rather than after it, and route deals whose delivery lead time no longer fits inside the window into a different message entirely",
+          "requires": [
+            "the rung-1 field populated on open deals",
+            "a workflow rule in the CRM"
+          ],
+          "gives": "The deadline applied per deal, which is where incentive effects actually convert - almost all of the volume lands in the final weeks"
+        },
+        {
+          "rung": 4,
+          "how": "Cover multi-jurisdiction footprints with a legislative-tracking subscription, and open a channel to the people who see budget exhaustion first - scheme administrators, installer networks, distributors and certification bodies - because a scheme that is technically open but has spent its allocation is closed in practice and that fact appears in no statute",
+          "requires": [
+            "a commercial tracking subscription or a trade body membership",
+            "a named contact at the administering body or channel"
+          ],
+          "gives": "Breadth across jurisdictions, plus the mid-year budget-exhaustion signal that decides whether the deadline is real"
+        }
+      ],
+      "min_data": {
+        "note": "One instrument with a published expiry date is enough to act on. Measuring lift needs at least one full announce-to-expiry cycle of the same instrument with dated outcomes, because deadline demand is heavily end-loaded and a mid-window read will always look like the scheme is not working."
+      },
+      "access_conditions": [
+        "Eligibility must be declared by the applicant, never inferred. Where a scheme's eligibility is defined by a health condition, a disability, or receipt of a means-tested benefit, constructing the eligible population from behaviour or from purchased attributes is prohibited rather than merely sensitive - the applicant declares it for this purpose or it is not collected",
+        "Primary sources are free but not always machine-readable; the practical constraint is having someone who can read a scheme document and translate the eligibility rule into one field",
+        "Where you advise on eligibility you may be making a regulated statement in some categories - the register should record who signed off the eligibility wording"
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "This is the clearest hard-expiry signal in the catalogue: the instrument carries its own date, and the signal is worth nothing the day after unless a successor scheme exists. Carry the date on the record and let it expire the record, rather than decaying a score."
+      },
+      "false_positives": [
+        "A scheme announced but never funded, or repealed before commencement, which converts an outreach campaign into a credibility loss",
+        "A consultation, draft rule or political announcement read as an enacted instrument",
+        "A national scheme whose local delivery body has already exhausted its allocation, so the deadline is theoretical",
+        "Headline eligibility that narrows drastically in the scheme document, leaving most of your list ineligible",
+        "Grandfathering or transitional relief that removes the urgency for exactly the customers you can address",
+        "Announcement effects that suppress demand: buyers wait for a rumoured better scheme, and the period before the change is worse than the period before the announcement",
+        "Deadlines that are extended at the last minute, which trains your list to disbelieve the next one",
+        "Traffic on your incentive calculator from installers, journalists, competitors and policy researchers rather than buyers",
+        "An eligible buyer who cannot complete inside the application lead time, so the deadline is real but unreachable"
+      ],
+      "confirmation_signals": [
+        "f05.eligibility_check",
+        "f06.financing_calculation",
+        "f13.regulatory_compliance_deadline"
+      ],
+      "recommended_action_class": "attach_the_deadline_to_the_deal_and_work_backwards_from_the_application_lead_time",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "ecommerce",
+          "saas",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "high_ticket",
+          "considered",
+          "local"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "regulation",
+          "funding",
+          "business_event",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "energy",
+          "construction",
+          "home_services",
+          "automotive",
+          "agriculture",
+          "healthcare_supply",
+          "financial_services",
+          "manufacturing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated high because a dated instrument supplies urgency the seller did not manufacture; unevidenced and should clamp."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The instrument is documentary; reliability is held at 3 because eligibility joins are usually thin and scheme budgets close schemes that statutes say are open."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f15.supply_disruption",
+      "family": "F15",
+      "name": "Upstream supply disruption or recall",
+      "definition": "A dated upstream event interrupts the supply, safety or serviceability of a product, component, ingredient or service that either you sell or the buyer already owns: a safety recall or market withdrawal, a supplier insolvency or plant shutdown, a contamination or quality hold, a transport-corridor closure or carrier failure, an export control or sanction, a labour stoppage, or a cyber incident at a logistics or manufacturing partner. Qualifying condition: the event names a manufacturer, part, model, lot, facility or corridor, and a resolvable link exists from that identifier to a unit you shipped, a unit the buyer owns, or an order you have promised.",
+      "question_answered": "Has something upstream just made a product our customers own unsafe or unobtainable, exactly which units and which promised orders are affected, and which of the incumbent's customers are now looking for an alternative?",
+      "intent_dimensions": [
+        "need",
+        "risk",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "asset",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "affected_identifier",
+        "identifier_type",
+        "event_type",
+        "event_date",
+        "installed_unit_record"
+      ],
+      "optional_supporting_fields": [
+        "lot_or_serial_range",
+        "manufacture_date_range",
+        "facility_or_corridor_id",
+        "purchase_order_line_id",
+        "promised_date_to_customer",
+        "substitute_part_id",
+        "remedy_type",
+        "warranty_registration_date",
+        "supplier_tier"
+      ],
+      "source_class": [
+        "public_record",
+        "news_feed",
+        "partner_feed",
+        "first_party_backend",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Make the installed base exist from records you already keep: pull model, serial, lot and ship date from order lines, warranty registrations, service-visit history and returns, and land them in one table keyed by customer and site. Nothing new is collected - it is a join across systems you already run - and without it every recall notice in the world is unactionable",
+          "requires": [
+            "exports from order, service and warranty systems",
+            "a place to keep the joined table"
+          ],
+          "gives": "The ability to answer 'who has the affected thing' at all, which is the entire signal and the part that is almost never built"
+        },
+        {
+          "rung": 2,
+          "how": "Match that table nightly against the free official notice feeds for your category - the product-safety regulator, the medicines and device regulator, the vehicle safety authority, the food agency - in every market you sell into, on make, model, lot and date-range fields rather than on free text",
+          "requires": [
+            "a scheduled job against public APIs or feeds",
+            "identifier normalisation between their format and yours"
+          ],
+          "gives": "Dated, authoritative, no-cost detection of events affecting units you can name, in hours rather than at the speed of trade press"
+        },
+        {
+          "rung": 3,
+          "how": "Get visibility on your own inbound: record confirmed ship date, port or hub of loading and carrier on every purchase-order line, subscribe to carrier and forwarder exception notifications, and watch supplier solvency through corporate-registry filings, payment-run behaviour and sudden changes to their payment terms",
+          "requires": [
+            "purchasing data at line level",
+            "carrier or forwarder notification access"
+          ],
+          "gives": "A corridor or supplier event mapped to specific orders and therefore to specific customer promises, days before the delivery is missed"
+        },
+        {
+          "rung": 4,
+          "how": "Add multi-tier mapping and component cross-reference so an event at a sub-tier plant resolves to your part numbers, and take a news feed with facility and entity extraction for events that never reach a regulator's notice - fires, strikes, blockades and force-majeure declarations",
+          "requires": [
+            "a licensed supply-chain mapping or a supplier-declared bill of materials",
+            "an entity-resolved news feed"
+          ],
+          "gives": "Warning on the disruptions that are invisible one tier up, which is where most of them start"
+        }
+      ],
+      "min_data": {
+        "min_installed_base_coverage_pct": 60,
+        "note": "Match at lot or serial granularity. Matching on model alone over-notifies by a large multiple, and a notification list that is mostly wrong trains customers to ignore the one notice that matters. Below roughly 60 percent installed-base coverage, treat the output as a service workflow, not a campaign."
+      },
+      "access_conditions": [
+        "Where the affected product is your own, notifying owners is a safety obligation with its own statutory timetable; it is not a marketing opportunity, and it should not be routed through a campaign tool that suppresses unsubscribed contacts",
+        "Official notice feeds are free but their identifier formats differ by market and by agency - the real cost of this signal is identifier normalisation, not access",
+        "Supplier-declared bill-of-materials and multi-tier maps are usually shared under confidentiality; they may inform your internal routing but cannot be republished to customers"
+      ],
+      "availability": "partial",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Public recall and enforcement feeds are open data; multi-tier supplier maps and distributor feeds are contractual and typically prohibit onward disclosure.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A disruption's commercial window closes when the buyer has found a substitute or the supply is restored. A safety recall is different: it stays live on the affected unit until that unit is remedied or retired, and should be held as a fact on the asset rather than decayed."
+      },
+      "false_positives": [
+        "A notice covering a lot or date range you never received, which model-level matching will not distinguish",
+        "A force-majeure declaration used as cover for a price renegotiation rather than a genuine interruption",
+        "A corridor or port event on a route you stopped using, still present in a cached routing table",
+        "Coverage of an event whose commercial impact was absorbed entirely by inventory in transit",
+        "Duplicate and amended notices for one campaign counted as several events",
+        "A stale installed base: the affected unit was replaced under warranty a year ago and the record was never closed",
+        "The buyer's incumbent being disrupted without the buyer being able to move, because they are inside a contract term or a qualification cycle",
+        "Panic buying that pulls demand forward and leaves a hole immediately behind it, read as growth",
+        "A component substitution the manufacturer already made silently, so the part number you match on is no longer the part in the field"
+      ],
+      "confirmation_signals": [
+        "f10.maintenance_and_failure",
+        "f11.replenishment_due",
+        "f13.customer_inventory_depletion"
+      ],
+      "recommended_action_class": "notify_the_affected_installed_base_and_offer_a_dated_replacement_or_substitute",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "marketplace",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "supply_disruption",
+          "product_failure",
+          "inventory_depletion",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "manufacturing",
+          "automotive",
+          "food_and_beverage",
+          "medical_devices",
+          "wholesale_distribution",
+          "retail",
+          "building_materials",
+          "logistics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "acquisition_path",
+          "source_url": "https://open.fda.gov/apis/",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Verified this session: a national medicines, device and food regulator publishes recall enforcement reports as free public APIs. Product-safety, vehicle and food agencies in other markets publish equivalent notice feeds; the entry is written to the source class rather than to this instance."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The notice is authoritative; reliability is capped by installed-base completeness and identifier normalisation, which is where the matching actually fails."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f15.security_incident",
+      "family": "F15",
+      "name": "Security incident or vulnerability affecting the incumbent",
+      "definition": "A publicly disclosed security event materially affects a product, service or provider a buyer depends on: a breach disclosure or regulatory notification, a vulnerability in a named product and version range that is known to be exploited, a ransomware or availability incident, the lapse or withdrawal of a compliance certification, or a mandatory filing that discloses a material cyber event. Qualifying condition: the disclosure is public and attributable to a named product or provider, carries a date, and can be joined to a first-party record of which of your accounts run that product or provider.",
+      "question_answered": "Has a buyer's current provider just failed in a way that reopens the decision, which of our accounts are exposed by our own records, and which of our customers should hear from us before they read it in the press?",
+      "intent_dimensions": [
+        "need",
+        "risk",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "external_feed",
+      "required_raw_fields": [
+        "advisory_or_disclosure_id",
+        "affected_product_and_version_range",
+        "disclosure_date",
+        "account_incumbent_product",
+        "account_id"
+      ],
+      "optional_supporting_fields": [
+        "exploitation_status",
+        "remediation_due_date",
+        "incident_duration",
+        "account_renewal_date",
+        "security_questionnaire_history",
+        "compliance_certificate_expiry",
+        "support_ticket_theme_counts",
+        "incumbent_field_last_verified_at"
+      ],
+      "source_class": [
+        "public_record",
+        "news_feed",
+        "crm",
+        "support_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Record the incumbent stack in a structured field. You already ask what the account runs today - in discovery, in security questionnaires, in integration requests and in support tickets - and it dies in free text; back-fill it and make it required. Tag support conversations that mention another provider's outage, because your own inbox is already telling you which accounts are exposed",
+          "requires": [
+            "CRM and helpdesk admin access",
+            "a back-fill pass over closed-lost notes and questionnaires"
+          ],
+          "gives": "The exposure join, without which no advisory feed produces an addressable account"
+        },
+        {
+          "rung": 2,
+          "how": "Subscribe to the free public advisory sources and match nightly on product and version range: the vendor-neutral vulnerability database, the national cyber agency's catalogue of vulnerabilities known to be exploited, each incumbent's own status page and security-advisory feed, and the breach-notification registers that state attorneys general and data-protection authorities publish",
+          "requires": [
+            "a scheduled job",
+            "product-name normalisation between the advisory's naming and yours"
+          ],
+          "gives": "Authoritative, dated, no-cost detection - and the public breach registers in particular are an off-website source almost nobody in commercial teams reads"
+        },
+        {
+          "rung": 3,
+          "how": "Fill the incumbent field from public technical surfaces where discovery never captured it: mail-exchanger and name-server records, certificate transparency logs, public job postings naming the stack, and the account's own public integration or partner listings",
+          "requires": [
+            "a domain per account",
+            "a lookup script and a review of each source's terms"
+          ],
+          "gives": "Coverage on accounts that never answered the question, at the cost of precision - these surfaces show what is deployed at the edge, not what the team uses"
+        },
+        {
+          "rung": 4,
+          "how": "Where none of the above resolves, take licensed technology-install coverage or ask a channel partner, auditor or managed-service provider - and hold it to a measured accuracy, because install-base coverage is the most commonly overstated claim in this category and decays within months of collection",
+          "requires": [
+            "a commercial agreement",
+            "a sample you can validate against accounts whose stack you already know"
+          ],
+          "gives": "Breadth on the long tail, at a precision you should measure rather than accept"
+        }
+      ],
+      "min_data": {
+        "min_accounts_with_incumbent_field": 50,
+        "note": "Version-range matching needs a version, not a product name. Without one, an advisory matches the whole customer base and the resulting list is noise; treat product-only matches as a research queue rather than an outreach list."
+      },
+      "access_conditions": [
+        "Detection must rest on the provider's own disclosure, a regulator's register or a published advisory. Material obtained from a criminal breach, a leak site or a credential dump is prohibited as an input, not a cheaper rung - see the restricted shard",
+        "Outreach during a live incident is a reputational and sometimes contractual hazard; the useful window opens at the post-incident review and at the next renewal, not on day one",
+        "Public technical lookups are subject to each source's terms and rate limits, and active probing of an account's infrastructure is out of scope for this entry entirely"
+      ],
+      "availability": "public_cost_free",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Advisory catalogues and breach registers are public; licensed install-base data is contractual and usually prohibits redistribution and re-identification of the underlying observations.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 120,
+        "note": "A security failure reopens a decision that does not act until the next renewal or budget cycle. The signal should be carried on the account until that date rather than spent in the week of the disclosure, which is the week the buyer is least able to talk to you."
+      },
+      "false_positives": [
+        "The advisory affects a version, module or deployment mode the account does not run",
+        "The account sits on a managed tier that was patched before public disclosure, so the exposure never existed for them",
+        "An incident at a sub-processor or a shared platform read as an incident at the incumbent itself",
+        "Security researchers, journalists, competitors and the incumbent's own staff generating exactly the same public interest as buyers",
+        "An account contractually locked in, where the incident produces frustration but no purchasable outcome for a year",
+        "The incident raising switching cost rather than lowering it: the account must now complete an investigation and cannot change anything until it closes",
+        "A transparent, well-handled disclosure that increases trust in the incumbent - a real and frequently observed outcome",
+        "The account's own security team researching the incident from the account's network, which is diligence and not intent",
+        "A stale or edge-only incumbent record: the mail record shows a platform the buying team abandoned two years ago"
+      ],
+      "confirmation_signals": [
+        "f13.regulatory_compliance_deadline",
+        "f10.migration_preparation",
+        "f14.internal_approval_step"
+      ],
+      "recommended_action_class": "route_to_a_security_and_renewal_conversation_rather_than_a_breach_themed_pitch",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "high",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "product_failure",
+          "competitor_failure",
+          "regulation",
+          "contract_expiry",
+          "business_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "financial_services",
+          "healthcare",
+          "public_sector",
+          "professional_services",
+          "telecommunications"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "acquisition_path",
+          "source_url": "https://nvd.nist.gov/developers/vulnerabilities",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Verified this session: a national vulnerability database publishes a free public API whose records can be filtered by a product and version identifier and by last-modified date, which is what makes nightly matching against an incumbent field practical without a licence."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Held mid-scale: the event reopens a decision but rarely creates one inside the quarter, and the observed outcome is often renewal delay rather than switching."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

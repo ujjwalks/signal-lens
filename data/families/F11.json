@@ -1,0 +1,953 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F11",
+  "signals": [
+    {
+      "id": "f11.subscription_renewal_window",
+      "family": "F11",
+      "name": "Subscription or contract renewal window",
+      "definition": "A live subscription, contract, policy or licence has a known term end, next billing date or notice deadline, and the current date falls inside the window in which the renewal decision is actually made - the notice period plus a lead time set per business. The primary case is the company's own book: its own customers' own renewal dates. The secondary case is a prospect's incumbent contract, but only where the end date was declared by the buyer or published in a public register, never modelled. Qualifying condition: a dated term_end or next_billing_date on a record whose status is live, and today within [term_end - notice_period - lead_time, term_end].",
+      "question_answered": "Which of our own live subscriptions are inside the window where the renewal decision gets made, which of them are renewing on autopilot rather than being reconsidered - and which prospects have told us, in words, when their current agreement ends?",
+      "intent_dimensions": [
+        "timing",
+        "urgency",
+        "commitment",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "subscription_status",
+        "term_end_date",
+        "auto_renew_flag"
+      ],
+      "optional_supporting_fields": [
+        "notice_period_days",
+        "contract_value",
+        "term_length_months",
+        "renewal_owner",
+        "prior_renewal_outcomes",
+        "price_change_at_renewal",
+        "incumbent_contract_end_declared",
+        "payment_method_expiry"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "commerce_platform",
+        "public_record"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Run one query against your own billing or subscription table: term_end_date and auto_renew_flag for every live subscription, expressed as days_to_renewal. You already store both columns. No tracking, no vendor, no consent question, no model.",
+          "requires": [
+            "read access to the billing or subscription database"
+          ],
+          "gives": "A dated renewal book covering 100% of your own customers, this week. This is the strongest and cheapest signal in the entire catalogue and it is the one unaided analyses skip, because it is not on the website."
+        },
+        {
+          "rung": 2,
+          "how": "Rank the window rather than just listing it: join utilisation, support-ticket volume and severity, and the last invoice's price change to each renewal date, so the book is ordered by risk and by expansion headroom instead of by date.",
+          "requires": [
+            "an account-keyed join across billing, product and support"
+          ],
+          "gives": "Turns a calendar into a prioritised action list - the difference between contacting everyone and contacting the ones who are deciding"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the prospect's incumbent contract end date as a structured, required CRM field asked in discovery ('when does your current agreement end, and what notice does it need?'), instead of leaving it in call notes.",
+          "requires": [
+            "one CRM field",
+            "a question in the discovery script"
+          ],
+          "gives": "A declared, dated competitive-displacement window - obtained from the buyer, for this purpose, which is the only clean basis for holding it"
+        },
+        {
+          "rung": 4,
+          "how": "For public-sector, regulated and listed buyers, read award dates, contract durations and expiry from national procurement award registers, regulator filing portals and published board papers. These are lawful public sources and free.",
+          "requires": [
+            "a scheduled read of the relevant register",
+            "entity matching to your account list"
+          ],
+          "gives": "Dated renewal windows for buyers who never tell a vendor anything - bounded strictly to the buyers whose contracts are published"
+        }
+      ],
+      "min_data": {
+        "min_live_subscriptions": 50,
+        "min_history_days": 365,
+        "note": "Rung 1 works from the first subscription; the thresholds apply to derived renewal-rate baselines, which need at least one full cycle before a 'below normal' claim means anything."
+      },
+      "access_conditions": [
+        "Rung 4 covers only buyers whose contracts are published - public bodies, some utilities, and disclosures by listed companies. It is not a general renewal feed and it does not exist for private companies.",
+        "Third-party 'contract expiry' or 'renewal date' fields sold as enrichment are overwhelmingly modelled rather than observed. If a supplier cannot say how a specific date was obtained, treat the field as an estimate with an unknown error rate, not as a date, and never let it drive an outbound claim that names the incumbent.",
+        "This row resolves a natural person from your own records. Even where the data is first-party and the processing is expected, a transparency duty attaches; where any field arrives from a source other than the individual, GDPR Art 14 notice is owed."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Your own customer's renewal date is your own contract data and contacting them about that contract is contract administration, not marketing. Two things push the other way. First, in several jurisdictions acting on the window is mandatory rather than optional: California's amended automatic-renewal law, in force from 1 July 2025, requires an annual reminder in the medium the customer is used to, disclosing what renews, the amount and frequency of the charge, and how to cancel. Second, using the same date to cross-sell something else is a secondary purpose and needs the notice to cover it. Prospect-side incumbent dates obtained by declaration are clean; the same field bought from a broker is not.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The window opens at term_end minus notice period minus lead time and closes when the renewal executes or lapses. One day after, this is either an onboarding signal or a win-back signal - different rows, different actions. Nothing about it decays gradually."
+      },
+      "false_positives": [
+        "An auto-renewing subscription that renews without anyone deciding anything: the date exists, the decision window does not, and manufacturing contact there can prompt a cancellation that would not otherwise have happened",
+        "A dormant or zero-usage subscription whose renewal is already lost regardless of outreach - a date with no relationship left behind it",
+        "A multi-year contract whose annual billing anniversary is mistaken for a decision point",
+        "A stale CRM date: the original order date, a legacy migration artefact, or a date last touched three renewals ago",
+        "Parent and child records on a group contract, where the child carries the parent's date and is contacted as if it could decide",
+        "A prospect's declared incumbent end date given in a discovery call as a polite brush-off ('call me in March') rather than as a real window",
+        "A payment-method expiry date read as a contract term end - it predicts an involuntary failure, which needs a billing action, not a sales one"
+      ],
+      "confirmation_signals": [
+        "f10.product_usage",
+        "f10.service_deterioration",
+        "f14.internal_approval_step"
+      ],
+      "recommended_action_class": "work_the_renewal_book_by_risk_and_headroom_not_by_date",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "subscription",
+          "saas",
+          "services",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "recurring",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "insurance",
+          "telecom",
+          "financial_services",
+          "utilities",
+          "professional_services",
+          "education"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 5 because the decision point is dated, first-party and certain rather than inferred - the only judgement involved is the width of the window."
+        },
+        {
+          "claim": "terms_note",
+          "source_url": "https://www.cooley.com/news/insight/2025/2025-06-04-california-automatic-renewal-law-amendments-take-effect-on-july-1-2025",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Verified by fetch on 2026-08-01: amended California automatic-renewal requirements effective 1 July 2025, including an annual reminder in the medium used for the original transaction, disclosing the product, charge frequency and amount, and how to cancel."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f11.replenishment_due",
+      "family": "F11",
+      "name": "Replenishment due on a consumable",
+      "definition": "A consumable the subject has already bought is projected to be exhausted, from the quantity purchased, the pack or dose size, and either an observed reorder interval or a usage rate the customer declared. Qualifying condition: at least two prior purchases of the same consumable, or one purchase plus a declared usage rate or a manufacturer-stated service interval, and today falling inside the projected depletion window. This row applies to consumables only. Projecting a depletion date for a durable is a category error, and projecting one for a consumable whose category would disclose a health condition, a pregnancy or a life stage is out of scope entirely: that is an excluded inference, not a replenishment model. Where such a cadence matters, the only lawful form is one the customer sets themselves. Where the order record resolves to a delivery address rather than to a named person - which is the normal case in retail - use the address-keyed form, f12.household_consumption_rate, and keep the projection at address level.",
+      "question_answered": "Which customers are about to run out of something they bought from us, and on what date - closely enough to time the reorder prompt to the week rather than the quarter?",
+      "intent_dimensions": [
+        "need",
+        "timing",
+        "urgency",
+        "category"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "item_id",
+        "order_date",
+        "quantity"
+      ],
+      "optional_supporting_fields": [
+        "pack_size",
+        "declared_usage_rate",
+        "prior_reorder_intervals",
+        "asset_id",
+        "subscription_interval",
+        "channel",
+        "return_flag",
+        "promotion_flag"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "crm"
+      ],
+      "collection_method": "inference",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "From the order table you already have, compute the median interval between repeat purchases of the same item, per customer where they have three or more orders and per item otherwise, and list customers whose days-since-last-order has passed that median.",
+          "requires": [
+            "an order export with customer id, item id, date and quantity"
+          ],
+          "gives": "A dated reorder-due list this week with no model, no vendor and no new data. Explicitly exclude customers with fewer than three orders rather than guessing for them."
+        },
+        {
+          "rung": 2,
+          "how": "Replace the observed interval with a consumption calculation: pack size divided by units per use, times a typical or declared usage rate. This works from the first purchase, so first-time buyers are covered instead of waiting a whole cycle to become visible.",
+          "requires": [
+            "pack size and dose or units-per-use on the product record"
+          ],
+          "gives": "Coverage of new customers, who are precisely the ones an interval model cannot see"
+        },
+        {
+          "rung": 3,
+          "how": "Ask the customer to set the interval: a subscribe-and-save cadence, a 'remind me in N weeks' control, or one usage question at checkout. Then use their answer instead of your estimate.",
+          "requires": [
+            "one control in the account or post-purchase surface"
+          ],
+          "gives": "A declared interval beats every inferred one, and it moves the basis from inference to declaration - which is the only acceptable form of this signal in any sensitive category"
+        },
+        {
+          "rung": 4,
+          "how": "Key the projection to the installed asset rather than the buyer: serial number, install date, meter or hours reading, and the manufacturer's stated service interval, from the service and warranty records you already keep.",
+          "requires": [
+            "an asset register with a service-interval field"
+          ],
+          "gives": "The consumable follows the machine, not the purchasing contact - the only variant that survives a change of buyer in B2B, and the correct key for filters, cartridges, reagents and wear parts"
+        },
+        {
+          "rung": 5,
+          "how": "Join the channels that are not your website before drawing any conclusion: retail EPOS or distributor sell-through, telephone and rep-entered orders, marketplace order feeds, and trade-counter sales.",
+          "requires": [
+            "a partner or distributor reporting agreement, or a marketplace seller feed",
+            "one customer key across channels"
+          ],
+          "gives": "Prevents the dominant failure of this signal - an interval computed from web orders alone reads every offline reorder as a lapse and every offline customer as churned"
+        }
+      ],
+      "min_data": {
+        "min_customers_with_repeat_purchase": 500,
+        "min_orders_per_subject": 3,
+        "min_history_days": 365,
+        "note": "Two orders give an interval with no dispersion, so 'late' cannot be defined. Under a year of history the estimate cannot see seasonality and will fire annual items monthly. Below these floors, ship rung 3 - ask the customer - instead of a projection."
+      },
+      "access_conditions": [
+        "Distributor and retail sell-through data is contractual, not purchasable: it comes from the trading agreement and usually arrives aggregated and late.",
+        "Restrict the projection to categories that carry no special-category meaning. Where the category itself would disclose a health condition, a pregnancy or a life stage, the only permitted form is a cadence the customer sets explicitly for that purpose."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": "Item-level purchase history about your own customers is first-party transactional data, but it is more revealing than most teams assume, because the product taxonomy carries meaning the order table does not. The boundary that matters is not the projection technique, it is the category: a depletion model over a neutral category is ordinary retail practice, and the same model over a category that discloses a health condition or a life stage is the excluded inference class wearing a supply-chain costume.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "Meaningful within roughly one consumption interval of the projected depletion date. Beyond that the customer has already bought elsewhere or stopped using the product, and a late reminder advertises that you were not paying attention."
+      },
+      "false_positives": [
+        "The customer bought the same item offline, on a marketplace or through a distributor - a channel shift read as depletion, which is the dominant error whenever the interval is computed from web orders alone",
+        "A stock-up or promotional multipack purchase that extends the real interval far beyond the observed one",
+        "A gift or a purchase made for someone else, which is consumed by a person the record cannot see and never recurs",
+        "A trade, reseller or office-manager account whose reorder interval reflects a stockroom and a budget cycle, not consumption",
+        "A durable mis-classified as a consumable, producing 'time to replace your sofa' nonsense that destroys credibility for every other message",
+        "Seasonal or event-driven items whose real interval is annual, scored against a consumption cadence",
+        "The product was tried once and abandoned: the depletion date arrives on schedule and the need does not exist",
+        "A shared household or shared account where several people consume at a rate no individual record can represent",
+        "A returned or refunded order still counted as consumption, restarting the clock on a purchase that was reversed"
+      ],
+      "confirmation_signals": [
+        "f11.reorder_cadence_pattern",
+        "f10.product_usage",
+        "f11.loyalty_programme_behaviour"
+      ],
+      "recommended_action_class": "time_a_reorder_prompt_to_the_projected_depletion_date",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short"
+        ],
+        "consumable_vs_durable": [
+          "consumable"
+        ],
+        "triggers": [
+          "recurring",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "grocery",
+          "beauty",
+          "retail",
+          "industrial_equipment",
+          "automotive",
+          "hospitality"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The underlying need is real and dated when the category is genuinely consumable, which supports 4; the projection is an estimate over noisy multi-channel purchase data, which is why reliability is 3 and why no coverage figure is claimed."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f11.loyalty_programme_behaviour",
+      "family": "F11",
+      "name": "Loyalty or membership programme behaviour",
+      "definition": "A member of an owned loyalty, rewards, trade or membership programme reaches a state in the programme ledger that itself creates a reason to buy, or stops accruing after a stable pattern. Qualifying condition: an identified member with an accrual and redemption ledger, and at least one of - balance at or above the redemption threshold, a benefit or points expiry inside the outreach window, tier qualification within reach with the qualifying period ending, a redemption started but not completed, or an accrual gap greater than twice the member's own median interval.",
+      "question_answered": "Which programme members are sitting on a reason to buy that they created themselves - points about to expire, a tier within reach, a reward unredeemed - and which have quietly stopped accruing while still looking like customers?",
+      "intent_dimensions": [
+        "commitment",
+        "timing",
+        "value",
+        "preference"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "member_id",
+        "points_balance",
+        "accrual_event_date",
+        "programme_status"
+      ],
+      "optional_supporting_fields": [
+        "points_expiry_date",
+        "tier",
+        "tier_threshold_gap",
+        "qualifying_period_end",
+        "redemption_started_at",
+        "benefit_activated",
+        "accrual_channel",
+        "enrolment_date"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "offline_system",
+        "crm"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export three columns from the programme ledger you already run: balance, points expiry date and tier gap. Flag members whose balance crosses the lowest redemption threshold, and members whose points expire inside 60 days.",
+          "requires": [
+            "read access to the loyalty ledger"
+          ],
+          "gives": "Two dated, first-party, self-created reasons to buy per member, available immediately. The ledger exists in every programme; almost nobody queries it as a demand signal."
+        },
+        {
+          "rung": 2,
+          "how": "Add tier mechanics: distance to the next tier and days left in the qualifying period, so the members who are close and running out of time are separable from those who are not.",
+          "requires": [
+            "tier thresholds and period end dates as data, not as marketing copy"
+          ],
+          "gives": "The strongest variant, because the member has already told you what they are working toward"
+        },
+        {
+          "rung": 3,
+          "how": "Capture accrual from every channel that touches the programme - in-store scans, app, telephone, partner earn - and compute an accrual-gap measure per member against their own median.",
+          "requires": [
+            "one member key across till, app and web",
+            "partner earn events posting to the ledger"
+          ],
+          "gives": "Distinguishes real disengagement from an unscanned store visit, which is the single largest source of false lapse in retail programmes"
+        },
+        {
+          "rung": 4,
+          "how": "Record redemption friction as events: redemption started and abandoned, reward viewed but not claimed, benefit activated but unused.",
+          "requires": [
+            "events on the redemption surface"
+          ],
+          "gives": "Turns an inventory of balances into a list of people who tried to act and stopped, which is a far tighter cohort"
+        }
+      ],
+      "min_data": {
+        "min_active_members": 1000,
+        "min_history_days": 365,
+        "note": "Accrual-gap thresholds need a member-level median, which needs at least a year and enough members that the median is not one person's habit. Balance and expiry rules need no history at all and work from day one."
+      },
+      "access_conditions": [
+        "Partner earn and burn data arrives through the coalition or partner agreement and usually lands aggregated and delayed; do not model member-level cadence on it.",
+        "Enrolment consent and channel consent are different things. Being a member is not permission to send SMS."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "The ledger is your own first-party record of a relationship the member joined deliberately, so the signal itself is clean. Two constraints sit around it and neither is about availability. First, the programme is a regulated construct in its own right in California: a loyalty programme that trades benefits for personal information is a financial incentive under the CCPA, requiring a notice of financial incentive describing the material terms before opt-in, and the Attorney General's January 2022 sweep was aimed precisely at programmes that had not given one. Second, marketing channel consent - email, SMS, push - is a separate requirement from the lawfulness of holding the ledger, and it varies by jurisdiction. Neither of these makes the signal unavailable; they change what you may do with it, which is a different axis.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "Every qualifying condition carries its own date - the points expiry, the end of the qualifying period, the reward validity end. Store the signal with that date rather than with an age; one day past its own deadline it is worth nothing, and one day before it is worth the most it will ever be worth."
+      },
+      "false_positives": [
+        "A large balance accumulated by one exceptional purchase from someone with no ongoing relationship - a balance is not a habit",
+        "Programme gaming: accounts farming points across employees, family members or resold memberships, whose accrual reflects arbitrage rather than consumption",
+        "A trade or business member accruing on behalf of an employer, where the person holding the points has no say in the next purchase",
+        "An accrual gap caused by a channel that does not report to the ledger - an unscanned store visit, a marketplace order, a partner purchase posted late - rather than by disengagement",
+        "Expiry-driven redemption that simply cannibalises a full-margin purchase the member would have made anyway, which is why the discount-affinity variant of this signal is a reason to withhold an offer rather than to send one",
+        "Dormant enrolments created at the till to complete a transaction, which never represented a member at all",
+        "A household sharing one membership, so accrual reflects several people's behaviour attributed to one name"
+      ],
+      "confirmation_signals": [
+        "f11.reorder_cadence_pattern",
+        "f11.replenishment_due",
+        "f06.price_sensitivity"
+      ],
+      "recommended_action_class": "surface_the_members_own_deadline_and_avoid_discounting_the_already_loyal",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "recurring",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "grocery",
+          "hospitality",
+          "travel",
+          "beauty",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 3: the member has created a reason to act, but programme states are cheap to reach and the same state persists across many members who will not buy. Reliability is higher than strength because the ledger itself is exact."
+        },
+        {
+          "claim": "terms_note",
+          "source_url": "https://www.oag.ca.gov/news/press-releases/data-privacy-day-attorney-general-bonta-puts-businesses-operating-loyalty",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "Verified by fetch on 2026-08-01: California Attorney General announcement dated 28 January 2022 of an investigative sweep of loyalty programmes, stating that businesses offering financial incentives in exchange for personal information must give a notice of financial incentive describing the material terms before the consumer opts in."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f11.reorder_cadence_pattern",
+      "family": "F11",
+      "name": "Transaction cadence pattern and deviation",
+      "definition": "The subject's own transaction history has a measurable rhythm - inter-purchase interval, basket composition, channel mix and spend level - and the current position in that rhythm, or a deviation from it, is the signal. Qualifying condition: at least three transactions spanning at least two intervals, giving a median interval and a dispersion; the row fires when days since last transaction reach that median (due), fall well short of it (accelerating), or exceed it by more than the dispersion allows (breaking). The unit is whatever the payment or loyalty identifier actually resolves to, which in retail is a household rather than a person - treat it as a household unless an authenticated individual login is present, and do not attempt to work out who that household contains.",
+      "question_answered": "Which existing customers are on rhythm, ahead of it, or falling off it - and is a break a churn warning, an expansion opening, or simply us losing sight of purchases that moved to a channel we do not read?",
+      "intent_dimensions": [
+        "timing",
+        "need",
+        "risk",
+        "channel"
+      ],
+      "identity_level": "household",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "transaction_date",
+        "transaction_value"
+      ],
+      "optional_supporting_fields": [
+        "basket_item_ids",
+        "channel",
+        "median_interval_days",
+        "interval_dispersion",
+        "return_flag",
+        "promotion_flag",
+        "identifier_type",
+        "account_merge_history"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "marketplace",
+        "crm"
+      ],
+      "collection_method": "inference",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "From the order table: per subject, compute the median inter-purchase interval and its median absolute deviation, then classify each subject as due, accelerating or breaking. Exclude subjects with fewer than three transactions rather than assigning them a default.",
+          "requires": [
+            "an order export with a subject key, date and value"
+          ],
+          "gives": "A three-state cadence classification of the whole customer base this week, from data you already hold - no model, no vendor, no tracking"
+        },
+        {
+          "rung": 2,
+          "how": "Union in the off-website order streams before interpreting any break: in-store EPOS, telephone and rep-entered orders, trade counter, distributor sell-through and marketplace orders. Only then decide whether a gap is a lapse.",
+          "requires": [
+            "one customer key that spans channels",
+            "a partner or marketplace order feed"
+          ],
+          "gives": "Removes the largest and most expensive error in the family: a customer who moved channel being treated, and messaged, as a defector"
+        },
+        {
+          "rung": 3,
+          "how": "Adjust for seasonality per item family, and neutralise promotional pull-forward, so annual and event-driven categories are not scored against a consumption cadence.",
+          "requires": [
+            "an item-family mapping",
+            "promotion flags on transactions"
+          ],
+          "gives": "Stops the pattern firing on categories that never had a cadence to begin with"
+        },
+        {
+          "rung": 4,
+          "how": "In B2B, re-key the cadence to the account or the delivery site rather than the named purchaser, and carry an identifier-merge history so a changed card, email or contact does not create a phantom new customer and a phantom churn.",
+          "requires": [
+            "an account or site key",
+            "a record of identifier merges"
+          ],
+          "gives": "Survives the ordinary churn of purchasing contacts, which otherwise produces a steady stream of false lapses and false new customers"
+        }
+      ],
+      "min_data": {
+        "min_subjects_with_3plus_orders": 500,
+        "min_orders_per_subject": 3,
+        "min_history_days": 365,
+        "note": "Three transactions is the floor for an interval plus a dispersion. Below 500 qualifying subjects the classification thresholds are fitted to noise; below a year, seasonal categories will be classified as breaking every year on schedule."
+      },
+      "access_conditions": [
+        "Distributor, marketplace and partner order feeds are contractual and often arrive without a customer key, which caps how well rung 2 can ever work - state that limit rather than modelling around it.",
+        "Do not use basket composition to infer household composition, life stage or any characteristic of the people in the household. The cadence is the signal; the contents are not a demographic instrument."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": "Transaction history about your own customers is first-party data and needs no third party. The care is in the identity: a card, a loyalty number or a delivery address resolves to a household, and treating that as a person both mis-attributes behaviour and invites inferences about the household that are not permitted. Keep the resolution honest and the row stays low-risk.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "A cadence classification is a rolling state and should be recomputed rather than aged. The half-life applies to the deviation event: a break that nobody acted on within about six weeks has usually resolved itself into either a quiet return or a completed defection."
+      },
+      "false_positives": [
+        "A purchase made in a channel you do not join - store, phone, rep, distributor or marketplace - which makes an entirely active customer look lapsed",
+        "A changed payment card, email address or loyalty number splitting one customer into two records, resetting the cadence and creating a false new customer alongside a false churn",
+        "In B2B, the purchasing contact leaving and a colleague ordering under a new record for the same site and the same need",
+        "Stock-up buying and promotional pull-forward compressing two intervals into one, then leaving a gap that reads as a break",
+        "Seasonal, gift and event-driven categories whose interval is annual and calendar-driven rather than consumption-driven",
+        "A returned or cancelled order counted as a transaction, so the clock restarts on a purchase that was reversed",
+        "A reseller, agent or buying group purchasing on behalf of many end customers, whose cadence belongs to a business rather than a consumer",
+        "Subscription auto-renewals counted as discretionary transactions, making a passive standing order look like active recurring demand",
+        "A shared household identifier where one member stopped buying and another started, netting to no visible change"
+      ],
+      "confirmation_signals": [
+        "f11.replenishment_due",
+        "f11.loyalty_programme_behaviour"
+      ],
+      "recommended_action_class": "route_by_deviation_expansion_retention_or_channel_reconciliation",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "local",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "recurring",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "grocery",
+          "hospitality",
+          "industrial_equipment",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 3 in both facets deliberately: the pattern is computed from complete first-party records, but its interpretation depends on channel coverage the average company does not have, so a confident-looking number would misrepresent it."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f11.upgrade_cycle_due",
+      "family": "F11",
+      "name": "Upgrade cycle due",
+      "definition": "An existing customer reaches the point in their own ownership or subscription cycle at which the next purchase is normally a MOVE UP a tier, capacity, model or plan rather than a repeat of the same thing. Qualifying condition: an identified customer on a known plan, tier or model, plus at least one of - sustained use at or above the ceiling of the current tier across two or more billing periods, a documented successor product for the one they hold with their unit past the cohort's median upgrade age, a previously declined upgrade whose blocking condition has since changed, or a cohort upgrade interval reached where the customer has upgraded at a stable interval before.",
+      "question_answered": "Which existing customers are due to buy UP rather than buy again, and what is the specific ceiling or successor that makes the case?",
+      "intent_dimensions": [
+        "timing",
+        "value",
+        "readiness",
+        "preference"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "customer_id",
+        "current_tier_or_model",
+        "acquisition_or_plan_start_date",
+        "usage_or_utilisation_measure"
+      ],
+      "optional_supporting_fields": [
+        "tier_ceiling_value",
+        "periods_at_or_above_ceiling",
+        "successor_product_id",
+        "cohort_median_upgrade_interval_days",
+        "prior_upgrade_dates",
+        "prior_upgrade_declined_reason",
+        "overage_charges",
+        "seat_or_licence_utilisation"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "commerce_platform",
+        "product_analytics"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Sort your own customer table by time on current tier or model and flag everyone past the median interval at which customers like them have historically moved up. The interval is already in your order history - derive it, do not guess it",
+          "requires": [
+            "order or subscription history with a tier or model column"
+          ],
+          "gives": "A dated, first-party upgrade-due list on day one, with no instrumentation and no vendor. Most companies have never computed their own upgrade interval and assume it instead"
+        },
+        {
+          "rung": 2,
+          "how": "Join whatever utilisation measure you already bill on - seats used against seats bought, storage, overage lines, service visits - and separate the customers who are pressed against the ceiling of what they bought from the ones who merely held it a long time",
+          "requires": [
+            "a billing or entitlement table with a consumed-versus-contracted pair"
+          ],
+          "gives": "The difference between an anniversary and a real constraint. An overage line is the customer telling you the tier is too small in their own money"
+        },
+        {
+          "rung": 3,
+          "how": "Maintain a successor map - which current model or plan supersedes which - and attach the specific reason the successor resolves the constraint you observed at rung 2",
+          "requires": [
+            "a maintained product-succession table, which is a catalogue decision rather than a data one"
+          ],
+          "gives": "Turns a timing flag into a named recommendation, and makes the outreach specific enough to be useful rather than a generic upsell"
+        },
+        {
+          "rung": 4,
+          "how": "Re-open previously declined upgrades whose stated blocking reason has since changed - a price change, a missing feature that shipped, a contract term that has now ended",
+          "requires": [
+            "declined-upgrade reasons captured as structured values rather than free-text notes"
+          ],
+          "gives": "The highest-conviction rung, because the customer already evaluated and told you what stopped them. It is also the rung most companies cannot reach, because the reason was never stored as data"
+        }
+      ],
+      "min_data": {
+        "note": "Rung 1 needs enough completed upgrades to derive an interval rather than assert one. Below roughly 30 historical upgrades in a comparable cohort the median is noise - use the successor map at rung 3 and the ceiling test at rung 2 instead, and say the interval is unknown rather than publishing a fabricated one.",
+        "thresholds": {
+          "historical_upgrades_in_cohort": 30
+        }
+      },
+      "access_conditions": [
+        "Every rung reads records the seller already holds about its own customers. There is no third-party path in this row and none is needed",
+        "An upgrade cycle is not a replacement cycle. If the next purchase replaces a failed or worn-out unit rather than moving up from a working one, that is f10.lifecycle_stage; if it repeats the same item, that is f11.reorder_cadence_pattern"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "An upgrade window is wide but not open-ended: the constraint that opened it either gets resolved, gets tolerated, or gets solved by a competitor. Utilisation-driven windows decay faster than anniversary-driven ones."
+      },
+      "false_positives": [
+        "A long tenure on one tier that reflects a deliberate, satisfied fit rather than a pending move - time alone is not a constraint",
+        "Utilisation spikes from a one-off project, seasonal peak or data migration rather than sustained growth",
+        "An account being consolidated into a parent or group contract, where the apparent upgrade is an administrative merge",
+        "A customer already in an active renewal or procurement conversation, where a separate upgrade approach cuts across the deal",
+        "Seat counts inflated by dormant, departed or service accounts that were never deprovisioned",
+        "A customer preparing to leave, where ceiling pressure is being solved by migration rather than by upgrade - check against f10.migration_preparation before acting",
+        "Test, sandbox, internal or partner accounts sitting in the production customer table"
+      ],
+      "confirmation_signals": [
+        "f11.subscription_renewal_window",
+        "f06.quote_request",
+        "f05.requirement_formation"
+      ],
+      "recommended_action_class": "route_to_owner_with_the_named_ceiling_and_successor",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "subscription",
+          "saas",
+          "ecommerce",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "capacity_pressure",
+          "contract_expiry",
+          "product_failure",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecoms",
+          "consumer_electronics",
+          "equipment"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ],
+  "reconciliation_note": "F11 carries 4 rows against the source spec's 5. The fifth listed signal, 'upgrade cycles', could not be written as a distinct acquisition row: the only way to detect it is utilisation measured against entitlement, which is the same fields, the same first rung and the same action as f10.product_usage. It was merged there on 2026-08-01 rather than duplicated across two families. F11's four rows cover the spec's remaining four: subscription renewal, replenishment, loyalty behaviour and transaction patterns."
+}

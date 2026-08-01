@@ -158,6 +158,911 @@
       ],
       "sourcing_verified_at": "2026-08-01",
       "coverage_trend": "stable"
+    },
+    {
+      "id": "f04.marketplace_activity",
+      "family": "F04",
+      "name": "Marketplace activity",
+      "definition": "Demand activity against the subject's listings on a marketplace the subject does not own - listing sessions, saves and watch adds, cart adds, buyer questions, and offers - indicating that a shopper is weighing this item against the alternatives sitting beside it. Qualifying condition: a listing-level session, save, question or offer recorded by the marketplace for an item in a category the seller competes in, attributable to a listing and a time window rather than to a person.",
+      "question_answered": "Are shoppers evaluating our product on surfaces we do not control, and which listings are being weighed against alternatives?",
+      "intent_dimensions": [
+        "category",
+        "preference",
+        "channel"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "listing_id",
+        "marketplace_id",
+        "event_type",
+        "event_count",
+        "period_or_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "watch_or_save_count",
+        "offer_amount",
+        "buyer_question_topic",
+        "listing_conversion_rate",
+        "search_term_rank",
+        "featured_offer_state",
+        "competing_listing_price"
+      ],
+      "source_class": [
+        "marketplace",
+        "partner_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Download the seller-dashboard traffic and conversion report for your own listings on a weekly schedule and keep it as a time series per listing instead of reading it once and closing the tab",
+          "requires": [
+            "a seller account on the marketplace"
+          ],
+          "gives": "Listing-level sessions, saves and conversion for your own items with no engineering work at all"
+        },
+        {
+          "rung": 2,
+          "how": "Connect the marketplace's seller API and pull listing traffic, watch counts, buyer questions and offers on a daily job",
+          "requires": [
+            "seller API credentials",
+            "a scheduled job and somewhere to land the rows"
+          ],
+          "gives": "Daily granularity, questions and offers as discrete events, and a history you own rather than a dashboard window"
+        },
+        {
+          "rung": 3,
+          "how": "Join marketplace order records to your own customer records for the minority of buyers who later register the product, claim a warranty or buy direct",
+          "requires": [
+            "order export",
+            "a key the buyer supplies themselves, such as a registration or warranty claim"
+          ],
+          "gives": "Person-level continuity for registered buyers only - never for the browse population, which is the population this signal is about"
+        }
+      ],
+      "min_data": {
+        "min_listing_sessions_per_period": 30,
+        "period_days": 7,
+        "min_listings_for_category_read": 3
+      },
+      "access_conditions": [
+        "Marketplace traffic arrives listing-aggregated, not per visitor. Only questions, offers and orders carry a platform-scoped pseudonymous handle, and that handle cannot be joined to your own visitor or customer identity at any rung.",
+        "There is no rung at which the browsing shopper becomes addressable. If the plan depends on retargeting marketplace browsers, the plan is wrong, not the instrumentation.",
+        "Scraping listing pages instead of using the seller API is a terms violation on every major marketplace, and it is also the version that breaks silently when the page changes."
+      ],
+      "availability": "integration",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Marketplace developer and seller agreements restrict how listing and buyer data may be exported, retained and combined with other datasets, and several forbid using platform data to build audiences off-platform. Read the specific programme terms before anything beyond your own listings is stored.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 10,
+        "note": "Marketplace consideration windows are short; a listing watched a fortnight ago has usually resolved into a purchase somewhere or been forgotten."
+      },
+      "false_positives": [
+        "Competitor and price-scraper reconnaissance of your listing, which is routine on any marketplace with a visible price",
+        "Automated repricing and comparison bots inflating session counts without a human present",
+        "Your own team, agency or channel partner checking how the listing renders",
+        "A shopper saving an item to a wish list as a bookmark for some future year",
+        "Traffic arriving on a mis-tagged search term and bouncing, which raises sessions and means nothing",
+        "An existing owner returning to the listing to re-order a consumable or check a specification"
+      ],
+      "confirmation_signals": [
+        "f04.product_comparison",
+        "f06.price_sensitivity",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "fix_the_listing_against_the_adjacent_offers_and_capture_the_buyer_direct",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "industrial_equipment"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Listing-level demand is real evidence of category evaluation but it is aggregate and un-addressable, so it informs merchandising far more than it informs outreach."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The counts are the platform's own and are accurate as counts; bot and competitor traffic is the reason this is not higher."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "f04.vendor_shortlisting",
+      "family": "F04",
+      "name": "Vendor shortlisting",
+      "definition": "The buyer reveals that a defined set of suppliers is under consideration and that the subject is in it: an invitation to tender or RFP, a named-competitor answer on an inbound form, a security or procurement questionnaire issued to a supplier set, a reference request, or a scheduling thread that references parallel evaluations. Qualifying condition: an artefact that names at least one competing option alongside the subject, or a procurement document addressed to a set of suppliers rather than to one.",
+      "question_answered": "Are we on the buyer's shortlist, who else is on it, and what has to be true for us to be the one chosen?",
+      "intent_dimensions": [
+        "preference",
+        "requirements",
+        "commitment",
+        "authority"
+      ],
+      "identity_level": "buying_group",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "account_id",
+        "competing_option_count_or_names",
+        "artifact_type",
+        "captured_at"
+      ],
+      "optional_supporting_fields": [
+        "rfp_or_tender_id",
+        "submission_deadline",
+        "evaluation_criteria",
+        "stakeholder_roles",
+        "incumbent_flag",
+        "decision_date",
+        "questionnaire_type",
+        "source_of_capture"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_web",
+        "public_record"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Add one question to the demo, quote and contact forms - what else are you evaluating - and write the answer to a CRM field the pipeline report groups by",
+          "requires": [
+            "a form you already own",
+            "one CRM custom field"
+          ],
+          "gives": "Named alternatives on inbound demand from the day it ships, for the price of one form field"
+        },
+        {
+          "rung": 2,
+          "how": "Make the same field mandatory at a defined pipeline stage and have the rep record the artefact type - tender, questionnaire, reference request - and its deadline",
+          "requires": [
+            "stage validation in the CRM",
+            "a rep process someone enforces"
+          ],
+          "gives": "Shortlist status on outbound and partner-sourced deals too, plus a date you can plan the deal against"
+        },
+        {
+          "rung": 3,
+          "how": "Route inbound procurement mail and tender-portal invitations into a shared queue that creates or updates the CRM record, keeping the deadline and the issuing entity",
+          "requires": [
+            "a shared procurement mailbox",
+            "a parser or workflow rule"
+          ],
+          "gives": "The shortlists you were invited to and nobody logged, which in most pipelines is a material share of them"
+        },
+        {
+          "rung": 4,
+          "how": "Watch published tender notices for your categories and jurisdictions and match them against target accounts",
+          "requires": [
+            "public tender notice feeds",
+            "a category-to-notice mapping"
+          ],
+          "gives": "Shortlists forming at public bodies before any invitation reaches you - public-sector demand only"
+        }
+      ],
+      "min_data": {
+        "min_named_alternatives": 1,
+        "prefer_stated_decision_date_over_half_life": true
+      },
+      "access_conditions": [
+        "Rung 4 is public-sector only. Private-sector shortlists are not published anywhere, and any source claiming to sell them is selling an inference, not a record.",
+        "An NDA or the RFP's own rules frequently forbid disclosing the competing bidder set outside the evaluation team. Record it internally; do not repeat it back to the buyer's competitors, publish it, or use it in a case study."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Public tender portals publish notices under their own reuse terms and frequently rate-limit or require registration for automated retrieval. Confidentiality clauses in the tender documents themselves are the binding constraint on what may be done with the bidder set, and they survive the deal.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "A shortlist is live until the decision date. Where a deadline was stated, use it in preference to this half-life - the stated date is data and the half-life is a default."
+      },
+      "false_positives": [
+        "A buyer naming competitors purely to create price leverage, with the decision already made",
+        "A three-quote procurement rule where two of the three names exist only to satisfy the policy",
+        "An incumbent renewal dressed as a competitive process to test the market",
+        "A consultant or reseller running the evaluation for an end customer you never meet, whose criteria are not the end customer's",
+        "A junior researcher compiling a market map with no budget and no mandate",
+        "A stale CRM field carried forward from a prior deal cycle and never revalidated"
+      ],
+      "confirmation_signals": [
+        "f06.quote_request",
+        "f07.demo",
+        "f14.buying_group_formation"
+      ],
+      "recommended_action_class": "qualify_the_evaluation_criteria_and_map_the_buying_group_before_the_deadline",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "manufacturing",
+          "public_sector"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Being named on a shortlist is the narrowest evaluation state a seller can observe directly, which is why it scores at the top of this family; the number is not a measured win-rate lift."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Declared by the buyer and therefore strong, discounted for self-report bias - buyers overstate and understate the competing set for their own reasons."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f04.risk_reduction_behavior",
+      "family": "F04",
+      "name": "Risk-reduction behavior",
+      "definition": "Inside an evaluation, the subject seeks the material that lowers the cost of being wrong rather than the material that describes the product: return, refund and cancellation policy, warranty and guarantee terms, service levels, security and compliance documentation, data-portability terms, insurance, or support questions of the can-I-get-out-of-this kind. Qualifying condition: at least one risk-class asset viewed or requested by a subject who has already viewed product or pricing content in the same session or a prior one.",
+      "question_answered": "What specific objection stands between this buyer and a purchase - is it commercial, technical, or trust?",
+      "intent_dimensions": [
+        "risk",
+        "confidence",
+        "requirements",
+        "readiness"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "page_or_asset_id",
+        "page_class",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "prior_product_view_flag",
+        "document_id",
+        "dwell_seconds",
+        "support_question_topic",
+        "gated_form_identity",
+        "session_id",
+        "referrer"
+      ],
+      "source_class": [
+        "first_party_web",
+        "support_system",
+        "first_party_backend"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Label the URLs you already publish - returns, refunds, warranty, guarantee, SLA, security, compliance, privacy, cancellation, insurance - as a risk-reduction page class, then count sessions containing both a product page and a risk page",
+          "requires": [
+            "the pageview stream you already collect",
+            "a URL-to-class list one person can write in an afternoon"
+          ],
+          "gives": "The objection mix across the whole funnel this week, with no new tracking and no new consent surface"
+        },
+        {
+          "rung": 2,
+          "how": "Put the trust and compliance documents behind a short form or a signed-in document room and log which document was requested",
+          "requires": [
+            "a document portal or a gated form"
+          ],
+          "gives": "Individual and account attribution on the highest-signal risk assets, paid for in some drop-off"
+        },
+        {
+          "rung": 3,
+          "how": "Classify support chats and tickets by objection topic and attach them to the same subject",
+          "requires": [
+            "support export or API",
+            "a topic scheme or classifier"
+          ],
+          "gives": "The objections of people who never found the page - a larger population than the one that did"
+        }
+      ],
+      "min_data": {
+        "min_risk_class_events": 1,
+        "requires_prior_product_or_pricing_view": true,
+        "session_window_days": 30
+      },
+      "access_conditions": [
+        "Rung 1 depends on policy content having its own URL. Policies rendered in a modal, a tab or an accordion on the product page emit no event, and this signal stays invisible until they get a route or an explicit open event - the fix is front-end work, not a data source.",
+        "Prior-purchase state is what separates a buyer reading the return policy from an owner reading it. Without an order join, the two populations are one segment and the segment is useless."
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "An unresolved objection either gets answered or ends the evaluation; after a few weeks the visitor has usually decided without telling you."
+      },
+      "false_positives": [
+        "An existing customer working out how to cancel or return something they already bought - the same pages serve both populations",
+        "Procurement or legal reviewing terms on a deal that is already agreed",
+        "A competitor copying your warranty, SLA or trust-page language",
+        "A vendor-risk team completing an annual questionnaire for a renewal rather than a new purchase",
+        "A student, journalist or compliance researcher reading policy pages as source material",
+        "A shopper checking the returns policy as a routine reflex before any real intent has formed"
+      ],
+      "confirmation_signals": [
+        "f05.eligibility_check",
+        "f06.quote_request",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "answer_the_named_objection_directly_rather_than_re_pitching_the_product",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "saas",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "software",
+          "financial_services",
+          "insurance"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Risk-reduction reading is late-funnel behaviour, but the customer-versus-prospect confound is severe enough that the raw signal should not be scored higher than the middle."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The event is exact; the interpretation is not, because one page serves buyers, owners, competitors and researchers equally well."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f04.returns_and_exchanges",
+      "family": "F04",
+      "name": "Returns and exchanges",
+      "definition": "A return, exchange or multi-variant order that is part of the evaluation rather than the end of it: an order carrying two or more variants of the same parent product bought in order to choose between them, a return whose reason is fit or specification rather than defect, or an exchange request that names a different model. Qualifying condition: a return or exchange record joined to an order where the buyer either ordered duplicate variants of one product or re-enters the same category inside the review window.",
+      "question_answered": "Is this customer still choosing between options, and can we win the second attempt instead of losing the category?",
+      "intent_dimensions": [
+        "preference",
+        "fit",
+        "requirements",
+        "risk"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "customer_id",
+        "order_id",
+        "order_line_items",
+        "return_or_exchange_flag",
+        "event_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "return_reason_code",
+        "requested_replacement_sku",
+        "parent_product_id",
+        "variant_attribute",
+        "refund_vs_exchange",
+        "category_re_entry_flag",
+        "channel",
+        "account_id"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Run one query over the order and return tables you already hold: flag orders containing two or more variants of the same parent product, and returns followed by another order or session in the same category within thirty days",
+          "requires": [
+            "read access to order and return tables"
+          ],
+          "gives": "A bracketing and re-shop segment today, from records that already exist, with no new collection whatsoever"
+        },
+        {
+          "rung": 2,
+          "how": "Make the return reason a structured required choice in the returns flow, separating wrong-fit or wrong-spec from defective and from changed-mind",
+          "requires": [
+            "a returns portal or RMA form you control"
+          ],
+          "gives": "Reason codes that tell an evaluation return apart from a quality failure - the two need opposite responses and look identical without this"
+        },
+        {
+          "rung": 3,
+          "how": "Offer an exchange path in the returns flow that captures the replacement the customer actually wants before the refund is issued",
+          "requires": [
+            "exchange support in the returns flow",
+            "inventory visibility at the moment of the request"
+          ],
+          "gives": "A declared next-choice product identifier, which is the single strongest field this signal can carry"
+        },
+        {
+          "rung": 4,
+          "how": "Bring marketplace and retail-partner return records into the same customer record where the partner agreement provides them",
+          "requires": [
+            "partner return feeds",
+            "a shared order key"
+          ],
+          "gives": "Coverage of returns that never touch your own systems, usually without a customer identifier attached"
+        }
+      ],
+      "min_data": {
+        "min_returns_or_variant_orders": 1,
+        "category_re_entry_window_days": 30,
+        "min_variants_of_same_parent_for_bracketing": 2
+      },
+      "access_conditions": [
+        "Returns handled by a retail or marketplace partner arrive as settlement lines without a customer key, so the buyer cannot be re-engaged. This signal is person-level only on channels you own.",
+        "Free-text return comments routinely contain health, disability, body-size or bereavement information that the customer supplied to explain a refund, not to be profiled on. Segment on the structured reason code and keep the free text out of the customer profile and out of any audience export."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 20,
+        "note": "Re-shopping follows a return quickly. Once the refund settles and the need has been met somewhere else, the window is closed."
+      },
+      "false_positives": [
+        "Habitual bracketing - a customer who orders three sizes every time, whose behaviour carries no incremental intent",
+        "Return fraud and wardrobing, which produce the same records as evaluation and none of the demand",
+        "A defective unit returned and re-bought identically, which is a quality signal rather than an evaluation signal",
+        "A gift return by someone who is not the buyer and has no relationship with the category",
+        "A trade account returning stock under a normal restocking arrangement",
+        "A return driven by a delivery or courier failure, where the product was never assessed at all"
+      ],
+      "confirmation_signals": [
+        "f04.product_comparison",
+        "f05.compatibility_check",
+        "f06.price_sensitivity"
+      ],
+      "recommended_action_class": "offer_the_exchange_before_the_refund_settles",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "apparel",
+          "consumer_electronics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "base_rate_of_returns",
+          "source_url": "https://nrf.com/media-center/press-releases/consumers-expected-to-return-nearly-850-billion-in-merchandise-in-2025",
+          "as_of": "2025-10-15",
+          "independence": "vendor_published",
+          "note": "Forecast return rate of 15.8% of annual US retail sales and 19.3% of online sales for 2025, totalling $849.9bn. Produced by a trade association jointly with a returns-logistics provider, so it is flagged vendor_published rather than independent. Used only to establish that returns are a routine, high-volume event class - which is why the entry insists on a reason code: without one, evaluation returns are buried in a very large pile of everything else."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement, and deliberately mid-range: an exchange request naming a replacement is a strong signal, habitual bracketing is a weak one, and this row covers both."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Return records are exact transactional facts; the discount is for the reason code being absent or unreliable in most implementations."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f04.information_depth_escalation",
+      "family": "F04",
+      "name": "Information-depth escalation",
+      "definition": "The subject's content mix shifts from overview material to detail material - specifications, manuals, documentation, API references, dimension and sizing sheets, implementation guides, methodology or teardown content - or the depth reached rises across successive visits. Qualifying condition: two or more detail-class assets in one session, or a session whose maximum content-depth tier exceeds the subject's own previous maximum.",
+      "question_answered": "Has this visitor moved from wondering whether the category is for them to checking whether this specific product will actually work?",
+      "intent_dimensions": [
+        "fit",
+        "requirements",
+        "confidence",
+        "readiness"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "page_or_asset_id",
+        "content_depth_tier",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "session_id",
+        "dwell_seconds",
+        "scroll_depth",
+        "document_download_id",
+        "docs_search_query",
+        "prior_max_depth_tier",
+        "referrer",
+        "account_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "product_analytics",
+        "first_party_backend"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Give every URL you publish a depth tier in a lookup table - 1 overview, 2 feature or category, 3 specification, documentation, manual or reference - and compute each session's maximum tier from the pageview stream you already collect",
+          "requires": [
+            "existing pageviews",
+            "a URL-to-tier lookup, maintained by hand, that fits in a spreadsheet"
+          ],
+          "gives": "Session-level depth today; the tiering is an afternoon of judgement, not a project"
+        },
+        {
+          "rung": 2,
+          "how": "Track document downloads and documentation-site searches as first-class events carrying the asset identifier and the query",
+          "requires": [
+            "download event tracking",
+            "analytics on the docs site"
+          ],
+          "gives": "Depth on assets that are not pages, which is where most specification content actually lives"
+        },
+        {
+          "rung": 3,
+          "how": "Persist the subject's previous maximum depth tier so escalation is measured between visits rather than inside one",
+          "requires": [
+            "a durable first-party identifier or an authenticated session"
+          ],
+          "gives": "Escalation as a trend, which is the real signal - one deep session may only be a curious reader"
+        },
+        {
+          "rung": 4,
+          "how": "Read documentation and in-product help depth for signed-in users and roll it up to the account",
+          "requires": [
+            "product analytics",
+            "an identity join between docs, product and CRM"
+          ],
+          "gives": "Account-level depth including the evaluator who never touches the marketing site at all"
+        }
+      ],
+      "min_data": {
+        "min_detail_assets_in_session": 2,
+        "escalation_requires_prior_session": true,
+        "identifier_persistence_days": 90
+      },
+      "access_conditions": [
+        "Cross-session escalation dies with the identifier. Where the first-party cookie is capped at seven days, or the visitor arrives through a privacy-preserving browser, only within-session depth survives and the signal should be scored as rung 1 regardless of what has been built above it.",
+        "Automated agents now fetch documentation in bulk. Depth measured without bot filtering measures crawler behaviour, and the filter list has to be maintained rather than written once."
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "Depth reached is meaningful while the evaluation is open; a specification read last quarter says nothing about this quarter's shortlist."
+      },
+      "false_positives": [
+        "Existing customers and their support teams using your documentation as documentation, which is usually the largest single population on a docs site",
+        "Integrators, agencies and contractors reading the reference for a client who has already bought",
+        "Candidates preparing for an interview at your company",
+        "LLM agents and crawlers fetching reference pages in bulk, which inflates depth with no human behind it",
+        "A competitor or student doing a teardown of your specifications",
+        "Engineers reading specifications years before any budget exists, with no authority to buy"
+      ],
+      "confirmation_signals": [
+        "f04.product_comparison",
+        "f05.compatibility_check",
+        "f07.trial"
+      ],
+      "recommended_action_class": "match_the_next_asset_to_the_depth_reached_and_route_to_a_specialist",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "ecommerce",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "consumer_electronics",
+          "industrial_equipment",
+          "manufacturing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Escalation across visits is a better predictor than depth in one visit, and the row is scored for the mixture of the two that most implementations will actually have."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Held down by two structural confounds that instrumentation cannot remove: existing customers in the documentation, and automated agents in the logs."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
     }
   ]
 }

@@ -1,0 +1,1078 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F02",
+  "signals": [
+    {
+      "id": "f02.search_query",
+      "family": "F02",
+      "name": "Search query",
+      "definition": "The subject issues a query whose terms name the category, a product, a competitor, or the problem the product solves - either into the company's own site search, or into an external search engine that then delivers the click. Qualifying condition: a query string is captured and attributed to a session, and the string matches a maintained category, brand, competitor or problem lexicon.",
+      "question_answered": "Is this person actively looking for what we sell, and in whose words - the category's, ours, or a competitor's?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "preference"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "query_text",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "query_source",
+        "result_count",
+        "zero_result_flag",
+        "clicked_result_id",
+        "refinement_sequence",
+        "landing_page",
+        "session_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "partner_feed"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Log the query string your own site-search box already receives, with a session identifier and timestamp, and bucket it against a hand-written category / brand / competitor / problem lexicon",
+          "requires": [
+            "a site search feature",
+            "server-side or app-level logging"
+          ],
+          "gives": "The highest-intent free text you will ever own, in the same week, with no third party in the path"
+        },
+        {
+          "rung": 2,
+          "how": "Pull query-to-landing-page data for your own verified domain from the search engine's webmaster console and join it to the page it landed on",
+          "requires": [
+            "verified property ownership",
+            "console API credentials"
+          ],
+          "gives": "The external demand vocabulary, but aggregated to page and day, with rare queries withheld - never a person"
+        },
+        {
+          "rung": 3,
+          "how": "Preserve the paid-search keyword and click identifier on the landing URL and persist them onto the session record",
+          "requires": [
+            "paid search spend",
+            "landing pages and redirects that do not strip query parameters"
+          ],
+          "gives": "Query-level intent joined to a real session, for the slice of demand you pay for"
+        }
+      ],
+      "min_data": {
+        "min_queries_per_bucket_per_month": 200,
+        "note": "Below roughly 200 queries in a lexicon bucket per month the bucket rate is noise. Read the individual queries instead - at low volume they are more informative than any score computed from them."
+      },
+      "access_conditions": [
+        "Webmaster-console query data is aggregated and rare queries are withheld to protect the person who typed them, so rung 2 is vocabulary, never a subject-level signal",
+        "Query text is free text and will occasionally contain special-category terms; matching it to a commercial lexicon is in scope, deriving a health, life-event or household attribute from it is not, and that class is documented as a prohibition with no implementation path",
+        "Paid click identifiers are supplied under the ad platform's terms, which restrict redistribution and re-identification"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Webmaster-console and paid-search query data arrive under platform API terms that limit redistribution and prohibit attempts to re-identify the searcher.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 7,
+        "note": "A query states what the person wanted at that moment. It stops describing them within days unless it repeats."
+      },
+      "false_positives": [
+        "Competitor or price-scraper reconnaissance running your catalogue through your own search box",
+        "Job applicants searching for careers, benefits or office locations",
+        "Existing customers searching for support articles, invoices or documentation",
+        "Student or academic research",
+        "Employees testing search relevance from inside the business",
+        "Bots and LLM agents issuing scripted queries with no human behind them",
+        "Navigational queries from people who wanted a different brand entirely"
+      ],
+      "confirmation_signals": [
+        "f02.website_browsing",
+        "f04.product_comparison",
+        "f06.price_sensitivity"
+      ],
+      "recommended_action_class": "answer_the_query_and_route_the_wording_to_sales_and_content",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "software",
+          "professional_services",
+          "consumer_electronics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "access_conditions",
+          "source_url": "https://support.google.com/webmasters/answer/17011259?hl=en",
+          "as_of": "2026-08-01",
+          "independence": "vendor_published",
+          "note": "Verified this session: rare queries are omitted from the report table to protect user privacy, which is why console query data cannot be resolved to a person."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f02.website_browsing",
+      "family": "F02",
+      "name": "Website browsing depth",
+      "definition": "The subject views a set of pages whose classification marks them as commercial research rather than support, careers or press - product, category, solution, use-case or documentation pages - with enough depth or repetition to separate the visit from a bounce. Qualifying condition: two or more commercially classified pageviews inside one session, or a return visit to the same commercial page cluster.",
+      "question_answered": "Is anyone actually researching us, or are we counting arrivals - and which part of the offer are they working through?",
+      "intent_dimensions": [
+        "category",
+        "need",
+        "confidence"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "page_url",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "page_class",
+        "session_id",
+        "scroll_depth",
+        "active_time_seconds",
+        "sequence_index",
+        "referrer",
+        "return_visit_count"
+      ],
+      "source_class": [
+        "first_party_web",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Write a lookup table from URL pattern to page class (commercial, support, careers, press, legal) and score the pageview stream you already collect against it",
+          "requires": [
+            "an existing pageview stream",
+            "a stable URL structure"
+          ],
+          "gives": "Separates research from traffic using data already on disk - the table is an afternoon's work and it is the whole signal"
+        },
+        {
+          "rung": 2,
+          "how": "Add engagement events - scroll depth and active time rather than time-on-page - so a page that was read is distinguished from a page that was loaded",
+          "requires": [
+            "tag manager or app-level analytics"
+          ],
+          "gives": "Removes the largest source of noise: open tabs and single-scroll bounces scored as study"
+        },
+        {
+          "rung": 3,
+          "how": "Stitch sessions to a persistent same-origin first-party identifier so browsing depth accumulates across weeks instead of resetting every visit",
+          "requires": [
+            "a server-set identifier on your own origin"
+          ],
+          "gives": "Depth measured over a consideration cycle rather than a single sitting"
+        }
+      ],
+      "min_data": {
+        "min_sessions_per_page_class_per_week": 100,
+        "note": "Page-class depth rates are unstable below roughly 100 sessions per class per week; under that, use browsing as a per-subject flag rather than a rate to compare against."
+      },
+      "access_conditions": [
+        "Page classification is the signal. Without it, a careers page and a pricing page carry identical weight and the depth measure is meaningless",
+        "Bot and agent traffic must be filtered before depth is computed, not after, or the deepest sessions in the dataset will belong to crawlers"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 2,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 10,
+        "note": "Browsing depth describes an open research window; it stops predicting once the window closes with either a purchase or silence."
+      },
+      "false_positives": [
+        "Crawlers, uptime monitors and LLM agents fetching pages at machine depth",
+        "Competitor research reading the full positioning stack",
+        "Job applicants working through the site before an interview",
+        "Analysts, press and students profiling the company",
+        "Existing customers using marketing pages as documentation",
+        "Employees and agency staff browsing their own site",
+        "A left-open tab producing dwell that was never attention"
+      ],
+      "confirmation_signals": [
+        "f02.search_query",
+        "f02.device_and_session_continuity",
+        "f06.price_sensitivity"
+      ],
+      "recommended_action_class": "score_and_hold_until_a_stronger_signal_confirms",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "retail",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "f02.channel_switching",
+      "family": "F02",
+      "name": "Channel switching",
+      "definition": "The same subject appears in a second channel shortly after acting in a first - opens an email then lands on the site, moves from the site to live chat, a call or a booked appointment, from app to web, or from online to a store or showroom. Qualifying condition: two channel-attributed events resolve to one subject identifier inside a stated window, and the second channel costs the subject more effort than the first.",
+      "question_answered": "Has this person escalated from channels that cost them nothing to channels that cost them effort - and where do they want to transact?",
+      "intent_dimensions": [
+        "channel",
+        "readiness",
+        "commitment"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "channel",
+        "event_type",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "prior_channel",
+        "elapsed_seconds",
+        "campaign_id",
+        "thread_id",
+        "store_id",
+        "agent_id",
+        "appointment_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "crm",
+        "support_system",
+        "offline_system"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Carry your own subject identifier on every outbound link you send - email, SMS, printed code - and write it onto the session on arrival, so the message-to-web switch joins with no new system",
+          "requires": [
+            "control of your own outbound link templates"
+          ],
+          "gives": "The most common switch, closed this week, using systems you already pay for"
+        },
+        {
+          "rung": 2,
+          "how": "Stamp the same identifier into chat, callback, quote and appointment forms so web-to-assisted switches land in the same table as the web events",
+          "requires": [
+            "form and chat widgets that accept a hidden field"
+          ],
+          "gives": "The escalation that matters most - anonymous browsing becoming a request for a human"
+        },
+        {
+          "rung": 3,
+          "how": "Join the store, branch or contact-centre record on an identifier the subject already gives you there - loyalty number, phone, order reference - to close the online-to-offline switch",
+          "requires": [
+            "point-of-sale or contact-centre export",
+            "a shared identifier collected in both places"
+          ],
+          "gives": "The switch that is invisible to every web analytics tool, and the one physical retailers are judged on"
+        }
+      ],
+      "min_data": {
+        "window_hours": 72,
+        "note": "State the join window explicitly and hold it constant. A window wide enough to catch every switch will also join two unrelated people who share an inbox or a phone."
+      },
+      "access_conditions": [
+        "The join needs one identifier the subject supplies in both channels; without it, cross-channel matching becomes probabilistic and the signal stops being evidence",
+        "Contact-centre and store records are usually held under a different lawful basis and retention schedule than web events; joining them does not merge those obligations"
+      ],
+      "availability": "integration",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "hourly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 5,
+        "note": "A switch into an assisted channel is a request for a response now; its value collapses over days, not weeks."
+      },
+      "false_positives": [
+        "Existing customers escalating a billing or delivery problem, which reads as purchase intent and is not",
+        "A switch caused by failure rather than interest - a broken page, a form that would not submit, a search that returned nothing",
+        "A forwarded email or shared inbox, so the person in the second channel is not the person in the first",
+        "Assistants, agencies and proxy researchers acting on someone else's behalf",
+        "Job applicants moving from a careers page into chat",
+        "A single person using two devices being counted as a switch rather than a continuation"
+      ],
+      "confirmation_signals": [
+        "f07.demo",
+        "f06.quote_request",
+        "f02.device_and_session_continuity"
+      ],
+      "recommended_action_class": "route_to_a_human_in_the_channel_they_chose",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "saas",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_services",
+          "automotive",
+          "financial_services",
+          "professional_services",
+          "retail"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f02.device_and_session_continuity",
+      "family": "F02",
+      "name": "Device and session continuity",
+      "definition": "The same subject returns across separate sessions or surfaces - a second visit days later, a phone session followed by a desktop session - where the return is established by an identifier the subject supplied or by a same-origin identifier your own server set, and not by probabilistic matching. Qualifying condition: two or more sessions resolve to one subject over a stated horizon, with the basis of that resolution recorded alongside it.",
+      "question_answered": "Are we looking at one researcher whose consideration is building over weeks, or at a stream of unrelated first visits that our counters are inflating?",
+      "intent_dimensions": [
+        "commitment",
+        "timing",
+        "identity_scope",
+        "confidence"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "session_id",
+        "timestamp",
+        "resolution_basis"
+      ],
+      "optional_supporting_fields": [
+        "device_type",
+        "auth_state",
+        "first_seen_at",
+        "session_count",
+        "days_since_first_seen",
+        "identifier_age_days"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Set the visitor identifier from your own server on your own origin rather than from a script, and count sessions per identifier",
+          "requires": [
+            "the ability to set a cookie in an HTTP response from your own domain"
+          ],
+          "gives": "A return horizon measured in months instead of the seven days that script-written storage gets on privacy-restricting browsers"
+        },
+        {
+          "rung": 2,
+          "how": "Promote the identifier to a durable subject id at any moment the subject declares themselves - login, newsletter, saved basket, quote form - and backfill the prior sessions onto it",
+          "requires": [
+            "one authenticated or declared touchpoint",
+            "a backfill job"
+          ],
+          "gives": "Continuity that survives storage clearing, because it is anchored to something the person gave you"
+        },
+        {
+          "rung": 3,
+          "how": "Join the surfaces the person has authenticated on - web, mobile app, email - on that same declared identifier so continuity is deterministic across devices",
+          "requires": [
+            "authentication on more than one surface"
+          ],
+          "gives": "Cross-device continuity with a basis you can show the person, and no third party in the graph"
+        }
+      ],
+      "min_data": {
+        "min_sessions_for_return_flag": 2,
+        "horizon_days": 90,
+        "note": "State the horizon before measuring. Return rates computed over an unstated horizon are not comparable to anything, including your own previous number."
+      },
+      "access_conditions": [
+        "A CNAME-delegated subdomain served by a third-party script is not the same as a same-origin server-set identifier; privacy-restricting browsers cap cookies set in responses to CNAME-cloaked requests to seven days, so a managed 'first-party' identifier of that kind does not buy the long horizon it is sold as buying",
+        "Probabilistic cross-device and shared-network linkage is deliberately absent from this ladder. Binding devices together because they share a network resolves a household without anyone having declared anything, which is household-composition inference rather than a continuity measure, and belongs with the prohibited classes that carry no implementation path",
+        "Every stored return count must carry its resolution basis, because a count built on a seven-day identifier and a count built on a login mean different things and cannot be pooled"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "explicit_consent",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "A return pattern describes an open consideration window. Once returns stop, the accumulated count keeps overstating the subject unless it decays."
+      },
+      "false_positives": [
+        "A shared household, office or shop-floor device carrying one identifier for several people",
+        "One person clearing storage or using private browsing, appearing as many first-time visitors",
+        "Persistent bots and monitoring agents that accept and return cookies",
+        "Existing customers whose returns are support-driven rather than purchase-driven",
+        "Corporate networks and VPNs concentrating unrelated people behind one egress path",
+        "An assistant or agent session returning on behalf of the person who will actually decide"
+      ],
+      "confirmation_signals": [
+        "f02.website_browsing",
+        "f02.search_query",
+        "f08.account_verification"
+      ],
+      "recommended_action_class": "raise_confidence_and_extend_the_observation_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "financial_services",
+          "automotive",
+          "retail"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "identity_horizon",
+          "source_url": "https://webkit.org/blog/11338/cname-cloaking-and-web-privacy/",
+          "as_of": "2026-08-01",
+          "independence": "vendor_published",
+          "note": "Verified this session: 'ITP now detects third-party CNAME cloaking requests and caps the expiry of any cookies set in the HTTP response to 7 days.' Published by the browser engine's own maintainers about their own product."
+        },
+        {
+          "claim": "identity_horizon",
+          "source_url": "https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/",
+          "as_of": "2026-08-01",
+          "independence": "vendor_published",
+          "note": "Verified this session: script-writable storage is deleted after seven days of browser use without user interaction on the site, which is the cap rung 1 exists to escape."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "f02.advertising_response",
+      "family": "F02",
+      "name": "Advertising response",
+      "definition": "The subject responds to a paid placement - clicks a search, social, retail-media or display ad, or completes an action inside the ad unit - and the click identifier survives to the landing session, so the response is attributable to a specific placement rather than to a channel in aggregate. Qualifying condition: a session carries a click or campaign identifier that resolves to a known placement, and that session contains at least one post-click event.",
+      "question_answered": "Which paid message is pulling people who then behave like buyers, as opposed to which one buys the cheapest clicks?",
+      "intent_dimensions": [
+        "category",
+        "channel",
+        "confidence"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "click_or_campaign_id",
+        "landing_url",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "creative_id",
+        "keyword_or_audience_id",
+        "placement_type",
+        "post_click_event_count",
+        "device_type",
+        "session_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "partner_feed"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Preserve the click identifier and campaign parameters through every redirect, consent wall and login bounce, and write them onto the first-party session record on arrival",
+          "requires": [
+            "landing pages and redirects that do not strip query parameters"
+          ],
+          "gives": "Placement-level response using identifiers the platform already appends for free - no contract, no new vendor"
+        },
+        {
+          "rung": 2,
+          "how": "Report your own post-click outcomes back to the platform from your server, keyed on the stored click identifier, instead of relying on a browser tag firing",
+          "requires": [
+            "a server-side endpoint",
+            "an outcome definition you actually believe in"
+          ],
+          "gives": "Response measured against your outcomes rather than the platform's view of them, and it survives blocked tags"
+        },
+        {
+          "rung": 3,
+          "how": "Reconcile platform-reported clicks against landing sessions on a daily export and publish the gap as a standing number",
+          "requires": [
+            "platform reporting export",
+            "session-level logs"
+          ],
+          "gives": "An honest measure of how much of your paid traffic is unobservable, which is the number every downstream ratio depends on"
+        }
+      ],
+      "min_data": {
+        "min_clicks_per_placement": 100,
+        "note": "Below roughly 100 clicks a placement's post-click rate is noise; roll up to campaign or audience before comparing anything."
+      },
+      "access_conditions": [
+        "Click identifiers are supplied under the ad platform's terms; those terms restrict redistribution and prohibit using the identifier to re-identify the person outside the platform's own measurement",
+        "A large share of paid clicks arrive with parameters stripped by in-app browsers, redirect chains and privacy settings; the gap is a property of the channel, not a bug to be engineered away"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Ad platform terms govern the use of click identifiers and of any outcome data sent back; several jurisdictions treat outbound conversion reporting as a sharing of personal data requiring an opt-out path.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 2,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 3,
+        "note": "An ad click is the weakest act in this family and the fastest to stop meaning anything; it is useful mainly as the opening of a session, not as a standing fact about a person."
+      },
+      "false_positives": [
+        "Accidental taps, which are a large and well-known share of mobile display clicks",
+        "Click fraud and bot traffic bought alongside real inventory",
+        "Competitors clicking to inspect landing pages or to spend your budget",
+        "Existing customers clicking brand ads they would have reached organically",
+        "Response to a discount or a giveaway rather than to the product",
+        "Ad-verification and brand-safety crawlers following creative links",
+        "Curiosity clicks on a creative that misrepresented the destination"
+      ],
+      "confirmation_signals": [
+        "f02.website_browsing",
+        "f02.search_query",
+        "f04.product_comparison"
+      ],
+      "recommended_action_class": "attribute_the_session_and_wait_for_a_second_act",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "discretionary",
+          "replacement",
+          "seasonal"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "travel",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "f02.offline_qr_response",
+      "family": "F02",
+      "name": "Offline QR or code response",
+      "definition": "The subject scans a code printed or broadcast on a physical surface - packaging, a shelf label, a poster, a receipt, a vehicle, an event badge, a screen - or types a code shown offline, and lands on a URL whose parameters identify that specific placement. Qualifying condition: a session arrives on a URL carrying a placement identifier that exists only on an offline surface.",
+      "question_answered": "Which physical placements are producing real digital sessions - and is this person standing in front of the product right now?",
+      "intent_dimensions": [
+        "channel",
+        "readiness",
+        "urgency"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "placement_code",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "landing_url",
+        "store_or_venue_id",
+        "surface_type",
+        "device_type",
+        "repeat_scan_count",
+        "campaign_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "offline_system"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Give every printed surface its own code or URL parameter and keep one table mapping code to placement; log the parameter on arrival",
+          "requires": [
+            "the ability to print or label distinct codes",
+            "landing pages that preserve parameters"
+          ],
+          "gives": "Placement-level attribution for the cost of a spreadsheet and a redirect - the cheapest offline-to-digital measurement that exists"
+        },
+        {
+          "rung": 2,
+          "how": "Route every code through a redirect service on your own domain so the scan is counted before the landing page renders, and so a printed code can be repointed after it has shipped",
+          "requires": [
+            "a redirect service you control"
+          ],
+          "gives": "Scan counts that survive a broken landing page, and printed assets that stay useful after a campaign ends"
+        },
+        {
+          "rung": 3,
+          "how": "Join the placement identifier to the store, shelf, route or event record so a scan arrives carrying its physical context",
+          "requires": [
+            "a placement register maintained by whoever installs the surfaces"
+          ],
+          "gives": "In-aisle and in-venue intent - a scan that says where the person is, not only that they scanned"
+        }
+      ],
+      "min_data": {
+        "min_scans_per_placement": 30,
+        "note": "One code per placement is the real minimum, and it is unrecoverable: a code reused across placements can never be separated afterwards, no matter how many scans it collects."
+      },
+      "access_conditions": [
+        "Coarse location, where it is captured at all, comes from the landing session and not from the scan; the code itself carries the placement, which is the more reliable of the two and needs no device permission",
+        "Codes on packaging outlive the campaign that printed them; a redirect you control is the only way to retire a destination without recalling the product"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 2,
+        "note": "A scan means the person was physically present at that surface. Within days that fact is history rather than context."
+      },
+      "false_positives": [
+        "Curiosity scans by passers-by, children and people testing whether the code works",
+        "Staff and installers verifying placements after a print run",
+        "Link-preview fetchers in messaging apps opening the destination with no human reading it",
+        "A code photographed and opened later somewhere else, or shared so a second person lands on it",
+        "Camera apps that pre-fetch a destination before the person decides to open it",
+        "Scans driven by an incentive on the surface - a prize draw, a discount, a warranty registration - rather than by product interest"
+      ],
+      "confirmation_signals": [
+        "f02.channel_switching",
+        "f04.product_comparison",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "serve_the_in_context_page_and_offer_the_next_physical_step",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "local",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "event",
+          "seasonal"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "home_services",
+          "automotive",
+          "travel"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

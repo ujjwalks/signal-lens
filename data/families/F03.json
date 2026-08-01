@@ -1,0 +1,1238 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F03",
+  "signals": [
+    {
+      "id": "f03.content_consumption",
+      "family": "F03",
+      "name": "Content consumption depth",
+      "definition": "The subject consumes a piece of owned or syndicated content to a depth that indicates study rather than a glance - reading a long-form page past a stated threshold, watching past a stated proportion of a video, completing a download, or returning to the same asset. Qualifying condition: an engagement threshold is crossed on an asset carrying a topic and a stage tag, not merely an asset load.",
+      "question_answered": "Is this person educating themselves on the problem we solve, and which part of the argument are they still working through?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "confidence"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "asset_id",
+        "engagement_measure",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "asset_topic",
+        "asset_stage",
+        "completion_ratio",
+        "repeat_view_count",
+        "referrer",
+        "gated_flag",
+        "session_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Tag every content asset with a topic and a buying stage in a simple lookup table, then score the pageviews you already collect against that map",
+          "requires": [
+            "an existing pageview stream",
+            "someone who knows which content argues which point"
+          ],
+          "gives": "Turns undifferentiated content traffic into a statement about what the audience is trying to work out - no new events needed"
+        },
+        {
+          "rung": 2,
+          "how": "Add real engagement thresholds - scroll depth and active time for text, playback quartiles for video - so reading is separated from loading",
+          "requires": [
+            "tag manager or app-level analytics",
+            "a video player that emits progress events"
+          ],
+          "gives": "Removes the dominant noise source: a 45-second skim scored identically to a full read"
+        },
+        {
+          "rung": 3,
+          "how": "Attach consumption to a declared identity at the point content is gated or a preference centre is used, and backfill the prior anonymous history onto it",
+          "requires": [
+            "one gated asset or subscription touchpoint",
+            "a backfill job"
+          ],
+          "gives": "A content history that accrues to a person rather than to a browser, which is what makes topic progression readable"
+        }
+      ],
+      "min_data": {
+        "min_views_per_asset_per_month": 100,
+        "note": "Per-asset completion rates below roughly 100 views per month move more with who linked to the page than with anything about the audience. Compare at topic level until the volume exists."
+      },
+      "access_conditions": [
+        "Gating content to force identification lowers the number of people who consume it; the identified signal and the reach are traded against each other and the trade must be made deliberately, not by default",
+        "Syndicated placements usually return aggregate engagement only, so consumption there is a topic-level reading and never a subject-level one"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 2,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "Education persists longer than a visit: someone who studied the category three weeks ago is still forming a view. It decays, but slowly."
+      },
+      "false_positives": [
+        "Students, academics and hobbyists reading for a project rather than a purchase",
+        "Job applicants studying the company before an interview",
+        "Competitors reading positioning and pricing arguments",
+        "Existing customers using marketing content as documentation",
+        "Press and analysts researching the category",
+        "Automated fetchers and LLM agents retrieving the page in full",
+        "A tab left open producing dwell that was never attention"
+      ],
+      "confirmation_signals": [
+        "f03.webinar_attendance",
+        "f02.search_query",
+        "f04.product_comparison"
+      ],
+      "recommended_action_class": "offer_the_next_asset_in_the_same_topic_and_hold_for_confirmation",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "financial_services",
+          "manufacturing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f03.social_engagement",
+      "family": "F03",
+      "name": "Social engagement",
+      "definition": "The subject takes a public, attributable action on a social platform toward the company, its people or its category - following, commenting, replying, resharing or saving - on an account or post the company owns and can therefore read. Qualifying condition: an engagement event on a company-owned account or tracked post, carrying a platform handle.",
+      "question_answered": "Who is publicly paying attention to us, and is any of that attention coming from the kind of organisation we sell to?",
+      "intent_dimensions": [
+        "category",
+        "authority",
+        "confidence"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "actor_handle",
+        "post_id",
+        "engagement_type",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "platform",
+        "comment_text",
+        "profile_stated_employer",
+        "profile_stated_role",
+        "follower_count",
+        "engagement_sequence_count",
+        "resolved_account_id"
+      ],
+      "source_class": [
+        "partner_feed",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Open each of your own posts on a weekly cadence and transcribe the reaction and comment handles into a dated table. This is manual by construction: the native analytics export carries impressions, clicks, reactions and shares as aggregate COUNTS and does not carry actor identity, so it cannot supply actor_handle",
+          "requires": [
+            "admin access to your own social accounts"
+          ],
+          "gives": "The people engaging with your own posts, this week, with no integration work at all"
+        },
+        {
+          "rung": 2,
+          "how": "Pull handle-level engagement on your own organisation content through the platform's API. Expect this to need partner-tier or approved management API access rather than self-serve developer registration on some platforms, and to return app-scoped identifiers that do not join across surfaces on others - so the table may accumulate automatically without being joinable on a stable handle",
+          "requires": [
+            "developer access for your own accounts",
+            "acceptance of the platform's API terms"
+          ],
+          "gives": "Repeat engagement becomes visible, which is the only part of this signal worth much"
+        },
+        {
+          "rung": 3,
+          "how": "Resolve a handle to an organisation only where the person's own public profile states an employer, and store that as a claim with a confidence and a date, never as a verified fact",
+          "requires": [
+            "a manual or assisted matching step",
+            "a place to record confidence"
+          ],
+          "gives": "Account-level reading of who is watching, with the uncertainty preserved instead of laundered"
+        }
+      ],
+      "min_data": {
+        "min_engagements_per_actor": 3,
+        "note": "A single like is not evidence of anything. Require repeat engagement from the same handle across separate posts before the actor enters any ranked list."
+      },
+      "access_conditions": [
+        "Platform APIs cover the accounts and posts you own; engagement on a competitor's posts is generally not retrievable, and harvesting it against the platform's terms is not an acquisition path this catalogue will describe",
+        "A profile-stated employer is self-declared, frequently stale, and must never be promoted to verified account membership",
+        "Handles are pseudonymous by design on several platforms; resolving one to a named person is a separate act needing its own basis",
+        "Rung 1 is manual by construction. Any tool offering this as a bulk export of reactor identities is operating against the platform's terms."
+      ],
+      "availability": "partial",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Social platform API terms govern retention, redistribution and any attempt to combine engagement data with other datasets; they change often and unilaterally.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 2,
+      "reliability": 2,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "Public engagement is cheap to give and cheap to forget; a like from a month ago says almost nothing about this month."
+      },
+      "false_positives": [
+        "Employees, investors and their networks engaging out of loyalty",
+        "Job seekers signalling interest to a recruiter rather than to a buyer",
+        "Reciprocity and engagement-pod behaviour, where the engagement is payment for engagement",
+        "Automated accounts and scheduled engagement tools",
+        "Competitors and their agencies monitoring the account",
+        "People engaging with an individual creator or executive rather than with the company",
+        "Consultants and agencies engaging as part of their own marketing"
+      ],
+      "confirmation_signals": [
+        "f03.content_consumption",
+        "f03.community_recommendation",
+        "f02.website_browsing"
+      ],
+      "recommended_action_class": "watch_for_repeat_engagement_before_treating_it_as_intent",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "ecommerce",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "discretionary",
+          "problem",
+          "event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "consumer_electronics",
+          "retail",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "declining"
+    },
+    {
+      "id": "f03.review_reading",
+      "family": "F03",
+      "name": "Review reading",
+      "definition": "The subject interrogates other buyers' reviews rather than merely landing on a page that contains a star rating - opening the review module, sorting or filtering it, expanding a critical review, or paging through several. Qualifying condition: an interaction event on a review surface, not a pageview of a page on which reviews happen to sit.",
+      "question_answered": "Is this buyer in risk-reduction mode, and which specific objection are they trying to settle before they commit?",
+      "intent_dimensions": [
+        "risk",
+        "confidence",
+        "preference"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "review_surface_id",
+        "interaction_type",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "product_id",
+        "sort_or_filter_applied",
+        "star_filter_selected",
+        "reviews_expanded_count",
+        "negative_review_opened_flag",
+        "dwell_seconds"
+      ],
+      "source_class": [
+        "first_party_web",
+        "commerce_platform",
+        "review_platform",
+        "marketplace"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Fire an event when the review module enters the viewport and when a review is expanded, sorted or filtered - the module is already on your product pages, it is simply silent",
+          "requires": [
+            "tag manager or app-level analytics"
+          ],
+          "gives": "The difference between a page that contains reviews and a person who read them, available in the same sprint"
+        },
+        {
+          "rung": 2,
+          "how": "Record which filter was chosen - lowest-rated first, a named use case, a specific version - so the objection under test is captured rather than the fact that reviews were opened",
+          "requires": [
+            "a review widget that exposes its own filter state"
+          ],
+          "gives": "The objection itself, which is the part sales and merchandising can act on"
+        },
+        {
+          "rung": 3,
+          "how": "Take category-level buyer-intent reporting from a review-platform partner programme in the categories where you hold a listing",
+          "requires": [
+            "a paid vendor listing in that category"
+          ],
+          "gives": "Visibility of research happening off your own site - account-level only, and only for listed categories"
+        }
+      ],
+      "min_data": {
+        "min_review_count_per_product": 10,
+        "note": "Below roughly 10 reviews on an item there is nothing to sort or filter, so the interaction events this signal depends on will never fire regardless of instrumentation."
+      },
+      "access_conditions": [
+        "Third-party review-platform intent reporting is obtainable only by becoming a listed vendor; it is not sold as raw data and it does not resolve below the account",
+        "Behaviour on a marketplace's own review surface belongs to the marketplace and is visible to you only through whatever reporting it chooses to expose",
+        "Rungs 1 and 2 need no review-platform category at all, which is why this signal is not gated on having one"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 7,
+        "note": "Reading reviews is late-stage risk work; it belongs to an open decision and expires with it."
+      },
+      "false_positives": [
+        "Existing customers checking whether a fault they already have is widely reported",
+        "Competitors auditing your review corpus for positioning or for a takedown",
+        "A buyer researching a gift or a purchase for someone else",
+        "Platform moderators and review-fraud investigators",
+        "Journalists and consumer-testing organisations",
+        "Habitual review readers who read reviews on everything and buy very little",
+        "A person reassured by the reviews of a competitor's product and reading yours only for contrast"
+      ],
+      "confirmation_signals": [
+        "f04.product_comparison",
+        "f06.price_sensitivity",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "answer_the_objection_being_filtered_for_on_the_page",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "saas",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "software",
+          "travel",
+          "home_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f03.community_recommendation",
+      "family": "F03",
+      "name": "Community recommendation",
+      "definition": "A request for a recommendation, or a recommendation itself, is posted in a community the company may lawfully read - its own forum or user group, or an external community with an official feed - and the post names the category, a competitor, or the company. Qualifying condition: a post or comment matching a maintained category, competitor or brand lexicon, in a community whose terms permit programmatic or manual reading.",
+      "question_answered": "Is a real buyer asking their peers what to buy in our category right now, and are we in the answer?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "preference",
+        "authority"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "post_id",
+        "community_id",
+        "post_text",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "author_handle",
+        "brands_mentioned",
+        "reply_count",
+        "sentiment",
+        "author_tenure_days",
+        "thread_resolution_state"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "partner_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "If you run a forum, user group or customer channel, export its posts and run a category and competitor lexicon over them once a week",
+          "requires": [
+            "an owned community",
+            "an export or database query"
+          ],
+          "gives": "Recommendation requests from people who are already yours to talk to, with identities you already hold"
+        },
+        {
+          "rung": 2,
+          "how": "Subscribe to the official API or feed of the external communities that publish one, restricted to the endpoints their terms permit, and match against the same lexicon",
+          "requires": [
+            "an official feed",
+            "acceptance of the community's terms"
+          ],
+          "gives": "Demand expressed in public before anyone visits your site"
+        },
+        {
+          "rung": 3,
+          "how": "Have named people participate in the communities that offer no feed and log recommendation requests by hand into the same table",
+          "requires": [
+            "a person with standing in that community",
+            "a logging habit"
+          ],
+          "gives": "The highest-quality version of this signal. It scales with headcount, not with spend, and it is the only lawful route where no API exists"
+        }
+      ],
+      "min_data": {
+        "min_posts_per_lexicon_term_per_month": 20,
+        "note": "Below roughly 20 matches a month, treat matches as individual leads to read, not as a trend to chart. Community volume is bursty and a monthly rate hides that."
+      },
+      "access_conditions": [
+        "Communities without an official feed must not be scraped against their terms; the manual rung exists precisely because the automated one is frequently not permitted",
+        "A community handle is a pseudonym. Resolving it to a person or an employer is a separate act with its own basis, and in most communities it breaches the community's own norms even where it is technically possible",
+        "Vendors participating in threads about their own category are visible and usually governed by community rules on self-promotion; ignoring those rules destroys the source"
+      ],
+      "availability": "partial",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Community platform terms typically restrict bulk retrieval, storage and any commercial re-use of member posts, and several prohibit contacting members on the basis of their posts.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 10,
+        "note": "A public request for a recommendation is answered within days. After that the thread is a record of a decision someone else already influenced."
+      },
+      "false_positives": [
+        "Students, hobbyists and side-project builders asking about a category they will never buy in",
+        "Vendors and their staff seeding or steering threads without disclosure",
+        "Consultants and agencies asking on behalf of an unnamed client, so the person asking is not the buyer",
+        "Old threads resurfacing in search and being read as current demand",
+        "Questions asked to settle an argument or to write a comparison piece rather than to buy",
+        "Competitors probing for positioning and objections",
+        "A person asking on behalf of an employer who has already chosen a supplier"
+      ],
+      "confirmation_signals": [
+        "f02.search_query",
+        "f03.review_reading",
+        "f14.referral_source_named"
+      ],
+      "recommended_action_class": "respond_in_the_thread_under_a_disclosed_identity_and_log_the_request",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "home_services",
+          "professional_services",
+          "consumer_electronics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f03.conference_activity",
+      "family": "F03",
+      "name": "Conference and event activity",
+      "definition": "The subject is present at an industry event in a way that leaves a record the company may hold - a badge scanned at its stand, a meeting or session booked, a workshop attended - or an organisation appears on an event's published exhibitor, sponsor or speaker list. Qualifying condition: an event identifier plus either a scanned or booked subject record, or a published organisation listing.",
+      "question_answered": "Which people and which companies spent budget and a working day to be in the same room as our category this quarter?",
+      "intent_dimensions": [
+        "category",
+        "authority",
+        "timing",
+        "commitment"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "event_id",
+        "interaction_type",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "organisation_name",
+        "job_title_declared",
+        "booth_or_session_id",
+        "meeting_booked_flag",
+        "conversation_notes",
+        "follow_up_owner",
+        "consent_capture_state"
+      ],
+      "source_class": [
+        "offline_system",
+        "partner_feed",
+        "public_record"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export the badge scans and booked meetings from the events you already attend, on the day, into the same table as your digital signals",
+          "requires": [
+            "a scanning device or app at the stand",
+            "somewhere to put the export"
+          ],
+          "gives": "Identified, consented, job-titled records that most teams leave stranded in a device and never join to anything"
+        },
+        {
+          "rung": 2,
+          "how": "Take the organiser's attendee or lead file where your exhibitor contract includes it, and record the contract's use limits in the same row as the data",
+          "requires": [
+            "an exhibitor or sponsor contract that grants the file"
+          ],
+          "gives": "Reach beyond the people who stopped at your stand, with the permitted-use window attached rather than assumed"
+        },
+        {
+          "rung": 3,
+          "how": "Read the exhibitor, sponsor and speaker lists events publish openly and treat them as account-level category evidence for organisations you never spoke to",
+          "requires": [
+            "nothing but the event's own website"
+          ],
+          "gives": "A free, account-level view of who is investing in the category - never person-level, and it must not be inflated into one"
+        }
+      ],
+      "min_data": {
+        "note": "One event is an anecdote. Attendance patterns only become evidence once the same organisation appears across two or more events in the same category within a year."
+      },
+      "access_conditions": [
+        "Organiser attendee files are supplied under an event contract that usually limits use to a stated purpose and period; those limits travel with the data and must be stored beside it, not remembered",
+        "A badge scan carries the consent captured at the moment of scanning under the organiser's own notice; it is not a general marketing permission",
+        "Published exhibitor and speaker lists are free and lawful to read, which says nothing about whether individuals named on them may be contacted"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Event contracts govern both the attendee file and the scanned-lead file, commonly restricting use to a period after the event and prohibiting resale or transfer.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": true,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "Event evidence arrives in bursts and is worked in a window measured in weeks; the organisational fact that a company attends the category's events outlasts the individual record."
+      },
+      "false_positives": [
+        "Badges scanned for a prize draw, a coffee or a giveaway with no product interest whatsoever",
+        "Job seekers working the exhibition floor",
+        "Competitors and their partners attending as buyers",
+        "Vendors selling to you rather than buying from you",
+        "Students and academics on free or discounted passes",
+        "A junior colleague scanned in place of the person who decides",
+        "Consultants and agencies attending on behalf of many unnamed clients"
+      ],
+      "confirmation_signals": [
+        "f03.webinar_attendance",
+        "f07.demo",
+        "f14.buying_group_formation"
+      ],
+      "recommended_action_class": "follow_up_inside_the_contracted_window_and_record_the_permitted_use",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable",
+          "consumable"
+        ],
+        "triggers": [
+          "event",
+          "problem",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "manufacturing",
+          "software",
+          "professional_services",
+          "financial_services",
+          "healthcare"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f03.webinar_attendance",
+      "family": "F03",
+      "name": "Webinar attendance",
+      "definition": "The subject registers for, attends live, or watches the recording of a scheduled online session, and the depth of that attendance is recorded - join time, watch duration, questions asked, polls answered. Qualifying condition: a registration or attendance record joined to a declared identity, carrying a duration or interaction measure rather than a binary attended flag.",
+      "question_answered": "Who gave us half of a working hour, and did they stay for the part that actually matters?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "commitment",
+        "authority"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "session_id",
+        "attendance_state",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "watch_duration_seconds",
+        "questions_asked",
+        "poll_responses",
+        "registration_source",
+        "replay_watched_flag",
+        "declared_role",
+        "declared_organisation"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "partner_feed",
+        "crm"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export the registration and attendance report your webinar tool already produces after every session and load it keyed on the email address the person gave you",
+          "requires": [
+            "any webinar or streaming tool",
+            "a place to load a CSV"
+          ],
+          "gives": "The cheapest identified signal in this catalogue. Most teams already have the file and use only the registration half of it"
+        },
+        {
+          "rung": 2,
+          "how": "Keep watch duration, question text and poll answers, not just attended or did-not-attend, so a five-minute drop-off is not scored like a full hour",
+          "requires": [
+            "a tool that exports duration and interaction detail"
+          ],
+          "gives": "Separates the people who came for the topic from the people who came for the title"
+        },
+        {
+          "rung": 3,
+          "how": "Push attendance events into the CRM automatically as the session closes, so follow-up happens inside the window where the attention is still warm",
+          "requires": [
+            "a webinar-to-CRM integration or a scheduled job"
+          ],
+          "gives": "Removes the two-day lag that is the usual reason this signal produces nothing"
+        }
+      ],
+      "min_data": {
+        "min_sessions_for_duration_benchmark": 3,
+        "note": "A watch-duration threshold means nothing on a single session. You need several sessions of the same format before a drop-off point can be read as a signal about the person rather than about the content."
+      },
+      "access_conditions": [
+        "Registration data is declared by the person for this purpose, which is why it is clean; using it for an unrelated purpose spends that basis",
+        "Replay views are frequently anonymous unless the recording sits behind the same form, so replay attendance is often a different, weaker signal than live attendance"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 20,
+        "note": "Attendance is a dated act of attention. The follow-up window is short, but the fact that the person studied the topic keeps some value for weeks."
+      },
+      "false_positives": [
+        "Registrants who never attend - registration is often just a bookmark for a recording",
+        "Attendees there for continuing-education credit, a certificate or a giveaway",
+        "Competitors and analysts attending under a plausible email address",
+        "One meeting-room login covering a room full of people, or several logins covering one",
+        "An assistant registering and attending on behalf of an executive",
+        "Existing customers using webinars as training",
+        "Recruiters and job seekers attending to see how the company presents itself"
+      ],
+      "confirmation_signals": [
+        "f03.content_consumption",
+        "f07.demo",
+        "f03.conference_activity"
+      ],
+      "recommended_action_class": "follow_up_on_the_question_they_asked_within_the_attention_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "event",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "financial_services",
+          "education",
+          "manufacturing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f03.social_proof_momentum",
+      "family": "F03",
+      "name": "Social-proof momentum",
+      "definition": "A public source that refers people to the company accelerates measurably against its own history - sessions from one referrer, thread, listing or creator exceed that source's trailing baseline by a stated multiple - or the public proof itself accelerates, in review postings, ratings, followers or stars, against the baseline you have been recording. Qualifying condition: a source-level count exceeds its own trailing baseline by the stated multiple, and at least one session or proof event falls inside the burst window.",
+      "question_answered": "Is something outside our control currently pushing people toward us, and which thing is it - so we can meet the traffic rather than read about it in next month's report?",
+      "intent_dimensions": [
+        "category",
+        "confidence",
+        "timing"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "source_id",
+        "session_id",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "trailing_baseline_count",
+        "burst_multiple",
+        "landing_page",
+        "source_type",
+        "review_posting_count",
+        "public_proof_count_series",
+        "mention_count"
+      ],
+      "source_class": [
+        "first_party_web",
+        "review_platform",
+        "news_feed",
+        "partner_feed"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute a trailing eight-week baseline per referrer from the session data you already hold, and flag any source whose weekly sessions exceed it by your chosen multiple",
+          "requires": [
+            "session logs with a referrer field",
+            "one scheduled query"
+          ],
+          "gives": "Momentum detection this week from data already on disk - one query, no new system, no vendor"
+        },
+        {
+          "rung": 2,
+          "how": "Find and record the specific post, thread, listing or review that produced each burst, so the momentum has a cause you can answer rather than a number you can only watch",
+          "requires": [
+            "someone to look, once per alert"
+          ],
+          "gives": "Turns an anomaly into an addressable event - the difference between knowing traffic tripled and knowing why"
+        },
+        {
+          "rung": 3,
+          "how": "Snapshot the public proof counts that move without producing clicks - review posting velocity, rating counts, follower or star series - on a weekly schedule",
+          "requires": [
+            "a weekly job",
+            "somewhere to keep the history"
+          ],
+          "gives": "Momentum visible even when it never becomes a session, which is most of it"
+        }
+      ],
+      "min_data": {
+        "baseline_weeks": 8,
+        "min_sessions_per_source_per_week": 20,
+        "note": "A burst multiple computed against a baseline of fewer than roughly 20 weekly sessions will fire constantly on noise. Sources below that floor belong in a long tail bucket, not in the alert."
+      },
+      "access_conditions": [
+        "Referrer strings are increasingly absent - in-app browsers, private messages and restrictive referrer policies deliver traffic with no source at all - so an unattributed burst is a genuine result rather than a measurement failure to engineer around",
+        "Most public proof surfaces publish only a current total and no history, so a baseline you did not capture cannot be reconstructed later; the weekly snapshot is the whole of rung 3",
+        "Momentum is a property of a source, not of a person; it raises or lowers confidence in the sessions arriving through that source and must not be written onto individuals as an attribute"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "route",
+      "strength": 2,
+      "reliability": 2,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 7,
+        "note": "A burst is a window, not a state. Once the source returns to its baseline the momentum is spent, and any score still carrying it is describing last week."
+      },
+      "false_positives": [
+        "A bot, scraper or monitoring wave arriving from a single source and read as human attention",
+        "A paid placement misread as organic because the campaign parameters were stripped in transit",
+        "A burst driven by something other than buying interest - an outage, a controversy, a funding announcement, a hiring story",
+        "One item republished by an aggregator across many domains, inflating the source count",
+        "Internal, investor and agency traffic during a launch week",
+        "Review velocity produced by a review-solicitation campaign the company itself ran, then read as independent proof",
+        "A seasonal pattern the trailing baseline is too short to have learned"
+      ],
+      "confirmation_signals": [
+        "f03.review_reading",
+        "f03.community_recommendation",
+        "f15.competitor_disruption"
+      ],
+      "recommended_action_class": "staff_the_surge_and_identify_the_source_before_scoring_the_sessions",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "event",
+          "discretionary",
+          "seasonal"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "consumer_electronics",
+          "retail",
+          "travel"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

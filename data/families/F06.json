@@ -1,0 +1,1142 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F06",
+  "signals": [
+    {
+      "id": "f06.quote_request",
+      "family": "F06",
+      "name": "Quote or pricing request",
+      "definition": "The subject asks for a price that is not published - submitting a quote, 'request pricing' or 'contact sales' form, configuring a quote in a self-serve quoting surface, or asking for a written proposal. Qualifying condition: a request event exists that names at least one product, plan or configuration and expects a seller-produced price in return; a general contact, support or partnership enquiry is not this signal.",
+      "question_answered": "Has this buyer moved from wanting to know what we do to wanting to know what it would cost them specifically?",
+      "intent_dimensions": [
+        "budget",
+        "readiness",
+        "value"
+      ],
+      "identity_level": "individual",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "quote_request_id",
+        "requested_product_or_config_ids",
+        "request_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "company_domain",
+        "account_id",
+        "stated_quantity",
+        "stated_budget_band",
+        "stated_decision_date",
+        "quote_value",
+        "quote_status",
+        "time_to_first_response",
+        "form_source_page",
+        "prior_session_ids"
+      ],
+      "source_class": [
+        "first_party_web",
+        "crm",
+        "first_party_backend",
+        "marketplace"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read the quote and 'contact sales' submissions you already store in your form backend or CRM, and stamp each one with the product or configuration it names",
+          "requires": [
+            "access to your own form store or CRM object"
+          ],
+          "gives": "Every quote ever asked for, retrospectively, with no new instrumentation and no third party"
+        },
+        {
+          "rung": 2,
+          "how": "Instrument the quoting surface itself - quote_started, quote_configured, quote_submitted - so abandoned configurations are visible and not only completed requests",
+          "requires": [
+            "tag manager or app-level analytics on the quote surface"
+          ],
+          "gives": "The abandoned population, usually several times larger than the submitted one, plus the configuration attempted"
+        },
+        {
+          "rung": 3,
+          "how": "Write the quote outcome back against the same quote_request_id so quote-to-won rate can be measured per configuration and the signal weighted by realised value",
+          "requires": [
+            "a shared quote_request_id between the request store and the opportunity record"
+          ],
+          "gives": "A strength calibrated on your own business instead of an assumed one"
+        },
+        {
+          "rung": 4,
+          "how": "Ingest inbound request-for-quote events from marketplaces or buyer procurement portals where you are already a listed supplier",
+          "requires": [
+            "an approved supplier listing and its portal API or partner feed"
+          ],
+          "gives": "Demand you never see on your own site - account level only, and only in the categories where you are listed"
+        }
+      ],
+      "min_data": {
+        "min_closed_quotes_for_rate_estimate": 30,
+        "min_history_days": 90,
+        "note": "Quote-to-won rate is not stable below roughly 30 closed quotes. Below that, use the event as a routing trigger only and do not attach a probability to it."
+      },
+      "access_conditions": [
+        "Rung 4 is obtainable only by being an approved supplier on that portal; inbound request-for-quote feeds are not purchasable as raw data",
+        "A quote record routinely carries the buyer's stated budget, headcount and timeline - that is commercial information about their organisation and must not be enriched, resold, or included in any dataset shared with a third party"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A quote is live while its own validity window is open. Where the quote carries a valid_until date, use it in preference to this default; a quote that has expired without action describes a lapsed negotiation, not live demand."
+      },
+      "false_positives": [
+        "Competitor price discovery - a rival submitting a request under a generic email domain to benchmark your list price",
+        "Procurement collecting three quotes because policy requires three quotes, for a purchase already awarded to the incumbent",
+        "Budget-cycle estimate gathering with nothing authorised - a number to fill a planning spreadsheet",
+        "A student, analyst, consultant or journalist collecting pricing for their own output",
+        "An existing customer asking for a re-quote at renewal, which is a retention event and not new demand",
+        "A proxy researcher assembling options for a decision-maker who has not engaged",
+        "An employee, reseller or agency testing the quote form"
+      ],
+      "confirmation_signals": [
+        "f06.budget_allocation",
+        "f06.negotiation",
+        "f07.demo"
+      ],
+      "recommended_action_class": "price_and_route_to_a_named_owner_inside_the_response_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "marketplace",
+          "ecommerce",
+          "manufacturing"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "problem",
+          "contract_expiry",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "manufacturing",
+          "construction",
+          "professional_services",
+          "insurance",
+          "automotive",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement from the shape of the event: asking a seller to produce a price for a named configuration is about as close to a stated purchase intention as a pre-transaction signal gets. Not measured; published quote-to-close benchmarks are overwhelmingly vendor marketing."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. The record is unambiguous but the population is contaminated by mandated three-quote procurement and competitor benchmarking, which is why this is 4 and not 5."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f06.financing_calculation",
+      "family": "F06",
+      "name": "Financing or payment-plan calculation",
+      "definition": "The subject models how they would pay rather than whether to buy - running a monthly-payment, lease-versus-buy, instalment or cost-of-finance calculator, choosing a term, or opening a financing option against a specific priced item. Qualifying condition: at least one financing input is entered, or a financing option is opened, for an identified item or amount. Any credit-file check, prequalification or eligibility outcome is a regulated credit act and is explicitly outside this signal.",
+      "question_answered": "Is the price accepted in principle, with the remaining question being how to pay for it rather than whether it is worth it?",
+      "intent_dimensions": [
+        "budget",
+        "readiness",
+        "timing"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "calculator_or_widget_id",
+        "priced_item_id_or_amount_band",
+        "term_or_plan_selected",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "scenarios_run_count",
+        "deposit_band",
+        "plan_type",
+        "time_on_financing_surface",
+        "next_checkout_step_reached",
+        "returned_within_days",
+        "session_id",
+        "referrer"
+      ],
+      "source_class": [
+        "first_party_web",
+        "commerce_platform",
+        "first_party_backend"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Fire one event when the financing or instalment control is opened and one when a term is chosen, on the calculator or checkout widget you already run - the fact and the term, not the figures the person typed",
+          "requires": [
+            "tag manager or app-level analytics"
+          ],
+          "gives": "The signal at full first-party fidelity while collecting the least data that still detects it"
+        },
+        {
+          "rung": 2,
+          "how": "Map the modelled amount onto bands derived from your own price list and store the band, never the raw entry",
+          "requires": [
+            "a band mapping in the event schema"
+          ],
+          "gives": "A budget band without holding a figure a person typed about their own money"
+        },
+        {
+          "rung": 3,
+          "how": "Join the financing event to the order or opportunity record to measure how often a financing interaction precedes a purchase, and at what lag",
+          "requires": [
+            "a shared order or session key into the commerce backend"
+          ],
+          "gives": "A measured lag and lift for your own catalogue in place of an assumed one"
+        },
+        {
+          "rung": 4,
+          "how": "Read the merchant-side reporting your point-of-sale or instalment finance provider already gives you - applications started, approved and declined at aggregate level - to see the part of the funnel that happens off your site",
+          "requires": [
+            "a merchant account with that provider and its reporting API"
+          ],
+          "gives": "Coverage of the off-site drop-off. Aggregate only: an individual approval or decline is a credit decision and must not enter a marketing profile"
+        }
+      ],
+      "min_data": {
+        "min_financing_events": 200,
+        "min_history_days": 90,
+        "note": "Financing interactions are a small fraction of pricing-surface traffic. Below roughly 200 events a conversion-lift estimate is noise, though the raw flag is usable as a routing trigger immediately."
+      },
+      "access_conditions": [
+        "Rung 4 is merchant reporting, not a consumer credit file. An individual approval or decline is a credit decision about a person and joining it to a marketing profile changes what the record is and who may hold it",
+        "Where a third-party tag captures values typed into finance fields before the form is submitted, that is precisely the pattern behavioural-telemetry and wiretapping claims target. Capture the selection and the band, never the keystrokes"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Merchant agreements with instalment and point-of-sale finance providers restrict re-use of application-level data for marketing; only aggregate merchant reporting is usable at rung 4.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "Payment modelling sits close to the decision. Two weeks after it, either the purchase happened or the affordability question was answered somewhere else."
+      },
+      "false_positives": [
+        "Calculator curiosity - people play with payment calculators the way they play with mortgage calculators, with no item in view",
+        "A competitor or comparison-site editor documenting your finance terms",
+        "A person modelling on behalf of someone else - a parent, a partner, or a proxy researcher",
+        "An existing customer costing an addition to an account rather than a new purchase",
+        "Coupon and shopping browser extensions, bots and LLM agents exercising every interactive control on the page",
+        "An employee or agency testing the checkout",
+        "A visitor using the calculator to price a competitor's product they intend to buy elsewhere"
+      ],
+      "confirmation_signals": [
+        "f06.budget_allocation",
+        "f08.payment_preparation",
+        "f08.billing_setup"
+      ],
+      "recommended_action_class": "present_total_cost_and_term_options_without_prompting_a_credit_check",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "manufacturing",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "high_ticket",
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "product_failure",
+          "replacement",
+          "desire",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "automotive",
+          "consumer_electronics",
+          "retail",
+          "construction",
+          "manufacturing",
+          "education"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: modelling the payment presumes the price. Held below quote request because a large share of calculator use is exploratory rather than committed. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. The event is easy to capture but easy to trigger accidentally, and browser extensions inflate it, so the evidence is weaker than the intent it implies."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f06.budget_allocation",
+      "family": "F06",
+      "name": "Budget allocation or budget confirmation",
+      "definition": "A specific amount of money is identified as available for this purchase and attached to the opportunity - the buyer states a budget band or an approved amount, a requisition or purchase-order reference appears, a budget holder joins the conversation, or a procurement step is opened. Qualifying condition: the budget is DECLARED by the buyer or evidenced by a procurement artefact they produced. A budget inferred from firmographics, spending behaviour or observable wealth proxies is not this signal and is not permitted here.",
+      "question_answered": "Is there money assigned to this, and does the person we are talking to control it?",
+      "intent_dimensions": [
+        "budget",
+        "authority",
+        "readiness",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "account_id_or_subject_id",
+        "declared_budget_band_or_approved_amount",
+        "declaration_source",
+        "declaration_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "budget_owner_role",
+        "fiscal_year_end",
+        "requisition_or_po_reference",
+        "approval_stage",
+        "currency",
+        "stated_decision_date",
+        "competing_line_items",
+        "declared_by_subject_id"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_web",
+        "offline_system",
+        "public_record"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Turn the budget question your sellers already ask into one structured picklist field on the opportunity - bands, not free text - instead of a line in a call note",
+          "requires": [
+            "one CRM field and one line in the qualification script"
+          ],
+          "gives": "A queryable budget facet on every new opportunity from next week, at zero engineering cost. Most teams already ask this and lose the answer in prose"
+        },
+        {
+          "rung": 2,
+          "how": "Parse the procurement artefacts you already receive - requisition numbers, purchase-order references, supplier-onboarding and vendor questionnaires - into a boolean 'procurement process opened' flag on the account",
+          "requires": [
+            "inbound document or inbox routing into the CRM"
+          ],
+          "gives": "Evidence of budget that does not depend on a seller remembering to ask, and that is hard for a buyer to overstate"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the buyer's fiscal-year end as a declared field and join it to a calendar table so the budget cycle becomes a scheduled trigger rather than a guess",
+          "requires": [
+            "one declared field and a calendar join"
+          ],
+          "gives": "Timing as well as budget - the cheapest upgrade in this family, because a calendar join needs no behavioural data at all"
+        },
+        {
+          "rung": 4,
+          "how": "For public-sector accounts, read the published budget line or tender record from the relevant public procurement register",
+          "requires": [
+            "the register's published interface and a declared User-Agent within its rate limits"
+          ],
+          "gives": "Independent corroboration of a claimed budget - public bodies only, and only where the line is itemised"
+        }
+      ],
+      "min_data": {
+        "min_closed_opportunities_with_band": 50,
+        "note": "Budget bands only start predicting anything once roughly 50 closed opportunities carry one. Before that, use the presence of a declared budget as the signal and ignore its size."
+      },
+      "access_conditions": [
+        "Public procurement registers are lawful public sources but usually impose a declared User-Agent, rate limits and attribution in their terms. 'public_cost_free' describes the price of the data, never the clearance to use it",
+        "A budget figure a buyer states in confidence is commercial information about their organisation. It may support the deal it was given for; it must not be enriched, resold, or fed into a shared dataset"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "none",
+      "terms_constrained": true,
+      "terms_note": "Rung 4 only: public procurement registers publish under their own terms of use, which commonly restrict bulk extraction and require attribution.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "irregular",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 90,
+        "note": "A stated budget lives inside the fiscal period it belongs to; at the period boundary it either converts or resets. Where the buyer's fiscal-year end is known, use it in preference to this default."
+      },
+      "false_positives": [
+        "An aspirational number given to close down a qualification question - the figure is real, nobody has approved it",
+        "A category budget that exists but is already committed to an incumbent renewal",
+        "A non-decision-maker relaying a figure they heard, with no authority to spend it",
+        "Procurement opening a vendor-onboarding process for a compliance or security review rather than a purchase",
+        "A purchase-order reference raised for a pilot or proof of concept that is not the production purchase",
+        "A number inflated deliberately to create room for a discount demand later",
+        "A budget stated by an agency or consultant on behalf of a client who has not approved it"
+      ],
+      "confirmation_signals": [
+        "f06.quote_request",
+        "f06.negotiation",
+        "f08.billing_setup"
+      ],
+      "recommended_action_class": "route_to_the_budget_holder_and_align_to_the_declared_fiscal_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "manufacturing",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "regulation",
+          "funding",
+          "contract_expiry",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "manufacturing",
+          "construction",
+          "education",
+          "energy"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: an allocated budget is a precondition for most considered purchases, but it precedes the decision rather than expressing it. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement, deliberately held at 3. The declaration is clean data but buyers routinely state budgets they do not control; the procurement-artefact route at rung 2 is materially more reliable than the stated band."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f06.negotiation",
+      "family": "F06",
+      "name": "Commercial negotiation",
+      "definition": "The buyer engages on terms rather than on fit - asking for a discount, a longer payment term, a different contract length, volume or ramp pricing, a redline to the commercial clauses of an agreement, or a price match against a named alternative. Qualifying condition: a request to change a stated price or commercial term is recorded against a specific quote, cart or agreement.",
+      "question_answered": "Has the conversation moved from whether this is the right product to on what terms we will do it, and which single term is blocking signature?",
+      "intent_dimensions": [
+        "budget",
+        "commitment",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id_or_subject_id",
+        "quote_or_agreement_id",
+        "term_or_concession_requested",
+        "request_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "requested_discount_band",
+        "current_vs_requested_contract_length",
+        "named_alternative_cited",
+        "redlined_clause_classes",
+        "quote_revision_count",
+        "revision_initiated_by",
+        "days_between_revisions",
+        "concession_granted",
+        "approver_involved"
+      ],
+      "source_class": [
+        "crm",
+        "first_party_backend",
+        "offline_system",
+        "first_party_web"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Count the quote revisions you already generate. A second and third version of the same quote id with a falling price is a negotiation, and the versions are already sitting in your quoting system, spreadsheet or CRM",
+          "requires": [
+            "quote versioning that already exists"
+          ],
+          "gives": "A negotiation flag and its intensity, retrospectively, for every deal you have ever quoted - no new data collected from anybody"
+        },
+        {
+          "rung": 2,
+          "how": "Add a structured 'concession requested' picklist to the CRM activity your sellers already log, so the reason - price, term, payment schedule, scope, liability - is queryable instead of buried in notes",
+          "requires": [
+            "one CRM picklist and a logging habit"
+          ],
+          "gives": "Which term blocks signature, aggregated across the pipeline rather than remembered deal by deal"
+        },
+        {
+          "rung": 3,
+          "how": "Track redline turnaround on the commercial schedule of your agreement - version count and days between versions - from the contract or e-signature system you already send from",
+          "requires": [
+            "contract or e-signature system with version history"
+          ],
+          "gives": "A late-stage readiness read that is independent of what the seller believes is happening"
+        },
+        {
+          "rung": 4,
+          "how": "Instrument the self-serve equivalents: promo-code field focused, 'request a discount' or price-match form submitted, plan-downgrade preview opened at checkout",
+          "requires": [
+            "checkout instrumentation"
+          ],
+          "gives": "The same signal in motions where there is no seller present to log it"
+        }
+      ],
+      "min_data": {
+        "min_closed_quotes_for_discount_curve": 100,
+        "note": "A discount-depth-to-close-rate curve is unusable below roughly 100 closed quotes. Before that, treat negotiation as a binary stage flag and do not model elasticity."
+      },
+      "access_conditions": [
+        "Redline text and clause positions are the counterparty's confidential information under most mutual non-disclosure agreements. Derive a version count, a clause class and a turnaround time; leave the text in the contract system",
+        "Where a reseller or broker negotiates on behalf of an end customer, the account the signal attaches to is the reseller, not the end customer - resolving it to the end customer usually requires a contractual right you do not have"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "none",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "The shortest-lived state in this family: negotiation resolves into a signature or a stall within weeks. A negotiation flag older than a quarter almost always describes a lost deal nobody closed out."
+      },
+      "false_positives": [
+        "Ritual discount-asking - procurement policy requires a concession request on every purchase regardless of how the deal is going",
+        "A buyer using your quote purely as leverage to improve the incumbent's renewal price",
+        "Legal redlines generated from a standard clause library, which arrive identically on every contract and carry no commercial signal",
+        "A stalled deal whose revisions are the seller chasing rather than the buyer engaging - check who initiated each version before scoring it",
+        "A reseller or broker negotiating for an end customer who has not decided",
+        "An existing customer renegotiating a renewal, which is retention rather than new demand",
+        "A price-match request generated by a browser extension at checkout rather than by a person"
+      ],
+      "confirmation_signals": [
+        "f06.budget_allocation",
+        "f08.billing_setup",
+        "f08.account_verification"
+      ],
+      "recommended_action_class": "route_to_an_approver_with_the_blocking_term_named",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "manufacturing",
+          "marketplace",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "contract_expiry",
+          "business_event",
+          "competitor_failure",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "manufacturing",
+          "professional_services",
+          "construction",
+          "logistics",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: arguing about terms presupposes agreement on the product. Nobody redlines a contract for a purchase they have no intention of making. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. Quote versions are hard evidence, but the leverage case - using your quote to move an incumbent - is common enough to keep this off 5."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f06.roi_analysis",
+      "family": "F06",
+      "name": "ROI or business-case construction",
+      "definition": "The subject builds the justification rather than the shortlist - completing an ROI, total-cost-of-ownership, payback or savings calculator, opening or downloading a business-case, cost-comparison or pricing-justification asset, or asking for figures to present internally. Qualifying condition: an interaction that reaches the RESULT of a value-quantification surface, or the retrieval of a value asset, naming a specific product or configuration.",
+      "question_answered": "Is someone assembling the internal argument for this purchase, and therefore expecting to defend it to a budget holder?",
+      "intent_dimensions": [
+        "value",
+        "budget",
+        "authority",
+        "commitment"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "asset_or_calculator_id",
+        "product_or_config_referenced",
+        "completion_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "inputs_completed_count",
+        "scenario_reruns",
+        "result_exported_or_shared",
+        "distinct_openers_of_result_link",
+        "asset_format",
+        "time_on_surface",
+        "return_visits_to_same_asset",
+        "declared_role_of_requester"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Instrument the COMPLETION of the value asset you already publish - the calculator reaching a result, or the cost-comparison or business-case document being opened or downloaded - rather than the pageview of the page it sits on",
+          "requires": [
+            "tag manager or app-level analytics"
+          ],
+          "gives": "Separates people building a case from people reading a page, using assets you already own. If you have no calculator, the PDF you already have is the rung-1 surface"
+        },
+        {
+          "rung": 2,
+          "how": "Give every generated result a shareable permalink and count distinct openers of that link",
+          "requires": [
+            "a result id in the URL and a server-side open counter"
+          ],
+          "gives": "Buying-group evidence with no cross-device tracking and no identity graph: a business case opened by three people is a buying group forming"
+        },
+        {
+          "rung": 3,
+          "how": "Capture the calculator inputs as bands - organisation size, current spend band, unit count - so the value surface doubles as declared-requirements capture",
+          "requires": [
+            "a band mapping and a clearly-labelled field on the result step"
+          ],
+          "gives": "Declared scale and budget attributes from a surface people complete willingly, without storing a figure to the unit"
+        },
+        {
+          "rung": 4,
+          "how": "Join value-asset completions to the opportunity record and test whether deals that built a business case close larger or faster",
+          "requires": [
+            "a shared session or account key into the CRM"
+          ],
+          "gives": "A weight for this signal measured on your own outcomes rather than assumed from its plausibility"
+        }
+      ],
+      "min_data": {
+        "min_completions_for_lift_estimate": 150,
+        "min_history_days": 180,
+        "note": "Value-asset completions are rare relative to traffic. Below roughly 150 completions with 180 days of outcome history, rung 4 will produce a number that moves every week."
+      },
+      "access_conditions": [
+        "Where the calculator asks for the person's employer, current spend or headcount, those are declared attributes of their organisation and need the same handling as a stated budget: usable for the conversation they were given for, not for enrichment or resale",
+        "A shareable result link is a lawful buying-group signal only while it stays link-level. Resolving the openers of a shared link into named individuals turns a counter into person-level tracking of people who never visited your site"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A business case is built to be presented. It stays live until the internal review it was built for happens, which is usually within a month; after that it has either won or been shelved."
+      },
+      "false_positives": [
+        "Competitors and analysts running your ROI calculator to see what you claim - often the heaviest single user of a public value model",
+        "Students, consultants and content marketers harvesting a value model for their own material",
+        "Your own sales team or trainers running the calculator during a demo or an onboarding session",
+        "A person building the case to justify NOT buying, or to price an in-house alternative",
+        "Bots and LLM agents completing forms while summarising the page",
+        "An existing customer assembling a renewal justification rather than a new purchase",
+        "A single enthusiast with no budget authority who will never present it to anyone"
+      ],
+      "confirmation_signals": [
+        "f06.budget_allocation",
+        "f06.quote_request",
+        "f07.demo"
+      ],
+      "recommended_action_class": "supply_defensible_numbers_and_a_reference_not_a_discount",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "manufacturing",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "capacity_pressure",
+          "regulation",
+          "contract_expiry",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "manufacturing",
+          "energy",
+          "logistics",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: building a justification implies an approval step exists and someone intends to face it. Held below quote request because the case may be built by someone without authority. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. Public value calculators attract a high share of competitor and analyst traffic, which is the specific reason this is 3 rather than 4."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f06.price_sensitivity",
+      "family": "F06",
+      "name": "Price-sensitivity behaviour",
+      "definition": "The subject's behaviour is organised around price rather than fit - repeated returns to the pricing surface without progressing, sorting or filtering by price, focusing a promo-code field, viewing a lower tier after a higher one, abandoning at the price step, or arriving through a discount route. Qualifying condition: at least two price-oriented actions within a window against the same product or plan set, at least one of which is a downward move or a discount-seeking action. This entry describes observed behaviour toward YOUR prices. It is not, and must not be turned into, an estimate of what a person can afford - see restricted.ability_to_pay_pricing_inference.",
+      "question_answered": "Is price the remaining objection for this buyer, and should we answer it with value framing, a different tier, or with nothing at all?",
+      "intent_dimensions": [
+        "budget",
+        "value",
+        "risk",
+        "preference"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "price_surface_or_plan_id",
+        "action_type",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "tier_sequence_viewed",
+        "promo_field_focused",
+        "coupon_code_attempted",
+        "sort_or_filter_applied",
+        "pricing_visit_count_in_window",
+        "days_between_pricing_visits",
+        "abandon_step",
+        "acquisition_route"
+      ],
+      "source_class": [
+        "first_party_web",
+        "commerce_platform",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Derive it from the pageview stream you already collect: count repeat pricing-surface visits per subject in a window, and flag any session where a lower tier is viewed after a higher one",
+          "requires": [
+            "an existing pageview stream carrying plan or product identifiers"
+          ],
+          "gives": "The signal this week with no new events, no new consent surface and no new vendor"
+        },
+        {
+          "rung": 2,
+          "how": "Instrument the three price-objection moments explicitly: promo-code field focused, coupon rejected, checkout abandoned at the price or shipping step",
+          "requires": [
+            "checkout instrumentation"
+          ],
+          "gives": "Separates a price objection from a general drop-off, which the pageview stream cannot do"
+        },
+        {
+          "rung": 3,
+          "how": "Join the flag to your discount ledger: who converted only with a code, and at what depth",
+          "requires": [
+            "order records carrying the code and the discount applied"
+          ],
+          "gives": "A measured elasticity for your own catalogue instead of a behavioural guess"
+        },
+        {
+          "rung": 4,
+          "how": "Run a holdout - withhold the offer from a random share of the flagged population and measure incremental MARGIN, not incremental conversion",
+          "requires": [
+            "randomised assignment and margin data at order level"
+          ],
+          "gives": "The only rung that answers the question this signal exists for, which is usually whether to discount at all"
+        }
+      ],
+      "min_data": {
+        "min_ordering_customers": 500,
+        "min_history_days": 180,
+        "min_orders_per_subject": 3,
+        "identity_horizon_days": 7,
+        "note": "Repeat-visit windows longer than 7 days are not observable on JavaScript-set first-party cookies under Safari's script-writable storage cap, so a 30-day window silently becomes a logged-in-users-only signal. CNAME-delegated 'first-party' setups do not escape that cap; a same-origin server-set cookie does."
+      },
+      "access_conditions": [
+        "Decide the observation window against the identity horizon you actually have, not the one you want: either restrict to 7 days, use a same-origin server-set cookie, or accept that the signal fires only for logged-in subjects",
+        "Acting on this signal by changing the price a person sees is personalised pricing, which carries disclosure duties in a growing number of jurisdictions and is a different decision from changing the message a person sees",
+        "Pricing pages and checkout are the exact surfaces that behavioural-telemetry and wiretapping claims target; session replay on a pricing page is the highest-exposure way to collect this signal and is not needed for any rung above"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "high"
+      },
+      "activation_direction": "suppress",
+      "strength": 2,
+      "reliability": 2,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 7,
+        "note": "Price-oriented behaviour is a state, not a fact. It moves with a promotion, a pay cycle or a competitor's sale, so anything older than a fortnight describes a past mood rather than a current constraint."
+      },
+      "false_positives": [
+        "Deal-seeking as a habit rather than a constraint - a shopper who opens the promo field every time and would have paid full price",
+        "Coupon and price-comparison browser extensions that open the promo field automatically at every checkout, with no human intent behind it",
+        "A competitor or price-monitoring crawler sampling your tiers on a schedule",
+        "A pricing page that is simply unclear - a UX defect produces exactly the repeat-visit pattern this signal reads as price sensitivity",
+        "An existing customer checking the price of their own plan or an upcoming renewal",
+        "A journalist or analyst covering a pricing change",
+        "A buyer whose employer requires a documented cheaper alternative on file, not a cheaper purchase"
+      ],
+      "confirmation_signals": [
+        "f06.financing_calculation",
+        "f06.negotiation",
+        "f04.product_comparison"
+      ],
+      "recommended_action_class": "withhold_the_reflexive_discount_and_test_a_lower_tier_or_longer_term_first",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "desire",
+          "replacement",
+          "contract_expiry",
+          "occasion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "travel",
+          "software",
+          "telecoms"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "sensitivity",
+          "source_url": "https://www.ftc.gov/news-events/news/press-releases/2025/01/ftc-surveillance-pricing-study-indicates-wide-range-personal-data-used-set-individualized-consumer",
+          "as_of": "2026-08-01",
+          "independence": "independent",
+          "note": "FTC staff perspective on its surveillance-pricing 6(b) study, 17 January 2025: it reports that consumer behaviours 'ranging from mouse movements on a webpage to the type of products that consumers leave unpurchased in an online shopping cart can be tracked and used by retailers to tailor consumer pricing'. That is why this row is medium sensitivity and why its access_conditions separate changing the message from changing the price."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement, deliberately low. Price-oriented behaviour identifies a barrier, not a buyer; most of the flagged population is not close to purchase. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement, deliberately low. An unclear pricing page, a coupon extension and a genuine budget constraint produce the same event pattern, and rung 1 cannot tell them apart."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

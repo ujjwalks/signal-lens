@@ -1,0 +1,734 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F09",
+  "signals": [
+    {
+      "id": "f09.installation_scheduling",
+      "family": "F09",
+      "name": "Installation or site-visit scheduling",
+      "definition": "A dated installation, fitting, commissioning or pre-install survey appointment exists for the subject on a calendar owned by the seller, its installer network, or the customer. Qualifying condition: an appointment record carries a scheduled_start, a service location, and a job type that is an install or a pre-install survey rather than a repair or a warranty visit. The negative variant qualifies too: a booked slot that is rescheduled twice, or is still unconfirmed inside the lead-time window, is a slipping installation and carries the opposite action.",
+      "question_answered": "Which customers have a dated installation on the calendar, so the site-preparation, accessory and add-on window is open right now - and which bookings are drifting toward cancellation?",
+      "intent_dimensions": [
+        "readiness",
+        "timing",
+        "commitment",
+        "requirements"
+      ],
+      "identity_level": "location",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "appointment_id",
+        "scheduled_start",
+        "service_location_id",
+        "job_type",
+        "appointment_status"
+      ],
+      "optional_supporting_fields": [
+        "order_id",
+        "account_id",
+        "installer_id",
+        "reschedule_count",
+        "survey_outcome",
+        "lead_time_days",
+        "access_constraints",
+        "permit_reference"
+      ],
+      "source_class": [
+        "offline_system",
+        "first_party_backend",
+        "crm",
+        "partner_feed"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export the appointment table from whatever books your jobs today - a field-service or dispatch tool, a shared calendar, or the spreadsheet the scheduler actually keeps - and load appointment_id, scheduled_start, location and job_type nightly. Nothing else changes; you are reading a book you already keep.",
+          "requires": [
+            "read access to the scheduling system, or one exported CSV per night"
+          ],
+          "gives": "A complete, dated, first-party install book for every job. This is the highest-fidelity signal in the family and it involves no tracking, no vendor and no consent question."
+        },
+        {
+          "rung": 2,
+          "how": "Add appointment status transitions and reschedule counts, so the row distinguishes a confirmed install from one that has moved twice. Timestamp every status change rather than overwriting the current value.",
+          "requires": [
+            "status history retained in the scheduling system, or an append-only change log"
+          ],
+          "gives": "Separates the prepare-for-ownership case from the about-to-cancel case, which need opposite actions"
+        },
+        {
+          "rung": 3,
+          "how": "Join the pre-install survey outcome (measurements, access constraints, electrical or structural findings) to the appointment, so the row says what the site needs as well as when the visit is.",
+          "requires": [
+            "surveyors recording outcomes as structured fields rather than free-text notes"
+          ],
+          "gives": "Turns a date into a requirements list: the accessory, upgrade and remedial-work attach opportunities are in the survey, not the booking"
+        },
+        {
+          "rung": 4,
+          "how": "Where installation is delegated to a third-party installer network, take the appointment feed from the network under the existing service contract rather than reconstructing dates from invoices after the fact.",
+          "requires": [
+            "a data clause in the installer agreement",
+            "an agreed appointment schema"
+          ],
+          "gives": "Coverage of delegated installs, which are otherwise invisible until the job is billed - typically weeks after the window closed"
+        }
+      ],
+      "min_data": {
+        "min_appointments": 25,
+        "min_history_days": 90,
+        "note": "Below roughly 25 completed appointments there is no lead-time distribution to compare a new booking against, so 'slipping' cannot be defined and the row should be used as a dated fact only, not as a risk score."
+      },
+      "access_conditions": [
+        "When installation is subcontracted, the appointment lives in the installer's system and is obtainable only through the commercial agreement - it cannot be bought, scraped or inferred.",
+        "A pre-install survey record often contains photographs of the customer's premises. Keep them out of the signal store; carry the structured findings, not the media."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "The appointment record is your own service data about your own customer, so the operational use needs no new basis. Using it to target further sales is a secondary purpose the privacy notice must actually cover. Where the installed product itself discloses a special-category fact about the occupant - mobility, accessibility, medical or assistive equipment - the record must not be used to build audiences or shared with an advertising platform, however it was lawfully obtained for service.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The preparation window opens when the appointment is booked and closes when the job completes or fails. It does not decay gradually - one day after the install, this is an ownership signal (F10), not a preparation signal, and must be re-keyed."
+      },
+      "false_positives": [
+        "A repair, warranty or remedial visit mis-typed as an installation, where nothing is being bought",
+        "A duplicate or orphaned booking left open in the dispatch system after the real job was moved or cancelled",
+        "A survey or estimate visit counted as a committed install, when no purchase has been agreed and the survey may kill the sale",
+        "A landlord, letting agent, property manager or main contractor booking on behalf of an occupant - the booking contact is neither the buyer nor the person who will own the product",
+        "Capacity-holding or block bookings auto-created by a routing system to reserve technician time, with no customer behind them",
+        "A commissioning visit for a product bought elsewhere and only installed by you, where the purchase decision is already spent"
+      ],
+      "confirmation_signals": [
+        "f08.payment_preparation",
+        "f09.delivery_preparation",
+        "f13.permit_or_licence_filed"
+      ],
+      "recommended_action_class": "prepare_the_site_and_attach_readiness_items",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "marketplace",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_services",
+          "telecom",
+          "utilities",
+          "industrial_equipment",
+          "construction",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 4 rather than 5 because the appointment proves a commitment has been made, not that further spend follows; the attach rate behind that window is unmeasured here."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f09.onboarding_scheduling",
+      "family": "F09",
+      "name": "Onboarding or kickoff scheduling",
+      "definition": "A seller-run onboarding event - kickoff call, implementation workshop, training session, account-setup appointment or first-value milestone session - is booked, attended, rescheduled or missed for an account whose purchase is agreed or in final approval. Qualifying condition: a calendar event exists with a scheduled_start, an owning internal team and a resolvable customer account. Absence qualifies as well, and is the more valuable half: a closed account with no kickoff booked N business days after close is a stalled onboarding.",
+      "question_answered": "Which newly-closed accounts are actually moving into onboarding on schedule, and which have stalled before first value - the window in which expansion is cheapest and churn is quietly decided?",
+      "intent_dimensions": [
+        "commitment",
+        "timing",
+        "readiness",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_id",
+        "event_type",
+        "scheduled_start",
+        "event_status"
+      ],
+      "optional_supporting_fields": [
+        "attendee_role",
+        "attendee_count",
+        "reschedule_count",
+        "no_show_flag",
+        "contract_close_date",
+        "days_close_to_kickoff",
+        "owning_team"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "crm",
+        "support_system",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export the onboarding team's shared calendar or the booking link's own appointment list, match attendee email domain to account, and produce one number per account: days from contract close to first booked kickoff. List every closed account where that number is null after five working days.",
+          "requires": [
+            "a calendar or booking-tool export",
+            "a list of closed accounts with close dates"
+          ],
+          "gives": "Stall detection in the first week, with no integration and no product instrumentation. Most companies close deals and never measure this at all."
+        },
+        {
+          "rung": 2,
+          "how": "Subscribe to the booking tool's event webhooks (created, rescheduled, cancelled, no-show) and write them to the account timeline, so reschedule count and no-shows become queryable instead of anecdotal.",
+          "requires": [
+            "API or webhook access to the scheduling tool",
+            "a place to store account-level events"
+          ],
+          "gives": "The distinction between a customer who moved a meeting once and one who has ghosted twice - which is the actual churn predictor"
+        },
+        {
+          "rung": 3,
+          "how": "Join the implementation project tracker: phase gates, task completion and the identity of the customer-side owner. The signal becomes progress against a plan rather than attendance at a meeting.",
+          "requires": [
+            "onboarding run as tracked tasks rather than as a series of calls"
+          ],
+          "gives": "Detects the account that attends every call and completes nothing, which attendance data scores as healthy"
+        },
+        {
+          "rung": 4,
+          "how": "For seller-led onboarding delivered by a partner, reseller or implementation agency, take milestone dates from the partner under the existing agreement rather than assuming silence means progress.",
+          "requires": [
+            "a reporting clause in the partner agreement"
+          ],
+          "gives": "Coverage of partner-delivered onboarding, otherwise a complete blind spot in the exact accounts the seller never speaks to"
+        }
+      ],
+      "min_data": {
+        "min_accounts": 20,
+        "min_history_days": 180,
+        "note": "A time-to-kickoff threshold needs a distribution behind it. Below about 20 onboardings, use the raw list - 'these four have no kickoff booked' - rather than a percentile."
+      },
+      "access_conditions": [
+        "Export only the onboarding team's shared or dedicated booking calendar. A full staff calendar export sweeps up unrelated private meetings, including the employees' own, and creates an internal-monitoring problem that has nothing to do with the signal.",
+        "Attendee email addresses are personal data about the customer's employees. Store the role and the domain, not a roster."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": "This is the seller's own calendar for a service the customer has contracted. The exposure is internal rather than external: calendar exports are the easiest place to over-collect, so scope the export to the booking surface rather than to people.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A booked kickoff is meaningful across the onboarding period and loses value once the account is live. A stall, by contrast, gets worse with age rather than fading - store the age of the stall, not a decayed score."
+      },
+      "false_positives": [
+        "A kickoff booked by a procurement, PMO or executive sponsor who will never use the product - attendance by the wrong role reads as engagement and predicts nothing",
+        "A reschedule caused by the seller's own capacity or holidays, scored against the customer",
+        "A multi-site or multi-entity contract booking several kickoffs for one purchase, inflating the count and making one account look like four",
+        "A renewal, QBR or support escalation call mis-labelled as onboarding because the calendar title was copied from a template",
+        "An internal test booking, or a seller walking a colleague through the flow, which creates a real calendar record with no customer behind it",
+        "Onboarding delivered by a partner off your calendar entirely, so a perfectly healthy account looks stalled"
+      ],
+      "confirmation_signals": [
+        "f09.implementation_preparation",
+        "f10.product_usage",
+        "f10.service_deterioration"
+      ],
+      "recommended_action_class": "escalate_stalled_onboarding_and_time_expansion_after_first_value",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "hybrid",
+          "sales_led",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "financial_services",
+          "industrial_equipment"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 4 on the negative case - an unbooked kickoff after close is one of the few post-sale facts that is both early and unambiguous. The positive case (a kickoff exists) is weaker on its own and is why reliability is not 5."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f09.implementation_preparation",
+      "family": "F09",
+      "name": "Implementation preparation work",
+      "definition": "The subject performs preparatory work that only makes sense if the product is about to be put into service: issuing sandbox or test credentials, inviting colleagues into a workspace, running a test import or integration test, opening a migration ticket, requesting an implementation scope call or statement of work, downloading a technical checklist or security questionnaire response, or naming an internal project owner. Qualifying condition: two or more distinct preparation actions by the same account within 30 days, or one high-effort action alone (a sandbox key issued, a test import completed, a migration ticket opened). The row deliberately spans both sides of the sale: before contract it is a late-stage buying signal, after contract it is an onboarding-health signal, and the same fields detect both.",
+      "question_answered": "Is this account doing the unpaid work that precedes going live - and is that work happening before the contract, where it is the strongest late-stage buying signal available, or after it, where its absence is the earliest churn warning?",
+      "intent_dimensions": [
+        "commitment",
+        "readiness",
+        "requirements",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "event_name",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "actor_id",
+        "actor_role",
+        "environment",
+        "distinct_actor_count",
+        "ticket_category",
+        "doc_page_path",
+        "contract_status",
+        "test_record_count"
+      ],
+      "source_class": [
+        "product_analytics",
+        "first_party_backend",
+        "support_system",
+        "crm",
+        "first_party_web"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Count what your existing systems already log: support and pre-sales tickets tagged implementation, migration, integration or security review, grouped by account, plus hits on your implementation and migration documentation pages. Both exports exist today in the helpdesk and the web log.",
+          "requires": [
+            "a helpdesk export with an account or company field",
+            "server or analytics logs for the docs section"
+          ],
+          "gives": "A usable preparation count this week with no product instrumentation. Coarse, but it finds the accounts doing real work."
+        },
+        {
+          "rung": 2,
+          "how": "Emit named server-side events for the irreversible preparation acts you already perform: api_key_issued, sandbox_created, teammate_invited, test_import_completed, integration_connected. These are backend state changes, not page views, so they need no consent banner and survive ad blockers.",
+          "requires": [
+            "the ability to write an event row when your own backend changes state"
+          ],
+          "gives": "High-precision, low-volume events that mean something specific. This is the single highest-value instrumentation step in the family."
+        },
+        {
+          "rung": 3,
+          "how": "Weight preparation by effort and by breadth: distinct actors involved, records loaded in a test import, environments connected. One person clicking around is not the same as four people migrating data.",
+          "requires": [
+            "actor identity on the events",
+            "a volume field on import and integration events"
+          ],
+          "gives": "Separates evaluation from implementation, which the raw event count cannot do"
+        },
+        {
+          "rung": 4,
+          "how": "For non-software categories, take the equivalent from the systems that already hold it: signed method statements and RAMS, site-readiness checklists, drawing approvals, sample and spec sign-offs, or a customer-side project plan shared during scoping.",
+          "requires": [
+            "the project or document system used by delivery, exported with an account key"
+          ],
+          "gives": "The same signal for products that have no telemetry at all - the case a web-analytics vocabulary silently drops"
+        }
+      ],
+      "min_data": {
+        "min_accounts": 50,
+        "min_history_days": 90,
+        "note": "Preparation events are rare per account. Thresholding on a per-account rate needs enough accounts to see a base rate; below that, treat any high-effort event as an alert rather than scoring it."
+      },
+      "access_conditions": [
+        "Documentation traffic on its own is a weak and heavily contaminated source - crawlers, LLM agents, job applicants and students all read implementation docs. Never let a docs-only account reach a sales queue on that basis.",
+        "Sandbox and test-environment activity by a partner or systems integrator belongs to that partner's account, not to the end customer they are building for. Resolve integrator identities explicitly or they will pollute every account they touch."
+      ],
+      "availability": "integration",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": "Backend state-change events about a contracted account are first-party service data. The documentation-pageview rung is different: it is on-device tracking of an unauthenticated visitor, it does not survive an opt-out signal, and it is exactly the surface behind the current wave of behavioural-telemetry claims. Treat the two rungs as having different permission positions even though they feed one row.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "Preparation work goes cold fast: an account that built a test integration and then went quiet for six weeks has chosen something else, or lost its internal owner. The decay is the signal."
+      },
+      "false_positives": [
+        "An evaluator running a proof of concept with no budget and no approver, whose preparation is genuine and whose purchase will never happen",
+        "A partner, agency or systems integrator preparing an implementation for a different end customer entirely",
+        "An existing customer's engineer testing an unrelated feature, debugging a live incident, or rebuilding an integration that already exists",
+        "Automated traffic: crawlers, LLM agents and CI jobs hitting docs and sandbox endpoints, including sandbox keys created by security scanners",
+        "Job applicants reading implementation docs before an interview, and students or researchers working through a tutorial",
+        "Internal employees testing the flow, demoing to a colleague, or reproducing a customer issue in a customer-shaped account",
+        "A non-decision-maker's enthusiasm: a champion doing preparation work that has never been sanctioned by anyone who can sign"
+      ],
+      "confirmation_signals": [
+        "f09.onboarding_scheduling",
+        "f04.risk_reduction_behavior",
+        "f14.internal_approval_step"
+      ],
+      "recommended_action_class": "offer_implementation_support_and_confirm_the_go_live_date",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "industrial_equipment",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "High-effort preparation is costly to fake, which argues for 4-5; the contamination from evaluators, integrators and automated traffic is what holds reliability at 3."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f09.delivery_preparation",
+      "family": "F09",
+      "name": "Delivery preparation and slot arrangement",
+      "definition": "An action occurs that only makes sense when a physical delivery is imminent or being arranged: selecting or changing a delivery slot, entering access instructions or measurements, requesting a delivery-date change, arranging removal or disposal of the item being replaced, confirming site access, or - before the order exists - checking whether a specific address is served and what the lead time to it is. Qualifying condition: a fulfilment record carries a promised or scheduled delivery window for an order, or a pre-purchase serviceability or slot check is made against a specific address.",
+      "question_answered": "Which orders are inside the window where the customer is actively preparing to receive them - the moment accessories, removal, installation and protection plans sell - and which addresses were checked for serviceability but never ordered?",
+      "intent_dimensions": [
+        "readiness",
+        "timing",
+        "channel",
+        "commitment"
+      ],
+      "identity_level": "transaction",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "order_id",
+        "promised_delivery_window",
+        "delivery_address_id",
+        "fulfilment_status"
+      ],
+      "optional_supporting_fields": [
+        "slot_change_count",
+        "access_instructions_present",
+        "tracking_view_count",
+        "carrier_milestone",
+        "old_item_removal_requested",
+        "serviceability_check_postcode",
+        "lead_time_days",
+        "split_shipment_flag"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "partner_feed",
+        "first_party_web"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Query the order table you already have for orders with a promised delivery window in the next N days and a status that is not yet delivered. That list is the preparation cohort; it needs no new field and no new system.",
+          "requires": [
+            "read access to the order or fulfilment table"
+          ],
+          "gives": "A dated, complete, first-party pre-delivery cohort today. The window is usually the highest-attention period a customer ever gives you and most retailers use it only for operational email."
+        },
+        {
+          "rung": 2,
+          "how": "Capture the customer's own preparation acts as events on the order: slot chosen, slot changed, access instructions added, removal of the old item requested, delivery date moved.",
+          "requires": [
+            "the delivery-management surface writing an event per change rather than overwriting a field"
+          ],
+          "gives": "Distinguishes an engaged customer preparing a room from a passive one waiting - and a second slot change is an early cancellation warning"
+        },
+        {
+          "rung": 3,
+          "how": "Subscribe to carrier or fleet milestone webhooks (out for delivery, attempted, failed, rescheduled) and write them against the order.",
+          "requires": [
+            "a carrier or fleet integration",
+            "an order-to-consignment mapping"
+          ],
+          "gives": "Separates preparation from service recovery. Repeated tracking checks during a failed delivery are not purchase intent and must never be actioned as such."
+        },
+        {
+          "rung": 4,
+          "how": "Instrument the pre-purchase serviceability, postcode and lead-time checker as a first-class event with the checked address area and the answer given, so a 'we do not deliver there' or a 'six weeks' answer is recorded as a lost-demand fact rather than discarded.",
+          "requires": [
+            "an event on the checker",
+            "a decision on address granularity"
+          ],
+          "gives": "The only signal in the family that fires before the sale, and the cleanest source of geographic demand you are refusing"
+        }
+      ],
+      "min_data": {
+        "min_orders": 100,
+        "min_history_days": 60,
+        "note": "Rung 1 works from the first order. The thresholds apply to the derived measures - slot-change rates and lead-time distributions - which are meaningless on small samples."
+      },
+      "access_conditions": [
+        "Carrier milestone feeds are contractual: they come with the carrier account, not from a data market, and their retention terms are the carrier's.",
+        "Store the serviceability check at area granularity, not full address. A full-address log of people who checked and did not order is a list of addresses you have no order-based reason to hold."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "The order record is first-party transactional data and survives an opt-out signal because it is not tracking. The pre-purchase serviceability checker in rung 4 is the exception: it is on-device, it fires for unauthenticated visitors, and it does not survive an opt-out. Access instructions are quietly sensitive - 'leave in the porch, we are out until six' describes when a home is empty - and belong in the fulfilment system, not in a marketing profile.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The window closes at the delivery event, successful or failed. What follows is either an ownership signal or a service-recovery case, and both need a different row and a different action."
+      },
+      "false_positives": [
+        "Repeated tracking checks driven by a late, split or failed delivery - anxiety, not intent, and treating it as intent is how retailers upsell people who are already angry",
+        "A serviceability or postcode check by a competitor mapping your coverage, or by a logistics analyst benchmarking lead times",
+        "A gift order delivered to a recipient whose address is not the buyer's, so every address-keyed inference lands on the wrong household",
+        "A trade account, reseller or property manager receiving on behalf of an end customer who is invisible in the record",
+        "A split shipment or a reschedule creating a second delivery record for one purchase, double-counting the cohort",
+        "Someone checking whether you deliver to an address they are considering moving to, with no order intent at all",
+        "Bulk or business deliveries to a depot, where the delivery window has no relationship to a person preparing to receive anything"
+      ],
+      "confirmation_signals": [
+        "f09.installation_scheduling",
+        "f08.payment_preparation",
+        "f10.trade_in_activity"
+      ],
+      "recommended_action_class": "attach_accessories_removal_and_protection_before_the_delivery_date",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "local",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "grocery",
+          "consumer_electronics",
+          "furniture",
+          "logistics",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Post-purchase the underlying fact is certain, which argues high; the pre-purchase serviceability variant is much weaker. 4 is the blend, and a deployment that separates the two should score them apart."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

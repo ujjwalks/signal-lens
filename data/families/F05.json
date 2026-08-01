@@ -1,0 +1,1029 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F05",
+  "signals": [
+    {
+      "id": "f05.product_configuration",
+      "family": "F05",
+      "name": "Product configuration",
+      "definition": "The subject assembles a specific specification of the product rather than viewing a preset one - a configurator, plan builder, bundle picker, room or system planner, or a quote builder. Qualifying condition: at least one configuration option is moved off its default and the resulting state is carried to a summary, price, save, or share step.",
+      "question_answered": "Has the buyer moved from 'is this the right category' to 'this is the exact thing I would buy', and what specification would they buy?",
+      "intent_dimensions": [
+        "requirements",
+        "fit",
+        "preference",
+        "commitment"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "configuration_id",
+        "selected_option_values",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "configuration_completeness_pct",
+        "price_at_last_state",
+        "saved_or_shared_flag",
+        "abandon_step",
+        "repeat_configuration_count",
+        "session_id"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "commerce_platform"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Emit configuration_step_completed with the option key and chosen value from the configurator you already run - the configurator holds this state in memory to price the item and then discards it on unload; write it to an event instead",
+          "requires": [
+            "tag manager or app-level analytics",
+            "an existing configurator, plan table, or bundle picker"
+          ],
+          "gives": "The specification itself, not just 'someone used the configurator'"
+        },
+        {
+          "rung": 2,
+          "how": "Persist the configuration server-side against a resumable key so a returning subject picks it back up, which also yields abandon step and repeat-configuration count",
+          "requires": [
+            "a backend store and a durable first-party key"
+          ],
+          "gives": "Cross-session continuity and the exact step where specification stalls"
+        },
+        {
+          "rung": 3,
+          "how": "Join saved configurations to quotes and orders in the commerce or CRM backend so you learn which option combinations convert and which are dead ends",
+          "requires": [
+            "order or opportunity records keyed to the same subject"
+          ],
+          "gives": "Converts a behavioural signal into a merchandising and pricing input"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "No third party is involved at any rung; this signal is obtainable entirely from surfaces you already own"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "A configuration is a live specification while the requirement stands; it decays as the buyer either orders, respecifies, or drops the project."
+      },
+      "false_positives": [
+        "Employee or agency testing of the configurator after a release",
+        "Recreational configuring - car, PC and kitchen configurators are used as entertainment by people with no budget",
+        "Competitor reconnaissance on option availability and price break points",
+        "A specifier or proxy researcher configuring on behalf of the person who will actually buy",
+        "An existing customer configuring a replacement part or an add-on to something already owned",
+        "Student or hobbyist coursework"
+      ],
+      "confirmation_signals": [
+        "f06.quote_request",
+        "f07.sample_request",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "save_the_configuration_and_price_it_back",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "saas",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "desire",
+          "replacement",
+          "product_failure",
+          "property_or_relocation",
+          "business_event"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "automotive",
+          "furniture_and_interiors",
+          "building_products",
+          "industrial_equipment",
+          "software"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f05.compatibility_check",
+      "family": "F05",
+      "name": "Compatibility check",
+      "definition": "The subject tests the product against something they already own or are bound by - an installed system or version, a device or vehicle, a physical space, a standard, a service region. Qualifying condition: a fitment, serviceability, or integration lookup is executed carrying a specific identifier of the incumbent thing (model, version, registration, postcode, named system), and a pass or fail result is returned.",
+      "question_answered": "Is the buyer testing us against a constraint they already own, and which constraint is the one that could kill the deal?",
+      "intent_dimensions": [
+        "fit",
+        "requirements",
+        "risk"
+      ],
+      "identity_level": "visitor",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "subject_id",
+        "constraint_type",
+        "constraint_value",
+        "check_result",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "retry_count",
+        "alternate_values_tried",
+        "named_third_party_system",
+        "region_or_postcode",
+        "result_page_dwell_seconds",
+        "referrer"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "product_analytics",
+        "support_system"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Log the input and the result of the compatibility lookup you already serve - the delivery-postcode checker, the 'will it fit my vehicle' selector, the version-requirements table, the integrations directory search. The result is already computed server-side; persist the pair instead of only rendering it",
+          "requires": [
+            "an existing fitment, serviceability, or integration lookup"
+          ],
+          "gives": "The named incumbent constraint, which is the field sales actually needs"
+        },
+        {
+          "rung": 2,
+          "how": "Treat each integration or compatibility documentation page as a check keyed on the third-party system named on that page, so you capture the other half of the buyer's stack without owning a lookup tool",
+          "requires": [
+            "one page per named system and pageview tracking"
+          ],
+          "gives": "Coverage for companies with no configurator, at lower precision"
+        },
+        {
+          "rung": 3,
+          "how": "Aggregate failed checks into a standing demand register - which constraint fails most often, in which region, at what rate - and route that to product and partnerships rather than to sales",
+          "requires": [
+            "result stored with the failing value, not just a boolean"
+          ],
+          "gives": "Turns lost buyers into a ranked roadmap input; also the only honest way to size a market you currently cannot serve"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "A serviceability check that takes a full address rather than a postal district collects more personal data than the answer requires; take the coarsest input that returns a correct result"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": false,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "The intent decays over weeks, but a recorded failed constraint is a durable fact about that subject and should be kept after the intent has gone."
+      },
+      "false_positives": [
+        "A competitor or analyst mapping which systems, regions, or vehicle models you support",
+        "An implementation partner or consultant checking on behalf of a client who is the real buyer",
+        "An existing customer confirming an upgrade or migration path rather than making a new purchase",
+        "Crawlers, scrapers and LLM agents hitting integration and compatibility pages, which are unusually attractive to automated retrieval",
+        "A job applicant researching the stack before an interview",
+        "A user checking the fitment of a consumable for equipment they already own"
+      ],
+      "confirmation_signals": [
+        "f05.requirement_formation",
+        "f06.quote_request",
+        "f07.trial"
+      ],
+      "recommended_action_class": "answer_the_specific_constraint_and_log_the_gap",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "saas",
+          "subscription",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce",
+          "local_services"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement",
+          "product_failure",
+          "technology_change",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "automotive_parts",
+          "consumer_electronics",
+          "industrial_equipment",
+          "logistics_and_delivery"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f05.requirement_formation",
+      "family": "F05",
+      "name": "Requirement formation",
+      "definition": "The subject expresses what the solution must satisfy, as a constraint rather than a preference - filters applied and kept across views, a must-have checklist, requirement fields on a form, a published specification or scope of works, or a stated threshold in a sales or support conversation. Qualifying condition: at least one requirement is expressed as a value, threshold, standard, or exclusion attributable to the subject.",
+      "question_answered": "What must be true for this buyer to say yes, and can we satisfy it as we are today?",
+      "intent_dimensions": [
+        "requirements",
+        "fit",
+        "risk",
+        "budget"
+      ],
+      "identity_level": "visitor",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "requirement_key",
+        "requirement_value_or_threshold",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "requirement_source",
+        "must_have_vs_nice_to_have_flag",
+        "filter_persistence_across_sessions",
+        "requirement_count",
+        "conflicting_requirement_flag",
+        "stated_by_role"
+      ],
+      "source_class": [
+        "first_party_web",
+        "crm",
+        "support_system",
+        "first_party_backend"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Persist the facet filters your catalogue or directory already exposes as named requirement key-value pairs on the subject, keeping only the filters that survive more than one view - a filter applied and immediately removed is browsing, a filter carried across views is a requirement",
+          "requires": [
+            "a filterable catalogue, directory, or search UI"
+          ],
+          "gives": "Machine-readable constraints with no new form and no extra question asked of the buyer"
+        },
+        {
+          "rung": 2,
+          "how": "Add two or three structured requirement fields to the form you already run, replacing an open 'tell us about your project' box, and mark each as must-have or nice-to-have",
+          "requires": [
+            "an existing enquiry, quote, or signup form"
+          ],
+          "gives": "Requirements you can score against your own capability table, rather than free text nobody parses"
+        },
+        {
+          "rung": 3,
+          "how": "Extract requirement statements from sales notes, support tickets, and supplied specification documents into the same key-value shape, so a requirement stated on a call ranks alongside one typed into a filter",
+          "requires": [
+            "CRM or ticket text access and an agreed requirement vocabulary"
+          ],
+          "gives": "The only rung that catches requirements from buyers who never touch your website"
+        }
+      ],
+      "min_data": {
+        "note": "Requirement keys are only comparable once a controlled vocabulary exists. Below roughly 20 agreed keys the extract at rung 3 produces synonyms rather than signal."
+      },
+      "access_conditions": [
+        "Free-text sales and support notes are where special-category detail most often enters a CRM; extract only against an agreed requirement vocabulary and never pass raw note text into a scoring or audience pipeline"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "Requirements outlive a browsing session and often outlive the vendor shortlist; they die when the project is funded elsewhere or shelved."
+      },
+      "false_positives": [
+        "Filters used as a browsing convenience rather than a constraint, especially price filters set to explore a range",
+        "Requirements copied verbatim from a template or an incumbent supplier's specification, which describe the incumbent rather than the buyer's real need",
+        "A non-decision-maker stating requirements that the economic buyer will overrule",
+        "A procurement-mandated specification written to justify a supplier already chosen",
+        "An analyst, consultant, or student assembling a requirements matrix for a report",
+        "Aspirational must-haves that are dropped as soon as they carry a price"
+      ],
+      "confirmation_signals": [
+        "f05.compatibility_check",
+        "f06.quote_request",
+        "f13.rfp_or_tender_issued",
+        "f14.internal_approval_step"
+      ],
+      "recommended_action_class": "mirror_the_stated_requirements_before_pitching",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "ecommerce",
+          "marketplace",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local_services"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "regulation",
+          "contract_expiry",
+          "capacity_pressure",
+          "property_or_relocation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "construction",
+          "industrial_equipment",
+          "healthcare_it"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f05.eligibility_check",
+      "family": "F05",
+      "name": "Eligibility check",
+      "definition": "The subject supplies facts about themselves, for the stated purpose of the check, to learn whether they qualify - address serviceability, minimum or maximum thresholds such as company size or fleet count, licence or accreditation status, trade, student, or nonprofit status, or an affordability pre-check. Qualifying condition: the subject declares the qualifying facts for this purpose and a pass, fail, or refer result is returned against their record. Facts inferred from behaviour rather than declared are out of scope.",
+      "question_answered": "Can this buyer actually be served or approved, and if not, exactly what disqualified them?",
+      "intent_dimensions": [
+        "readiness",
+        "fit",
+        "requirements",
+        "budget"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "eligibility_check_type",
+        "declared_qualifying_values",
+        "result_status",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "decline_reason_code",
+        "retry_count",
+        "referral_route_offered",
+        "consent_record_id",
+        "check_completed_vs_abandoned",
+        "channel"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "crm"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Store the outcome of the eligibility gate you already operate - the serviceability postcode box, the 'are you VAT registered', the minimum-order or minimum-headcount screen - as a three-state result on the subject rather than as a page that silently redirects",
+          "requires": [
+            "an existing eligibility or serviceability gate"
+          ],
+          "gives": "A pass/fail/refer state, and the population of people you turn away, which almost nobody counts"
+        },
+        {
+          "rung": 2,
+          "how": "Add a coded decline reason so a fail becomes actionable - out of area, below threshold, wrong accreditation - and offer the qualifying path on the result screen",
+          "requires": [
+            "a reason-code vocabulary agreed with the team that owns the rule"
+          ],
+          "gives": "Turns a rejection into either a routed referral or a measured gap"
+        },
+        {
+          "rung": 3,
+          "how": "Verify declared facts against an authoritative register the subject has authorised you to query - a public licence or company register, or a regulated bureau check where one applies - and store only the verdict, not the underlying report",
+          "requires": [
+            "an authorisation record from the subject",
+            "a lawful basis and, for bureau checks, a permissible purpose"
+          ],
+          "gives": "A verified rather than asserted eligibility state, at materially higher legal cost"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Rungs 1 and 2 need only notice. Rung 3 changes the permission axis, not the availability axis: a check performed against a consumer credit bureau is a consumer report and requires a permissible purpose, adverse-action handling, and retention limits, none of which the subject's willingness to be checked supplies on its own",
+        "Store the verdict, not the evidence. A decline reason code belongs in the servicing record and must never be copied into a marketing attribute, audience, or lookalike seed",
+        "Where an eligibility route exists only for applicants with a health condition, a disability, or a benefit entitlement, the fact that a subject took that route must not be retained as a segment - see restricted.eligibility_route_special_category_inference"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Bureau-backed affordability and credit pre-checks are regulated consumer-reporting activity in the US and equivalent regimes elsewhere; the declared-facts variant described here is not, and the two must not be scored as one signal.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "A pass is a durable fact for as long as the underlying rule and the subject's circumstances hold; the intent it accompanies decays much faster than the eligibility state does."
+      },
+      "false_positives": [
+        "Curiosity checks - people test serviceability for an address they are only considering, particularly during a house search",
+        "An agent, broker, or family member running the check with someone else's details",
+        "Repeated attempts with altered values to find the threshold, which reads as several qualified subjects and is one unqualified one",
+        "A trade or nonprofit status claimed to unlock a discount by someone not entitled to it",
+        "An existing customer re-checking eligibility for a second site or vehicle",
+        "Automated form submissions and LLM agents completing gates to reach the content behind them"
+      ],
+      "confirmation_signals": [
+        "f06.financing_calculation",
+        "f07.reservation",
+        "f08.identity_verification"
+      ],
+      "recommended_action_class": "route_by_result_and_offer_the_qualifying_path",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace",
+          "saas"
+        ],
+        "purchase_motion": [
+          "local_services",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "property_or_relocation",
+          "business_event",
+          "regulation",
+          "problem",
+          "funding"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "telecommunications",
+          "utilities",
+          "financial_services",
+          "insurance",
+          "local_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f05.diagnostic_tool_use",
+      "family": "F05",
+      "name": "Diagnostic tool use",
+      "definition": "The subject submits an asset they own or operate to a tool that inspects it and returns findings - a site, security, or performance scan, a network or speed test, an energy or insulation audit, a fault-code lookup, a soil, water, or emissions test, a compliance or tax checker. Qualifying condition: an identifiable asset is submitted and a findings payload with a severity or score is produced against it. Tools whose output is a statement about a person's body or health are out of scope and are not detectable signals here.",
+      "question_answered": "Has the buyer had a specific defect in their own environment quantified, and how bad is the finding?",
+      "intent_dimensions": [
+        "need",
+        "fit",
+        "risk",
+        "urgency"
+      ],
+      "identity_level": "asset",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "asset_id",
+        "subject_id_or_contact",
+        "diagnostic_type",
+        "finding_severity_or_score",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "findings_categories",
+        "rerun_count",
+        "score_delta_since_last_run",
+        "report_downloaded_flag",
+        "remediation_page_views",
+        "asset_ownership_asserted_flag"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "product_analytics"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Store the findings of the free checker you already publish against the asset identifier, not just the fact that someone ran it - the severity of the worst finding is the signal, and it is thrown away by almost every free-tool implementation",
+          "requires": [
+            "an existing audit, scan, calculator, or checker"
+          ],
+          "gives": "A severity-ranked queue instead of an undifferentiated list of tool users"
+        },
+        {
+          "rung": 2,
+          "how": "Keep the run history per asset so you can compute the delta between runs - a subject who re-runs and finds the problem unchanged is a subject who has failed to fix it themselves",
+          "requires": [
+            "asset-keyed storage across sessions"
+          ],
+          "gives": "Distinguishes a fixed problem from a persistent one, which is the difference between a closed need and an open one"
+        },
+        {
+          "rung": 3,
+          "how": "Where the subject connects the asset directly rather than pasting an identifier, monitor it on a schedule and treat a newly appearing high-severity finding as the trigger, so the signal fires when the problem appears rather than when the buyer remembers your tool",
+          "requires": [
+            "an authorised connection to the asset",
+            "an explicit monitoring consent and a revocation path"
+          ],
+          "gives": "Shifts the signal from pull to push; upgrades permission from notice to explicit consent"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Scan only an asset the requester controls or has authorised. Unsolicited scanning of third-party infrastructure can constitute unauthorised access under computer-misuse statutes regardless of how benign the scan is, and asserting ownership in a form field does not make it true - rate-limit and log the assertion",
+        "Findings about a live asset can themselves be an exposure. Do not publish, resell, or index a findings payload that names a third party's vulnerability"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Diagnostic output about a named third party's asset is materially different from output about the requester's own; the second is a service, the first can be a disclosure.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "The intent decays quickly, but an unremediated high-severity finding stays true until the next run contradicts it; re-run the asset before treating an old finding as current."
+      },
+      "false_positives": [
+        "An agency, consultant, or reseller running the tool on a client's or a prospect's asset - the dominant archetype for any free scanner, and the runner is never the buyer",
+        "A competitor benchmarking your tool's output against their own",
+        "Curiosity runs by an owner with no budget and no intention to remediate",
+        "Automated or scripted runs, including LLM agents completing a scan on a user's behalf, which inflate volume and carry no contact",
+        "Internal QA and demo runs by your own staff",
+        "Someone scanning an asset they do not own - a competitor's domain, a landlord's building, a rival's fleet"
+      ],
+      "confirmation_signals": [
+        "f01.operational_problem_reported",
+        "f05.requirement_formation",
+        "f07.consultation"
+      ],
+      "recommended_action_class": "lead_with_the_finding_not_the_product",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "local_services",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "product_failure",
+          "regulation",
+          "security_incident",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "cybersecurity",
+          "energy_and_home_efficiency",
+          "automotive_service",
+          "agriculture"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f05.measurement_taken",
+      "family": "F05",
+      "name": "Measurement taken",
+      "definition": "The subject supplies a dimensional measurement of the thing the purchase must fit - a room, opening, roof, floor area, rack, vehicle bay, or an object or garment size - for the stated purpose of checking fit or producing a quote. Qualifying condition: at least one numeric measurement with a unit is recorded against the subject or the site, declared by the subject or captured by a surveyor with their agreement. Measurement of a person's body geometry derived from a photo, video, or scan is out of scope; see restricted.body_measurement_health_inference.",
+      "question_answered": "Has this buyer got as far as measuring, and does what they measured actually fit what we sell?",
+      "intent_dimensions": [
+        "requirements",
+        "fit",
+        "commitment",
+        "timing"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "measurement_type",
+        "measurement_value",
+        "measurement_unit",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "measured_entity_type",
+        "location_id",
+        "measurement_count",
+        "revision_count",
+        "fits_catalogue_range_flag",
+        "captured_by_surveyor_flag"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "crm",
+        "offline_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Turn the measurement you already ask for into structured numeric fields with a unit. Most quote forms and order notes already contain dimensions, typed into a free-text box where nothing can read them - three numeric fields and a unit selector is a one-afternoon change",
+          "requires": [
+            "an existing quote, enquiry, or order form"
+          ],
+          "gives": "Machine-comparable dimensions and, immediately, a fits/does-not-fit flag against your own catalogue range"
+        },
+        {
+          "rung": 2,
+          "how": "Score each measurement against the catalogue on submission and tell the subject the answer, storing both the measurement and the verdict; a measurement that falls outside your range is a routing decision, not a lead",
+          "requires": [
+            "catalogue dimension ranges in a queryable form"
+          ],
+          "gives": "Converts a lead-capture field into a qualification gate, and counts the demand you cannot serve"
+        },
+        {
+          "rung": 3,
+          "how": "Capture surveyed measurements from the field system your installers or surveyors already use and write them back to the same fields, so a measurement taken on site ranks alongside one typed on the website",
+          "requires": [
+            "an export or connector from the field-service or survey system"
+          ],
+          "gives": "The measurement that actually governs the order, taken by someone competent to take it"
+        }
+      ],
+      "min_data": null,
+      "access_conditions": [
+        "Collect the dimension, not the person. A garment or fit measurement typed in by the subject for sizing is a declared attribute; the same number derived from a photograph or a body scan is biometric processing and is excluded from this catalogue as an implementable signal",
+        "Do not retain a series of body measurements for the same person over time as a profile attribute. A trend in body measurement is the shortest path from a sizing form to a health inference"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Declared dimensions are ordinary personal data. Scan-derived body geometry is not, and the two must never share a field.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": true,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "A room does not change size. The measurement stays true; the intent attached to it does not, so score the recency of the submission separately from the validity of the number."
+      },
+      "false_positives": [
+        "A measurement taken for a project that is being costed but not yet approved or funded",
+        "A tenant, occupant, or family member measuring a property they cannot authorise work on",
+        "A tradesperson or specifier measuring on behalf of a client who is the actual buyer",
+        "Estimated rather than measured numbers - round figures typed to get past a required field",
+        "A measurement submitted to compare against an incumbent supplier's quote with no intention of switching",
+        "An existing customer measuring a second room or unit, which is expansion rather than acquisition"
+      ],
+      "confirmation_signals": [
+        "f05.product_configuration",
+        "f06.quote_request",
+        "f07.consultation",
+        "f09.installation_scheduling"
+      ],
+      "recommended_action_class": "confirm_the_fit_and_remove_the_sizing_risk",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "local_services",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "property_or_relocation",
+          "replacement",
+          "product_failure",
+          "desire",
+          "occasion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "furniture_and_interiors",
+          "building_products",
+          "flooring_and_window_treatments",
+          "apparel",
+          "data_centre_and_racking"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "source_url": null,
+          "as_of": "2026-08-01",
+          "independence": "author_estimate"
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

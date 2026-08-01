@@ -234,6 +234,34 @@ def check_entry(entry, f):
                   f"{facet} carries no evidence entry - it will clamp to the neutral "
                   "midpoint at render time rather than being taken at face value")
 
+    # --- cross-field coherence --------------------------------------------
+    # These combinations are individually in-enum and jointly incoherent. Each one
+    # was found by red team on a real entry before it was a rule here; a finding
+    # that stays prose recurs on the next contributor.
+    perm = entry.get("permission_requirement")
+    avail = entry.get("availability")
+    restricted = (entry.get("sensitivity") == "restricted"
+                  or avail in ("restricted", "should_not_be_collected"))
+    if not restricted:
+        if legal.get("terminal_equipment_access") and perm == "none":
+            f.add("error", eid, "permission_requirement",
+                  "terminal_equipment_access is true but permission is 'none'. Reading or "
+                  "writing on a visitor's device is non-essential access under ePrivacy "
+                  "Art 5(3)/PECR reg 6 and needs consent in the EEA and UK - 'none' is the "
+                  "floor of the enum, so this row would clear every permission gate. Use at "
+                  "least 'notice', or move the capture server-side and set the flag false")
+        if legal.get("person_level_resolution") and perm == "none":
+            f.add("error", eid, "permission_requirement",
+                  "person_level_resolution is true but permission is 'none'. Resolving a "
+                  "natural person always carries at least a transparency duty; data obtained "
+                  "from a source other than the individual owes notice under GDPR Art 14")
+        if (avail == "public_cost_free" and perm == "none"
+                and legal.get("person_level_resolution")):
+            f.add("error", eid, "availability",
+                  "public_cost_free + permission 'none' + person-level resolution is the "
+                  "free-equals-lawful collapse the two axes exist to prevent. Free to obtain "
+                  "is not free to use")
+
     # --- applicability -----------------------------------------------------
     app = entry.get("applicability")
     if not isinstance(app, dict):
@@ -249,9 +277,6 @@ def check_entry(entry, f):
                       "never be read as false)")
 
     # --- SAFETY: a restricted entry must ship no implementation path -------
-    restricted = (entry.get("sensitivity") == "restricted"
-                  or entry.get("availability") in ("restricted",
-                                                   "should_not_be_collected"))
     if restricted:
         if not str(eid).startswith("restricted."):
             f.add("error", eid, "id",

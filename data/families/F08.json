@@ -1,0 +1,766 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F08",
+  "signals": [
+    {
+      "id": "f08.identity_verification",
+      "family": "F08",
+      "name": "Identity verification step reached",
+      "definition": "The subject enters a step that exists only to prove who they are before a transaction can complete - starting or completing a know-your-customer, age-assurance or eligibility check, submitting an identity document, or sitting in a manual review queue. Qualifying condition: a verification case keyed to a specific pending transaction or account opening reaches a recorded state (started, referred, passed, failed, abandoned). The signal is the STATE OF THE CASE. The documents, images, biometric templates and any attribute extracted from them are never signal fields - see restricted.biometric_attribute_inference.",
+      "question_answered": "Has this buyer cleared the last identity barrier standing between them and a completed transaction, and if not, exactly where did they stop?",
+      "intent_dimensions": [
+        "readiness",
+        "risk",
+        "commitment",
+        "identity_scope"
+      ],
+      "identity_level": "individual",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "verification_case_id",
+        "verification_type",
+        "case_state",
+        "state_timestamp",
+        "blocked_transaction_or_account_id"
+      ],
+      "optional_supporting_fields": [
+        "step_reached_before_abandonment",
+        "attempt_count",
+        "resubmission_count",
+        "time_in_manual_review_queue",
+        "channel_self_serve_or_assisted",
+        "device_or_channel_switch_indicator",
+        "value_of_blocked_transaction"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "support_system",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Emit one state-change event per verification case from the flow you already run - started, referred, passed, failed, abandoned - carrying the case id, the state and the transaction it blocks, and nothing else",
+          "requires": [
+            "read access to the verification system's existing state changes or webhooks"
+          ],
+          "gives": "The whole signal from data that already exists. Almost every verification flow already writes these states; they are simply visible only to the risk team and never joined to the transaction"
+        },
+        {
+          "rung": 2,
+          "how": "Record the step at which an abandoned verification stopped - document capture, selfie or liveness, address entry, wait for manual review",
+          "requires": [
+            "step-level state in the verification flow"
+          ],
+          "gives": "The difference between a fraud signal and a usability defect, which the pass/fail outcome alone hides completely"
+        },
+        {
+          "rung": 3,
+          "how": "Measure time-in-queue for manual review and alert on it, treating the queue as a revenue path rather than a compliance backlog",
+          "requires": [
+            "queue timestamps, which the review tool already has"
+          ],
+          "gives": "The highest-readiness population you have - buyers who have passed everything except your own service level - and it needs no volume to be actionable"
+        },
+        {
+          "rung": 4,
+          "how": "Join case state to the value of the transaction it blocks so recovery effort is prioritised by exposed revenue instead of queue order",
+          "requires": [
+            "a shared transaction or application id between the verification system and the order or application store"
+          ],
+          "gives": "Prioritisation, and a measured cost of your own verification friction"
+        }
+      ],
+      "min_data": {
+        "min_cases_for_step_rates": 200,
+        "note": "Abandonment-by-step rates are unstable below roughly 200 cases per step. The manual-review service-level signal at rung 3 is usable from day one and needs no volume at all."
+      },
+      "access_conditions": [
+        "Verification records are held for a regulatory purpose - anti-money-laundering, age assurance, sanctions screening - whose permitted uses are specified exhaustively. Using the case STATE to help the buyer complete the transaction they started is inside that purpose; exporting it into an advertising audience is a separate decision with a separate basis, and in several regimes there is no basis available",
+        "Never copy the document image, the biometric template, the document number, or any attribute read off a document into the analytics record. Carry the state, the step and the timestamps",
+        "The verification store may lawfully contain biometric and special-category data. This row does not, and that is the reason the row carries only the state - do not close the gap by joining the analytics copy back to the source record",
+        "Retention for the verification record is set by the regulation, not by your analytics policy. A warehouse copy inherits the wrong retention clock and outlives its own lawful basis"
+      ],
+      "availability": "integration",
+      "permission_requirement": "regulated_access",
+      "terms_constrained": true,
+      "terms_note": "Verification providers' processing agreements normally enumerate permitted purposes exhaustively and prohibit secondary use; the underlying anti-money-laundering and age-assurance rules impose their own purpose and retention limits independent of the contract.",
+      "sensitivity": "high",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 5,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "The signal expires with the transaction it blocks, or when the verification is re-run. A verification state with no live transaction behind it is a compliance record, not an intent signal, and must not be scored as one."
+      },
+      "false_positives": [
+        "Verification run for account recovery, a password reset, or a periodic re-verification of an existing customer - no new purchase behind it",
+        "A regulated re-screening cycle (sanctions, politically-exposed-person, annual refresh) the customer did not initiate",
+        "An age check triggered by content access rather than by a purchase",
+        "Fraud and account-farm operators completing verification at scale: high completion rates, zero purchase intent",
+        "A person verifying on behalf of a company, a client or a dependant they represent",
+        "Sandbox or QA cases leaking into production reporting",
+        "An abandonment caused by a broken document-capture step on one device or browser, which reads as a risk signal but is a defect in your own flow"
+      ],
+      "confirmation_signals": [
+        "f08.payment_preparation",
+        "f08.billing_setup",
+        "f08.account_verification"
+      ],
+      "recommended_action_class": "clear_the_blocking_step_do_not_market_to_it",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "marketplace",
+          "subscription",
+          "services",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "regulation",
+          "business_event",
+          "desire",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "financial_services",
+          "insurance",
+          "marketplace",
+          "telecoms",
+          "travel",
+          "real_estate"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: submitting identity documents is a high-effort, low-ambiguity act that people do not perform speculatively. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. The record is authoritative and machine-generated with no self-report in it; the residual doubt is population contamination (re-verification, fraud rings), not measurement error."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f08.payment_preparation",
+      "family": "F08",
+      "name": "Payment method preparation",
+      "definition": "The subject puts a means of payment in place at or before the point of purchase - attaching, updating or re-authorising a payment instrument, completing a wallet or bank-authorisation handshake, passing a zero-value verification authorisation, or selecting a payment method at checkout. Qualifying condition: a tokenised payment instrument is created, updated, or authorised (successfully or not) against the subject or account. The fields are the token reference and the state; primary account numbers, security codes and bank credentials are never signal fields and must not leave the payment environment.",
+      "question_answered": "Can this buyer actually pay us right now - and if they tried, did it succeed, and if not, why?",
+      "intent_dimensions": [
+        "readiness",
+        "commitment",
+        "channel",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "account_or_subject_id",
+        "payment_instrument_token_reference",
+        "instrument_state",
+        "payment_method_class",
+        "state_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "decline_reason_class",
+        "retry_count",
+        "zero_value_auth_result",
+        "instrument_expiry_year_month",
+        "billing_country",
+        "is_first_instrument_on_account",
+        "wallet_vs_manual_entry",
+        "time_from_instrument_add_to_first_charge",
+        "strong_authentication_step_outcome"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Subscribe to the payment-instrument events your payment platform already emits - instrument attached, instrument updated, authorisation succeeded, authorisation failed - and store the token reference, the method class and the state",
+          "requires": [
+            "an existing merchant account and its webhook or events API"
+          ],
+          "gives": "The signal from data you are already being sent. In most companies these events reach finance and stop there"
+        },
+        {
+          "rung": 2,
+          "how": "Split declines by reason class - insufficient funds, expired instrument, issuer decline, strong-authentication abandoned",
+          "requires": [
+            "the decline reason your platform already returns, mapped to a small class list"
+          ],
+          "gives": "The single most valuable distinction in this row: an abandoned authentication step is a recoverable readiness signal with a usability cause, an issuer decline is not"
+        },
+        {
+          "rung": 3,
+          "how": "Add a zero-value or account-verification authorisation when an instrument is attached, so 'they added a card' becomes 'they added a card that works'",
+          "requires": [
+            "payment-platform support for verification authorisations"
+          ],
+          "gives": "Removes the largest false positive in this row - instruments that are attached but not chargeable"
+        },
+        {
+          "rung": 4,
+          "how": "Join instrument state to the order attempt so 'ready to pay and did not' is separated from 'tried to pay and could not'",
+          "requires": [
+            "a shared order or checkout-session id"
+          ],
+          "gives": "Two populations that need opposite treatments - an objection to answer versus a failure to recover"
+        }
+      ],
+      "min_data": {
+        "min_payment_attempts": 500,
+        "min_history_days": 90,
+        "note": "Decline-reason mix varies sharply by issuer, method and country. Below roughly 500 attempts a decline-class breakdown is not stable enough to route on, though the individual events are actionable one at a time from day one."
+      },
+      "access_conditions": [
+        "Card data is in scope for the payment card industry's security standard. The catalogue's fields are a token reference and a state; a primary account number, security code, full track data or a bank credential must never enter an analytics store, a CRM or an audience. Pulling card numbers into a warehouse to build this signal extends your compliance scope to the warehouse",
+        "Bank-authorisation style connections are consented for a stated purpose and a stated period. That consent does not extend to marketing segmentation and it expires - the connection lapsing is not a signal about the buyer",
+        "Merchant and processor agreements generally permit use of your own transaction data but restrict onward transfer and re-identification; check before joining instrument data to any third-party audience",
+        "Do not build this signal client-side by observing card-field interactions. That is both a card-security scope problem and the pattern behavioural-telemetry claims target, and it is unnecessary - every rung above is server-side"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Access is governed by your merchant or processor agreement, which defines permitted use of transaction data and normally prohibits onward transfer and re-identification; the card-security standard separately constrains where card data may be stored at all.",
+      "sensitivity": "high",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 5,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "hard_expiry",
+        "half_life_days": null,
+        "note": "An authorisation hold and a checkout session both expire on the payment platform's clock, typically within days. After that the buyer has to start again and the signal is spent, not merely weaker."
+      },
+      "false_positives": [
+        "A card updated on an existing subscription - a retention event, not new demand",
+        "An instrument added to start a free trial where no charge is imminent",
+        "Card testing and enumeration attacks, which generate large volumes of attach and decline events with no buyer behind them at all",
+        "A finance or procurement user loading a corporate card for somebody else's purchase",
+        "A wallet auto-fill that attaches an instrument without a deliberate decision by the person",
+        "An authorisation retried by your own dunning system rather than initiated by the customer",
+        "Internal or QA transactions run against a live merchant account"
+      ],
+      "confirmation_signals": [
+        "f08.billing_setup",
+        "f08.identity_verification",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "remove_the_payment_obstacle_inside_the_authorisation_window",
+      "applicability": {
+        "b2b_b2c": [
+          "b2c",
+          "b2b"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "marketplace",
+          "saas"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered",
+          "high_ticket"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "desire",
+          "replacement",
+          "occasion",
+          "contract_expiry",
+          "inventory_depletion"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "retail",
+          "consumer_electronics",
+          "travel",
+          "software",
+          "telecoms",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: presenting a means of payment is the last act before money moves. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. The event is machine-generated and unambiguous, but card-testing traffic can dominate raw volumes, which is why rung 3's verification authorisation matters more here than the score does."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f08.billing_setup",
+      "family": "F08",
+      "name": "Billing account setup",
+      "definition": "The subject configures the commercial plumbing the purchase will run through - creating or completing a billing profile, entering a billing or tax address, a tax registration number, a purchase-order or cost-centre reference, an invoicing contact, or requesting invoice-based payment terms. Qualifying condition: at least one billing-only field, one that exists solely in order to invoice somebody, is completed against an account. A shipping address or a login profile is not this signal.",
+      "question_answered": "Has somebody started doing the administrative work that only happens once a purchase has been decided internally?",
+      "intent_dimensions": [
+        "readiness",
+        "commitment",
+        "authority",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "account_id",
+        "billing_field_class_completed",
+        "completed_by_subject_id",
+        "completion_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "tax_registration_present",
+        "po_reference_present",
+        "invoicing_contact_differs_from_user",
+        "legal_entity_name_differs_from_account_name",
+        "payment_terms_requested",
+        "cost_centre_reference",
+        "billing_country",
+        "billing_contact_count"
+      ],
+      "source_class": [
+        "commerce_platform",
+        "first_party_backend",
+        "crm"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Flag the account the first time any billing-only field is completed - tax number, billing address, invoicing contact, purchase-order reference - and store that first-completion timestamp",
+          "requires": [
+            "read access to the billing or commerce records you already hold"
+          ],
+          "gives": "A decision-taken flag from fields that already exist. The fields are always there; the first-completion timestamp almost never is, and it is the part that carries the signal"
+        },
+        {
+          "rung": 2,
+          "how": "Separate 'the user completed it' from 'a different person completed it' by comparing the completing subject to the account's active users",
+          "requires": [
+            "a user id on the billing edit"
+          ],
+          "gives": "A finance or procurement contact appearing on the billing profile is a buying group forming, and it is one comparison away"
+        },
+        {
+          "rung": 3,
+          "how": "Detect the procurement-shaped variants explicitly: a purchase-order reference, a request for invoicing terms instead of card payment, a supplier-onboarding form, a tax-certificate or vendor-questionnaire request",
+          "requires": [
+            "routing those inbound requests into a structured field rather than an inbox"
+          ],
+          "gives": "The strongest variants in this row - each is a step nobody takes speculatively"
+        },
+        {
+          "rung": 4,
+          "how": "Join first-billing-field completion to the eventual order date and learn your own lag from billing setup to purchase",
+          "requires": [
+            "order records joined on account id"
+          ],
+          "gives": "A follow-up window measured on your own business rather than a generic one, which is what this signal is actually for"
+        }
+      ],
+      "min_data": {
+        "min_accounts_with_orders": 100,
+        "note": "The billing-setup-to-order lag at rung 4 needs roughly 100 completed orders before the median stops moving. The boolean flag at rung 1 is usable immediately and at any volume."
+      },
+      "access_conditions": [
+        "Tax registration numbers and legal entity names are business identifiers, but a sole trader's tax number can be a personal identifier in some jurisdictions. Store and score the field CLASS - 'a tax number is present' - rather than the value",
+        "Billing records carry statutory retention periods longer than most marketing retention policies. Copying them into a marketing store imports the wrong retention clock and creates data you cannot delete on request but also should not be holding for that purpose",
+        "In a reseller or agency motion the billing account and the deciding organisation are different entities; treat the billing account as the identity this signal attaches to and do not infer the end customer's readiness from it"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "Billing setup is close to the decision but not to the moment: in a business motion the gap between a completed billing profile and a first invoice runs to weeks. Measure your own lag at rung 4 and use it in place of this default."
+      },
+      "false_positives": [
+        "A finance team completing billing details for an unrelated existing contract or a renewal",
+        "Vendor onboarding completed for a procurement or security compliance review with no purchase attached to it",
+        "A tax, address or entity-name correction on an established account",
+        "Billing details entered only to unlock a free tier or trial that requires a card or a tax number",
+        "An agency or reseller setting up billing on behalf of a client whose decision is not made",
+        "A duplicate account created by an organisation that already buys from you, inflating account-level counts",
+        "Staff testing the billing flow with real details in a production account"
+      ],
+      "confirmation_signals": [
+        "f08.payment_preparation",
+        "f06.negotiation",
+        "f09.onboarding_scheduling"
+      ],
+      "recommended_action_class": "treat_the_decision_as_taken_and_shorten_the_path_to_invoice",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "marketplace",
+          "services",
+          "ecommerce"
+        ],
+        "purchase_motion": [
+          "considered",
+          "high_ticket",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "business_event",
+          "contract_expiry",
+          "funding",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "logistics",
+          "manufacturing",
+          "marketplace"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement: billing administration is unpleasant work that people only do once the buying decision has been made internally. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement, held at 4 because free tiers and trials that demand billing details for anti-abuse reasons manufacture this event on accounts that never intended to buy."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f08.account_verification",
+      "family": "F08",
+      "name": "Account and access verification",
+      "definition": "The subject removes the account-level barriers that stand before a transaction - verifying an email address or phone number, completing domain or workspace verification, configuring single sign-on, enrolling in multi-factor authentication, accepting an invitation to an existing account, or receiving administrator approval. Qualifying condition: an account state transition from unverified to verified, or from single-member to multi-member, is recorded. This is account hygiene, not identity proofing; for regulated identity checks see f08.identity_verification.",
+      "question_answered": "Has this account moved from a casual sign-up to something an organisation is standing behind - and has a second person joined it?",
+      "intent_dimensions": [
+        "readiness",
+        "commitment",
+        "authority",
+        "identity_scope"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "subject_id",
+        "verification_type",
+        "state_transition",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "email_domain_class",
+        "verified_member_count_after_transition",
+        "days_between_first_and_second_verified_member",
+        "inviter_subject_id",
+        "invite_acceptance_lag_hours",
+        "sso_or_domain_verification_completed",
+        "admin_approval_required",
+        "role_of_verified_subject"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "product_analytics",
+        "crm"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Timestamp the verification transitions your own authentication system already performs - email verified, phone verified, invitation accepted - onto the account record instead of leaving them in an auth log nobody queries",
+          "requires": [
+            "read access to your own auth events"
+          ],
+          "gives": "The signal today, from events you already generate, with no new collection from the user"
+        },
+        {
+          "rung": 2,
+          "how": "Classify the verified email domain as corporate, free-mail or disposable using a list you maintain yourself",
+          "requires": [
+            "a domain list you own and update"
+          ],
+          "gives": "The cheapest business qualification signal that exists on a self-serve account - and it needs no vendor, no enrichment purchase and no third-party lookup"
+        },
+        {
+          "rung": 3,
+          "how": "Count distinct verified members per account and the lag between the first and the second",
+          "requires": [
+            "membership records with verification state"
+          ],
+          "gives": "The moment a single user becomes a buying group. This is the most under-used field in the family and it is already in your database"
+        },
+        {
+          "rung": 4,
+          "how": "Treat single sign-on configuration, domain verification or an administrator approval step as a separate and stronger state than personal verification",
+          "requires": [
+            "workspace or tenant configuration events"
+          ],
+          "gives": "Authority arriving as an observed event rather than an inference: somebody with organisational standing had to act for it to happen"
+        }
+      ],
+      "min_data": {
+        "min_accounts": 200,
+        "min_history_days": 90,
+        "note": "A 'second verified member within N days' rule needs roughly 200 accounts with 90 days of history before N can be tuned to anything. The individual state transitions are usable at any volume."
+      },
+      "access_conditions": [
+        "Authentication logs are security records. Give the analytics copy its own minimal schema - account, subject, transition, timestamp - rather than replicating the log, which carries IP addresses and device data you do not need for this signal and should not retain for this purpose",
+        "Where the account belongs to a customer organisation, seat, role and membership data is governed by your contract with that organisation as well as by privacy law; a customer's employee list is not yours to enrich",
+        "Free-mail and disposable-domain classification must be maintained as your own list. Buying it re-introduces a third-party dependency for a judgement you can make yourself, and vendor domain lists go stale in exactly the way this catalogue avoids naming vendors to prevent",
+        "This row resolves a natural person from your own records. Even where the data is first-party and the processing is expected, a transparency duty attaches; where any field arrives from a source other than the individual, GDPR Art 14 notice is owed."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "The verified state is a persistent fact; the intent lives in the transition. A verification six months old describes the account, not this week's demand - which is why the required fields are the transition and its timestamp rather than the current state."
+      },
+      "false_positives": [
+        "Verification completed only to use a free tier or to open gated content",
+        "A corporate email address on a personal evaluation account with no organisational sponsorship behind it",
+        "A second verified member who is a colleague invited for a look rather than a stakeholder in a decision",
+        "Bulk invitations generated by a referral incentive or a growth loop rather than by a buying process",
+        "Multi-factor enrolment enforced by workspace policy, not chosen by the user - a policy artefact that reads as commitment",
+        "Re-verification after a security incident, a device change or a password reset",
+        "Contractors, agencies and support staff verified into a customer's account, inflating the member count without adding a buyer"
+      ],
+      "confirmation_signals": [
+        "f08.billing_setup",
+        "f07.trial",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "qualify_the_second_verified_member_not_the_first",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable"
+        ],
+        "triggers": [
+          "business_event",
+          "problem",
+          "hiring",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": true,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "marketplace",
+          "financial_services",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement, deliberately the lowest in this family. Email verification is table stakes for using anything; the strength lives almost entirely in rungs 3 and 4 - a second verified member, or domain and single sign-on configuration - not in the base transition. Not measured."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Author judgement. The events themselves are exact and system-generated; what they imply about intent is weak, which is the reason strength and reliability diverge on this row."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}

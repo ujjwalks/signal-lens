@@ -1,0 +1,1157 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F10",
+  "signals": [
+    {
+      "id": "f10.product_usage",
+      "family": "F10",
+      "name": "Product usage",
+      "definition": "Measured use of a product the subject already owns or subscribes to, relative to what the current tier, unit or configuration can carry: seats or licences consumed against those purchased, metered volume against an included allowance, hits against a hard feature ceiling, or, for a physical asset, cumulative hours, cycles or distance against its rated duty. Qualifying condition: utilisation crosses a stated share of entitlement in two or more consecutive measurement periods, or a hard limit is reached at least once. This row also carries the upgrade-cycle case: an owned asset that has passed the age, meter reading or duty cycle at which its category is normally replaced is the same measurement taken against a different entitlement.",
+      "question_answered": "Which existing customers have outgrown what they bought, which will outgrow it next quarter, and can we prove it from their own usage against their own contract rather than guessing from company size?",
+      "intent_dimensions": [
+        "need",
+        "value",
+        "timing",
+        "readiness",
+        "requirements",
+        "budget"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "metric_name",
+        "metric_value",
+        "entitlement_value",
+        "period_start",
+        "period_end"
+      ],
+      "optional_supporting_fields": [
+        "active_seats_vs_licensed_seats",
+        "overage_line_items",
+        "limit_reached_event_count",
+        "feature_gate_id",
+        "asset_serial",
+        "utilisation_trend_slope",
+        "admin_contact_id",
+        "provisioned_seat_count",
+        "entitlement_change_history",
+        "environment"
+      ],
+      "source_class": [
+        "product_analytics",
+        "first_party_backend",
+        "commerce_platform",
+        "user_authorized_connection",
+        "crm",
+        "offline_system"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute a utilisation ratio per account from the meters you already bill on - active seats against licensed seats, volume used against volume included, overage lines on the last three invoices - and rank the installed base by it every week",
+          "requires": [
+            "billing or entitlement records",
+            "one scheduled query"
+          ],
+          "gives": "An outgrowth list from data you already invoice against, with no product change and no new collection"
+        },
+        {
+          "rung": 2,
+          "how": "Emit an event whenever a user reaches a hard limit or sees a plan-gate message, carrying the gate identifier and the account",
+          "requires": [
+            "product event instrumentation",
+            "named gates in the code"
+          ],
+          "gives": "The specific constraint that is binding, which turns a ratio into a conversation"
+        },
+        {
+          "rung": 3,
+          "how": "Track the slope of utilisation per account and forecast the period in which the entitlement is exhausted",
+          "requires": [
+            "at least six periods of history per account"
+          ],
+          "gives": "A timing dimension - not who is over, but who is about to be"
+        },
+        {
+          "rung": 4,
+          "how": "For connected physical products, read cumulative duty - hours, cycles, distance, consumable counts - from the asset itself where the owner has authorized telemetry for service purposes",
+          "requires": [
+            "a connected asset",
+            "an owner authorization the owner can withdraw",
+            "a serial-to-account mapping"
+          ],
+          "gives": "Asset-level usage for hardware, and the only lawful route to it"
+        },
+        {
+          "rung": 5,
+          "how": "Keep the denominator's history: every entitlement change with its date, so an account that grew into its ceiling is distinguishable from one that was sold too small in the first place, and so downgrades are visible",
+          "requires": [
+            "an append-only entitlement change log"
+          ],
+          "gives": "Prevents the classic error of pitching an upgrade to an account that was mis-sold and is already unhappy"
+        }
+      ],
+      "min_data": {
+        "consecutive_periods_above_threshold": 2,
+        "default_threshold_pct_of_entitlement": 85,
+        "min_history_periods_for_forecast": 6,
+        "min_accounts": 25,
+        "note": "Two consecutive measurement periods are the minimum that separates a sustained ceiling from a month-end spike. Below roughly 25 accounts, read the list by hand rather than setting a threshold on it."
+      },
+      "access_conditions": [
+        "Rung 4 is available only where the owner authorized telemetry for a purpose that covers service and replacement; an authorization taken for product operation does not extend to marketing, and the two purposes should be recorded as separate flags rather than one.",
+        "Do not apply this signal to devices whose function is medical, assistive or clinical. Use of such a device is health information about an identified person, and the replacement inference built on it is excluded from this catalogue - see restricted.medical_and_assistive_device_replacement_inference."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Customer agreements and data-processing terms commonly limit use of service data to providing the service. Reading aggregate utilisation to propose a tier is normally account management; analysing customer content or end-user-level behaviour to build marketing segments frequently is not. Check the purpose clause before the segment exists, not after.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "Utilisation pressure builds and releases. A ratio measured last quarter says little about this one, and an upgrade offer built on a stale ratio reads as a guess."
+      },
+      "false_positives": [
+        "A one-off load - a migration, a seasonal peak, a batch backfill - that inflates utilisation without changing what the customer needs",
+        "A single power user or service account consuming the whole allowance while the rest of the account is idle",
+        "Internal testing, sandbox and partner-demo accounts, which are frequently the heaviest users in the base",
+        "Usage that is high because the customer is extracting their data before leaving, not because they are expanding",
+        "Seats licensed for a team that never deployed, which makes the ratio look low while the unmet need is real",
+        "Seats occupied by service accounts, integrations, bots, contractors and departed employees nobody deprovisioned - utilisation inflated by users the customer will never pay for",
+        "An account deliberately rationing at 100% because the limit is a budget decision they have already made, not an unmet need",
+        "Entitlement values that are stale in the CRM after a mid-term amendment, so the ratio is computed against a number that is no longer the contract",
+        "Hardware read on age alone: a lightly used asset past its nominal replacement date that will not be replaced, because age is not duty cycle"
+      ],
+      "confirmation_signals": [
+        "f11.subscription_renewal_window",
+        "f06.budget_allocation",
+        "f10.migration_preparation"
+      ],
+      "recommended_action_class": "propose_the_tier_that_matches_observed_utilisation",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecom",
+          "industrial_equipment"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement, not measurement: entitlement pressure is a well-attested expansion driver but its conversion rate is company-specific. Calibrate against your own upgrade history before trusting the number."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Billing meters are exact; the inference from a meter to a need is not."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising",
+      "supersedes": [
+        "f11.utilisation_against_entitlement"
+      ],
+      "merge_note": "Merged 2026-08-01 with the F11 shard's 'upgrade cycle: utilisation against entitlement', which was the same acquisition row - identical required fields, identical first rung, identical action. F11's entitlement-change-history rung and its false positives were folded in here rather than discarded."
+    },
+    {
+      "id": "f10.maintenance_and_failure",
+      "family": "F10",
+      "name": "Maintenance and failure",
+      "definition": "Fault, repair and maintenance activity against an asset the subject already owns: repeat service tickets or field visits on the same serial, an out-of-warranty repair estimate that is a material share of replacement value, recurring fault codes, parts orders for a wear component, or a service contract expiring on an asset with a fault history. Qualifying condition: two or more fault or corrective-service events on one asset inside the review window, or one repair estimate above the repair-versus-replace threshold for its category.",
+      "question_answered": "Which owned assets have crossed the point where repairing them again costs more than replacing them?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing",
+        "value"
+      ],
+      "identity_level": "asset",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "asset_serial",
+        "owner_account_id",
+        "event_type",
+        "event_date",
+        "fault_or_reason_code"
+      ],
+      "optional_supporting_fields": [
+        "repair_cost_estimate",
+        "replacement_value",
+        "warranty_status",
+        "warranty_end_date",
+        "parts_replaced",
+        "labour_hours",
+        "site_location_id",
+        "repeat_visit_flag",
+        "service_contract_end_date"
+      ],
+      "source_class": [
+        "support_system",
+        "first_party_backend",
+        "offline_system",
+        "partner_feed",
+        "user_authorized_connection"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Group the service tickets, RMAs and warranty claims you already hold by serial number, count corrective events per asset over the last twelve months, and flag every asset with two or more, plus every open repair estimate above a third of its replacement price",
+          "requires": [
+            "service or RMA records that carry a serial",
+            "a replacement price list"
+          ],
+          "gives": "A repair-versus-replace queue this week, out of records you already keep for warranty purposes"
+        },
+        {
+          "rung": 2,
+          "how": "Make the serial number a required field at intake in the support system and on the returns form, and record the fault as a structured code rather than free text",
+          "requires": [
+            "one required field",
+            "an agreed fault-code list"
+          ],
+          "gives": "Asset history that actually joins - missing serials, not missing data, is what usually breaks rung 1"
+        },
+        {
+          "rung": 3,
+          "how": "Take work orders from dealers, installers and authorized service partners into the same asset record under a data-sharing agreement",
+          "requires": [
+            "a partner agreement that names the data",
+            "a shared serial format"
+          ],
+          "gives": "The repairs that happen away from you, which for anything sold through a channel is most of them"
+        },
+        {
+          "rung": 4,
+          "how": "Read fault and diagnostic codes from the asset where the owner has authorized service telemetry",
+          "requires": [
+            "a connected asset",
+            "owner authorization",
+            "a serial-to-owner mapping"
+          ],
+          "gives": "Failure seen before the owner reports it, and a repair-versus-replace call made with duty-cycle evidence"
+        }
+      ],
+      "min_data": {
+        "fault_events_in_window": 2,
+        "window_days": 365,
+        "repair_to_replacement_cost_ratio": 0.33
+      },
+      "access_conditions": [
+        "Every rung above 1 depends on intake discipline: where tickets carry a customer but not a serial, asset-level history cannot be reconstructed afterwards and the fix is a form field, not a data source.",
+        "Work orders held by an independent repair channel belong to that channel. They arrive through an agreement that names the fields, never by scraping a partner portal.",
+        "Exclude assets whose function is medical or assistive. The repair history of such a device is health information about its owner - see restricted.medical_and_assistive_device_replacement_inference."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "A failure opens a decision window that closes when the owner repairs, replaces, or decides to live with it. After that the fault history is context, not a trigger."
+      },
+      "false_positives": [
+        "A fault caused by bad installation or misuse, where the owner replaces the installer rather than the asset",
+        "A warranty claim on a nearly new unit, which lowers the chance of a replacement purchase rather than raising it",
+        "Repeat tickets logged against one serial that was mis-keyed at intake, inflating a single asset's fault count",
+        "A preventive maintenance contract generating scheduled events that look like failures and are not",
+        "A repair requested by a tenant, contractor or facilities firm that does not hold the replacement budget",
+        "A fleet-wide recall or service bulletin, which produces correlated events across assets that have nothing individually wrong with them"
+      ],
+      "confirmation_signals": [
+        "f10.lifecycle_stage",
+        "f10.trade_in_activity",
+        "f06.quote_request"
+      ],
+      "recommended_action_class": "present_repair_versus_replace_economics_with_the_asset_history_attached",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "industrial_equipment",
+          "automotive",
+          "appliances",
+          "consumer_electronics"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. The repair-to-replacement ratio at which owners switch is category-specific and should be fitted from your own repair-then-repurchase history rather than taken from this row."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Service records are hard evidence that an event happened; the replacement inference on top of them is not."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f10.service_deterioration",
+      "family": "F10",
+      "name": "Service deterioration",
+      "definition": "The service a customer is currently buying is measurably getting worse for them: support contacts or escalations rising against that account's own baseline, breached service levels or issued service credits, repeated incidents, falling satisfaction scores, or falling active use while the contract still runs. Qualifying condition: a deterioration measure worsening in two or more consecutive periods against the account's own trailing baseline, or a single service-credit, breach or severity-one incident event.",
+      "question_answered": "Is a running service failing its customer badly enough to put the contract in play - ours to lose, or an incumbent's?",
+      "intent_dimensions": [
+        "risk",
+        "need",
+        "urgency",
+        "confidence"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "period",
+        "support_contact_count",
+        "escalation_or_incident_count",
+        "account_baseline_value"
+      ],
+      "optional_supporting_fields": [
+        "csat_or_nps_score",
+        "sla_breach_flag",
+        "service_credit_amount",
+        "active_user_count",
+        "time_to_resolution",
+        "incident_severity",
+        "renewal_date",
+        "declared_incumbent_provider",
+        "public_incident_feed_id"
+      ],
+      "source_class": [
+        "support_system",
+        "product_analytics",
+        "first_party_backend",
+        "news_feed",
+        "public_record"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Per account and per period, count support contacts, escalations and reopened tickets against that account's own trailing median, and list every account worsening two periods in a row with a renewal date inside two quarters",
+          "requires": [
+            "a support system you can export from",
+            "a renewal date per account"
+          ],
+          "gives": "A defection-risk list out of the helpdesk you already run, with no survey and no new tooling"
+        },
+        {
+          "rung": 2,
+          "how": "Add resolution time, service-credit events and breached-SLA flags to the same measure, and pair it with active-use decline from product telemetry",
+          "requires": [
+            "SLA tracking",
+            "usage telemetry"
+          ],
+          "gives": "Separation of a noisy account from a failing service, which is the distinction the rung 1 count cannot make"
+        },
+        {
+          "rung": 3,
+          "how": "Subscribe to the published status and incident feeds of the incumbent providers your prospects run, and record incident frequency, duration and severity per provider",
+          "requires": [
+            "a list of incumbent providers in your category",
+            "a feed reader and a store"
+          ],
+          "gives": "A switching window on an incumbent's customers, built from what the incumbent publishes about itself"
+        },
+        {
+          "rung": 4,
+          "how": "Ask the incumbent question at intake - who runs this today, and how has it been going - so a public incident record can be attached to a named account",
+          "requires": [
+            "one discovery or form field",
+            "a CRM field to hold the answer"
+          ],
+          "gives": "The join between a public outage and a specific buyer, which is what makes rung 3 actionable rather than atmospheric"
+        }
+      ],
+      "min_data": {
+        "consecutive_worsening_periods": 2,
+        "min_periods_of_baseline": 6,
+        "min_tickets_per_period_for_signal": 3
+      },
+      "access_conditions": [
+        "Public status and incident feeds describe the provider, not its customers. Attaching one to a prospect requires that prospect to have told you who their incumbent is; do not infer the incumbent from network, device or fingerprinting signals.",
+        "Aggregate complaint volume on public platforms measures who is loud, not who is affected. Treat it as a hypothesis to be confirmed at rung 4, never as a measurement."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Status pages and incident feeds are published for operational notification. Bulk automated retrieval may be rate-limited or restricted by the publisher's terms, and naming an incumbent's outage in outbound messaging carries commercial-disparagement exposure in some jurisdictions. Availability here is a statement about cost, not about clearance.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": false,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "weekly",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "Tolerance for a bad service is finite but not short. The window runs from the deterioration to the next renewal or budget cycle, whichever comes first."
+      },
+      "false_positives": [
+        "A ticket surge caused by a rollout, a migration or a new cohort onboarding - engagement, not deterioration",
+        "One vocal administrator generating the whole escalation history of an otherwise healthy account",
+        "Falling logins because the customer automated the workflow through your API, which is deeper adoption reading as disengagement",
+        "A public incident that hit a region, plan tier or product line the prospect does not use",
+        "Silence mistaken for health: an account that has already given up complaining scores well on every contact-based measure",
+        "A competitor's outage that the prospect never noticed because their own vendor absorbed it"
+      ],
+      "confirmation_signals": [
+        "f10.migration_preparation",
+        "f11.subscription_renewal_window",
+        "f13.rfp_or_tender_issued"
+      ],
+      "recommended_action_class": "route_to_retention_or_open_a_switching_conversation_with_the_evidence_attached",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecom",
+          "professional_services",
+          "facilities_management"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Deterioration predicts churn far better than it predicts a purchase from you; the strength here is for switching demand existing, not for it landing with the observer."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Contact counts are a proxy for experience with a known bias toward vocal users; the rung 2 additions reduce it without removing it."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f10.migration_preparation",
+      "family": "F10",
+      "name": "Migration preparation",
+      "definition": "Concrete preparation to move off an incumbent system or supplier: a full-account data export or portability request, creation of credentials whose only use is bulk extraction, an import of a competing system's export format, a session in migration or switching documentation, a parallel or sandbox environment stood up beside a live one, or, for physical estate, a decommissioning, removal or disposal quote. Qualifying condition: one material extraction or import action, or two or more migration-class documentation events attributed to one identified account inside the review window.",
+      "question_answered": "Is this account preparing to leave us - or is this prospect preparing to leave someone else?",
+      "intent_dimensions": [
+        "readiness",
+        "commitment",
+        "timing",
+        "urgency"
+      ],
+      "identity_level": "account",
+      "data_class": "behavioral_event",
+      "required_raw_fields": [
+        "account_id",
+        "action_type",
+        "object_scope_or_volume",
+        "timestamp"
+      ],
+      "optional_supporting_fields": [
+        "export_format",
+        "import_source_format",
+        "record_count",
+        "api_token_scope",
+        "sandbox_environment_id",
+        "migration_doc_page_id",
+        "actor_role",
+        "decommission_quote_id"
+      ],
+      "source_class": [
+        "product_analytics",
+        "first_party_backend",
+        "first_party_web",
+        "support_system"
+      ],
+      "collection_method": "tracking",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Alert on three events your admin audit log almost certainly already records and nobody reads: a full-account data export, a token created with read-everything scope, and a bulk delete or archive",
+          "requires": [
+            "an admin audit log",
+            "one query and one alert route"
+          ],
+          "gives": "The strongest churn warning in the product, available today, with no new instrumentation at all"
+        },
+        {
+          "rung": 2,
+          "how": "Instrument the import side and record the source format - import_wizard_started with the format of the file the prospect brought",
+          "requires": [
+            "an import tool",
+            "one extra field on the event"
+          ],
+          "gives": "Which incumbent a new trial is leaving, declared by the file they uploaded rather than guessed"
+        },
+        {
+          "rung": 3,
+          "how": "Classify migration, import and switching documentation as its own page class and attribute it to the signed-in account or the trial",
+          "requires": [
+            "a page-class lookup",
+            "an identity join on the docs and marketing site"
+          ],
+          "gives": "Intent before any data moves - the people reading how to switch outnumber the people switching"
+        },
+        {
+          "rung": 4,
+          "how": "Capture decommissioning, removal, de-installation and disposal quote requests from the service desk as migration events on the asset",
+          "requires": [
+            "a service quoting flow",
+            "an asset or site identifier on the quote"
+          ],
+          "gives": "The physical-estate equivalent, which otherwise never reaches a commercial system at all"
+        }
+      ],
+      "min_data": {
+        "min_export_share_of_account_records_pct": 50,
+        "migration_doc_events": 2,
+        "review_window_days": 30
+      },
+      "access_conditions": [
+        "Read the metadata of an export - volume, format, scope, timing - and never the payload. Inspecting what a customer is moving is a purpose their agreement almost certainly does not cover.",
+        "A statutory data-portability request must be fulfilled on its own terms and at its own speed. Reading it as a churn signal is permissible; slowing, gating or degrading it because it was read that way is not."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "contractual_access",
+      "terms_constrained": true,
+      "terms_note": "Administrator audit records are service data governed by the customer agreement. Using them to trigger a retention conversation is ordinary account management; copying them into a marketing platform is a different purpose and usually needs its own basis.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "Migrations move quickly once they start. A month-old export event has usually already resolved into a decision one way or the other."
+      },
+      "false_positives": [
+        "A scheduled backup, an audit extract or a compliance archive, which are indistinguishable from an exit at rung 1 and are the most common cause of a false alarm",
+        "A security review rotating credentials, including broad-scope read tokens",
+        "A consolidation in which the account is moving between your own tenants or environments",
+        "An implementation partner exporting on the customer's behalf for a data-quality exercise",
+        "A departing administrator taking a personal copy, which is a security incident and not a commercial one",
+        "A trial importing a competitor's export file purely to test your importer, with no plan to move"
+      ],
+      "confirmation_signals": [
+        "f10.service_deterioration",
+        "f11.subscription_renewal_window",
+        "f07.trial"
+      ],
+      "recommended_action_class": "escalate_to_a_named_owner_within_the_business_day",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "problem"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecom",
+          "financial_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Of the signals in this family, migration preparation is the one with the shortest distance to an irreversible decision; the estimate reflects that, not a measured conversion rate."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The events are exact. The benign-backup confound is the reason this is a 4 and not a 5."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    },
+    {
+      "id": "f10.lifecycle_stage",
+      "family": "F10",
+      "name": "Lifecycle stage",
+      "definition": "Where an owned asset sits in its service life: time since purchase, installation or registration measured against the replacement interval for its category, a published end-of-support or end-of-life date inside the planning horizon, an expiring warranty or service contract, or a lease or depreciation term running out. The start date comes from the subject's own purchase, registration or contract record - a transacted or declared fact about an asset, not an inference about the person who owns it. Qualifying condition: asset age at or beyond the category's median replacement interval, or a dated end-of-support, warranty-end or lease-end event inside the review horizon.",
+      "question_answered": "Which units we sold are old enough that a replacement conversation is due, and on what date does each one come due?",
+      "intent_dimensions": [
+        "timing",
+        "need",
+        "readiness",
+        "urgency"
+      ],
+      "identity_level": "asset",
+      "data_class": "calendar_join",
+      "required_raw_fields": [
+        "asset_id_or_serial",
+        "owner_account_id",
+        "service_start_date",
+        "category_replacement_interval_months"
+      ],
+      "optional_supporting_fields": [
+        "warranty_end_date",
+        "service_contract_end_date",
+        "end_of_support_date",
+        "lease_end_date",
+        "install_location_id",
+        "model_generation",
+        "usage_intensity_class",
+        "original_channel"
+      ],
+      "source_class": [
+        "crm",
+        "commerce_platform",
+        "first_party_backend",
+        "offline_system",
+        "public_record",
+        "licensed_dataset"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Compute months-in-service for every unit you hold a sale, install or registration date for, and derive the replacement interval empirically - the median gap between a customer's purchase in a category and their next one in the same category - instead of borrowing an industry figure",
+          "requires": [
+            "order or install records carrying a date",
+            "two or more purchase cycles of history"
+          ],
+          "gives": "A due-for-replacement queue this week, calibrated on your own customers rather than an average that may not describe them"
+        },
+        {
+          "rung": 2,
+          "how": "Publish your own end-of-support, end-of-life and last-order dates per model and join them to the installed base",
+          "requires": [
+            "a product lifecycle policy someone owns and maintains"
+          ],
+          "gives": "A dated, defensible reason to contact each owner - and the same dates the customer needs for their own planning"
+        },
+        {
+          "rung": 3,
+          "how": "Raise registration coverage so channel-sold assets enter the installed base at all - make warranty registration or app pairing worth completing, and accept registration from any purchase route",
+          "requires": [
+            "a registration incentive",
+            "a channel-agnostic registration route"
+          ],
+          "gives": "The installed base you did not sell directly, which for most durable-goods makers is the majority of it"
+        },
+        {
+          "rung": 4,
+          "how": "For asset classes with a lawful register, join age and ownership-duration records for assets you did not sell",
+          "requires": [
+            "a register or licensed dataset covering that asset class",
+            "a legal review of the permitted use in each jurisdiction"
+          ],
+          "gives": "Coverage of the competitive installed base, at the price of a broker dependency and a use restriction the base entry does not carry"
+        }
+      ],
+      "min_data": {
+        "min_installed_base_records_with_dates": 200,
+        "review_horizon_months": 6,
+        "interval_source": "empirical median from own repurchase history, refreshed annually"
+      },
+      "access_conditions": [
+        "Rung 1 needs a service start date, which is exactly what channel sales usually lack. Where only a manufacture date exists, treat the age as a lower bound and label it as one rather than dating the asset from the factory.",
+        "Rung 4 registers are regulated per asset class and per jurisdiction. Vehicle registration records in the United States carry statutory limits on the use of personal information for marketing, and property and equipment registers carry their own reuse terms. Public availability is a statement about cost, not about permitted use.",
+        "Rung 4 also introduces a third-party broker dependency that rungs 1 to 3 do not have; the entry's broker flag describes the base path only.",
+        "Exclude assets whose function is medical, assistive, mobility or reproductive-health. The service life of such a device is health and disability information about its owner, and assembling the ownership fact from a register or an installed-base file rather than receiving it from the owner is the prohibited class - see restricted.medical_and_assistive_device_replacement_inference.",
+        "Rung 4 applies only to asset classes whose ownership discloses nothing about the owner's health, disability or protected status. Where the register itself is disability- or health-gated, there is no rung 4."
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "The base signal uses records the seller already holds through its own customer relationship. Rung 4 moves into registers whose reuse for marketing is restricted by statute in several jurisdictions; the permission requirement for that rung is regulated access and it does not inherit this entry's clearance.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 3,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "monthly",
+      "freshness": {
+        "type": "persistent_fact",
+        "half_life_days": null,
+        "note": "An in-service date does not change; the horizon you measure it against does. Recompute the due list on a schedule rather than expiring the underlying fact."
+      },
+      "false_positives": [
+        "An asset that is old and entirely adequate - the interval is a distribution, so half the installed base sits beyond the median by construction",
+        "A unit retired, resold, written off or scrapped years ago that still appears active in the installed base",
+        "A standby or second unit that accrues age without accruing duty",
+        "A registration date that records when the owner got round to registering, not when the asset entered service",
+        "A lease that will be extended rather than replaced, decided by a finance owner the asset record does not name",
+        "A category whose replacement interval has drifted since the threshold was set, making every age-based flag early or late by the same amount"
+      ],
+      "confirmation_signals": [
+        "f10.maintenance_and_failure",
+        "f10.trade_in_activity",
+        "f10.product_usage"
+      ],
+      "recommended_action_class": "schedule_a_dated_replacement_offer_against_the_asset_clock",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "services",
+          "subscription"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "sales_led",
+          "hybrid",
+          "self_serve"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "automotive",
+          "industrial_equipment",
+          "appliances",
+          "consumer_electronics",
+          "it_hardware"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "category_replacement_interval_reference",
+          "source_url": "https://press.spglobal.com/2025-05-21-U-S-Vehicle-Age-Rises-Again-to-12-8-Years-in-2025,-According-to-S-P-Global-Mobility",
+          "as_of": "2025-05-21",
+          "independence": "vendor_published",
+          "note": "Average age of light vehicles in operation in the United States reached 12.8 years in 2025 - 14.5 for passenger cars, 11.9 for light trucks, with a 4.5% scrappage rate. Published by a firm that also sells vehicles-in-operation data, so it is flagged vendor_published rather than independent. Used only to support the design rule in rung 1: durable replacement intervals are long, category-specific and drifting, so an age threshold must be fitted per category and re-checked, never hard-coded."
+        },
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. Age alone is a weak trigger - it says a replacement is possible, not that anyone wants one - which is why this pairs with a failure or trade-in signal rather than standing alone."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "The date is a record rather than an inference; the reliability discount is for stale installed-base hygiene, not for the arithmetic."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f10.trade_in_activity",
+      "family": "F10",
+      "name": "Trade-in activity",
+      "definition": "The subject moves to convert an item they own into value toward a replacement: requesting a trade-in appraisal or buyback quote, entering a model and condition into a valuation tool, accepting or declining a trade-in offer, or booking collection or disposal of a working unit. Qualifying condition: a valuation or appraisal request naming a specific model, or an accepted trade-in offer, for an item in a category the subject's next purchase would come from. The subject declares the model, age and condition for the purpose of being quoted - the ownership fact is given, not inferred.",
+      "question_answered": "Who is establishing what their current item is worth, and therefore what they are about to replace it with?",
+      "intent_dimensions": [
+        "readiness",
+        "timing",
+        "budget",
+        "commitment"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "declared_model_or_category",
+        "valuation_request_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "declared_condition",
+        "declared_purchase_year",
+        "quoted_value",
+        "offer_accepted_flag",
+        "serial_or_registration",
+        "preferred_replacement_model",
+        "collection_date",
+        "channel"
+      ],
+      "source_class": [
+        "first_party_web",
+        "commerce_platform",
+        "partner_feed",
+        "marketplace",
+        "offline_system"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Put a valuation tool on your own site and instrument it end to end - quote_started, model and year entered, condition entered, quote_shown, quote_accepted or declined - treating the declared model and year as the two highest-value fields on the form",
+          "requires": [
+            "a valuation page",
+            "a price table, even a rough one"
+          ],
+          "gives": "A declared statement of what the person owns and how old it is, from someone telling you because they want to replace it"
+        },
+        {
+          "rung": 2,
+          "how": "Offer the trade-in inside the service, support and returns flows rather than only on a landing page",
+          "requires": [
+            "a link and a handoff in flows you already run"
+          ],
+          "gives": "The owners who would never visit a trade-in page, which is most of them"
+        },
+        {
+          "rung": 3,
+          "how": "Run the buyback through a partner and take the appraisal record back as a feed keyed to your own customer",
+          "requires": [
+            "a buyback or resale partner agreement that names the returned fields",
+            "an identifier the customer was told would be shared"
+          ],
+          "gives": "Trade-in coverage without holding inventory, at the cost of a partner dependency and a slower, thinner record"
+        },
+        {
+          "rung": 4,
+          "how": "For equipment traded under a business identity, monitor disposal and auction listings in your categories from sources that permit automated retrieval",
+          "requires": [
+            "listing sources whose terms allow it",
+            "a category-to-listing mapping"
+          ],
+          "gives": "Fleet and equipment disposals that precede a purchase - business sellers only"
+        }
+      ],
+      "min_data": {
+        "min_events": 1,
+        "quote_validity_days": 14,
+        "requires_declared_model": true
+      },
+      "access_conditions": [
+        "Valuation-tool use is visitor-level until the subject supplies contact details. Do not backfill identity by matching an entered serial number against a customer record unless the tool says that is what it does.",
+        "Rung 4 covers business sellers disposing of equipment under a company identity. It does not extend to individuals' resale listings: an identifiable person listing their own possession did not offer that listing to you as a purchase intent."
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Resale and auction platforms restrict automated retrieval in their terms, so rung 4 exists only where the source permits it or publishes a feed. A partner's appraisal record can be returned to you only if the customer was told it would be.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 14,
+        "note": "A quoted trade-in value is normally time-limited by the quote itself; when the quote expires, so does most of the signal."
+      },
+      "false_positives": [
+        "Curiosity pricing - an owner checking a value for insurance, an estate, or idle interest, with no replacement planned",
+        "An owner valuing an item in order to sell it and leave the category entirely",
+        "A proxy valuing a relative's or an employer's item, where the person on the form is not the person who decides",
+        "Repeat quote-shopping by a reseller or flipper pricing stock rather than replacing a personal item",
+        "A bot or price-comparison agent walking the valuation tool to harvest the price table",
+        "A quote declined because the offer was low, which turns a strong signal into a lost one unless the decline itself is captured and worked"
+      ],
+      "confirmation_signals": [
+        "f10.lifecycle_stage",
+        "f06.financing_calculation",
+        "f08.payment_preparation"
+      ],
+      "recommended_action_class": "hold_the_quoted_value_and_pair_it_with_a_specific_replacement",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "marketplace",
+          "services"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium"
+        ],
+        "consumable_vs_durable": [
+          "durable"
+        ],
+        "triggers": [
+          "replacement",
+          "discretionary"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "consumer_electronics",
+          "automotive",
+          "industrial_equipment",
+          "retail"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Judgement. The reasoning is structural rather than measured: an owner rarely prices an item they intend to keep, so the appraisal request is close to a declaration of replacement intent."
+        },
+        {
+          "claim": "reliability",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Declared for this purpose and therefore high quality, discounted for curiosity pricing and for owners who are exiting the category rather than replacing within it."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "rising"
+    }
+  ]
+}

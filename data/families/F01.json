@@ -1,0 +1,962 @@
+{
+  "$comment": "One shard of the signal-lens catalogue. DATA, never loaded whole into an agent context. Validate with: python3 scripts/validate_catalogue.py",
+  "catalogue_version": "0.1.0",
+  "as_of": "2026-08-01",
+  "shard": "F01",
+  "signals": [
+    {
+      "id": "f01.routine_disruption",
+      "family": "F01",
+      "name": "Break in an established operating cadence",
+      "definition": "A subject with a measurable historical cadence - order interval, usage frequency, service-visit rhythm, delivery schedule, consumption volume, machine hours - departs from its own baseline by more than its own variance explains, and the departure survives at least one full cycle. Qualifying condition: the baseline is computed per subject from at least three prior cycles, and the comparison is against that subject's own history, not a cohort average. Scope is operational cadence at account, asset or location level; this entry is never used to infer a person's life event or circumstances, a class excluded under restricted.life_event_inference_from_consumption.",
+      "question_answered": "Which existing customers or sites just stopped behaving the way they always have - and is that a need opening up or a customer quietly leaving?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "timing",
+        "risk"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "event_timestamp",
+        "event_or_order_type",
+        "quantity_or_volume"
+      ],
+      "optional_supporting_fields": [
+        "baseline_interval_days",
+        "interval_variance",
+        "asset_id",
+        "location_id",
+        "channel",
+        "seasonality_index",
+        "last_service_date",
+        "contract_term_dates"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "commerce_platform",
+        "product_analytics",
+        "offline_system"
+      ],
+      "collection_method": "export",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Export twenty-four months of your own order, booking or job history, compute per customer the median interval between purchases and the days since the last one, and list every customer past 1.5x their own median",
+          "requires": [
+            "one CSV export or twenty lines of SQL against the orders table"
+          ],
+          "gives": "A working post-sale need signal this week with no tracking, no vendor and no new events - and it covers customers who never visit the website at all"
+        },
+        {
+          "rung": 2,
+          "how": "Run the same computation on usage or service telemetry instead of orders - logins, sessions, jobs run, machine hours, meter reads, deliveries accepted",
+          "requires": [
+            "product or device event stream keyed to the account"
+          ],
+          "gives": "Detection weeks earlier than the missed reorder, because usage falls before the order does"
+        },
+        {
+          "rung": 3,
+          "how": "Add per-subject seasonality and variance so a seasonal customer's quiet quarter is not read as disruption, and so the alert threshold is a z-score against that subject rather than a fixed multiple",
+          "requires": [
+            "two or more years of history per subject, or a category seasonality curve"
+          ],
+          "gives": "Cuts the dominant false positive; without it the signal fires every January on half the book"
+        },
+        {
+          "rung": 4,
+          "how": "Join cadence held outside the commerce system: delivery and route records, dispatch and field-service visits, ERP goods movements, wholesale depot pickups, meter and telematics reads",
+          "requires": [
+            "operations, dispatch or ERP export",
+            "a stable account or site key across systems"
+          ],
+          "gives": "The only view of cadence for customers who never log into anything - in field service, wholesale, distribution and trade supply that is most of them"
+        }
+      ],
+      "min_data": {
+        "min_cycles_for_baseline": 3,
+        "min_history_days": 180,
+        "note": "Fewer than three prior cycles produces a baseline that is a guess. Run those subjects as a watchlist rather than as a trigger, and never alert on a first missed interval for a subject with high historical variance."
+      },
+      "access_conditions": [
+        "Rung 4 usually fails on key reconciliation rather than on access: if the ops system has no stable account or site key, building that key is the actual project",
+        "Do not apply this to individual consumer consumption in order to infer why the pattern changed; the account, asset and site levels are the lawful and useful levels"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "route",
+      "strength": 3,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 45,
+        "note": "A cadence break is informative while the cycle it broke is still current. After roughly a quarter the new pattern is the pattern, and the subject should be re-baselined rather than alerted on again."
+      },
+      "false_positives": [
+        "Seasonality or a fiscal-year rhythm the baseline window was too short to contain",
+        "A bulk or stock-up order that legitimately extends the next interval",
+        "A catalogue, contract or billing-entity change that moved the same demand to a different record",
+        "A staffing change on the customer side - the person who always reordered has left",
+        "Pipeline breakage: the events stopped arriving, not the behaviour",
+        "A site, branch or asset that closed, was sold, or was consolidated into a parent account",
+        "Demand moved to a different channel of yours - trade counter, marketplace, reseller - and is still being met"
+      ],
+      "confirmation_signals": [
+        "f01.operational_problem_reported",
+        "f10.service_deterioration",
+        "f11.replenishment_due"
+      ],
+      "recommended_action_class": "route_to_a_human_check_in_before_assuming_either_demand_or_churn",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "ecommerce",
+          "subscription",
+          "services",
+          "marketplace",
+          "saas"
+        ],
+        "purchase_motion": [
+          "transactional_ecommerce",
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "product_failure",
+          "inventory_depletion",
+          "contract_expiry",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "wholesale_distribution",
+          "field_service",
+          "manufacturing",
+          "facilities",
+          "logistics",
+          "utilities"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Deliberately mid-rated: a cadence break is ambiguous between new need and departure, and its value comes from being cheap and early rather than from being decisive. No verified independent measurement was found this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f01.alternative_solution_abandonment",
+      "family": "F01",
+      "name": "Abandonment of the incumbent solution or workaround",
+      "definition": "The subject stops, cancels, downgrades, pauses or dismantles whatever currently meets the need - a competing product or service, a manual workaround, a spreadsheet, an in-house build, a contractor arrangement, or an existing arrangement with you - or states an intention to do so. Qualifying condition: a termination, downgrade or dismantling event, or an explicit statement of abandonment, attached to a named incumbent and a date.",
+      "question_answered": "Has the thing they were using stopped being the answer, and are we in the room while the replacement gets chosen?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "urgency",
+        "timing",
+        "commitment"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "incumbent_solution_name",
+        "abandonment_event_type",
+        "event_timestamp"
+      ],
+      "optional_supporting_fields": [
+        "stated_reason",
+        "named_replacement",
+        "contract_end_date",
+        "downgrade_from_to",
+        "seat_or_volume_change",
+        "source_channel",
+        "notice_period_end"
+      ],
+      "source_class": [
+        "first_party_backend",
+        "support_system",
+        "crm",
+        "review_platform",
+        "public_record",
+        "news_feed"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read your own exits. Cancellations, downgrades, pauses, non-renewals and seat reductions are already stored with a free-text reason; classify the reason text for 'moving to', 'bringing it in-house', 'stopping this altogether', 'switching back to spreadsheets'",
+          "requires": [
+            "subscription or order table with cancellation reasons"
+          ],
+          "gives": "The highest-quality version of this signal, from data you own, this week - and it is post-sale, which is precisely where signal inventories stop looking. A leaver is filed as a loss when the row is also a dated statement about someone's next purchase"
+        },
+        {
+          "rung": 2,
+          "how": "Capture stated abandonment on the way in: add a structured 'what are you replacing, and what are you using now' field to the enquiry form and the first-call template, and mine the last year of existing notes for the same phrases",
+          "requires": [
+            "one form field and one CRM field"
+          ],
+          "gives": "Names the incumbent for inbound demand, which turns a generic enquiry into a migration conversation"
+        },
+        {
+          "rung": 3,
+          "how": "Watch lawful public evidence of abandonment for B2B accounts: the company's own announcement, a change to its published tooling or supplier page, a job posting that drops a named tool from the requirements, a review written at the moment of leaving, a published tender to replace an incumbent",
+          "requires": [
+            "manual or terms-compliant monitoring of named accounts"
+          ],
+          "gives": "Reaches accounts that are not customers and have not contacted you - the only rung that finds abandonment before the buyer starts shopping"
+        },
+        {
+          "rung": 4,
+          "how": "Treat contract-exit mechanics as the signal: a customer requesting a data export, a port-out or transfer request, a termination notice served on you, a partner telling you a shared client has given notice, a request for a final invoice",
+          "requires": [
+            "support and billing events tagged for exit intent",
+            "partner communication channel"
+          ],
+          "gives": "Dated, high-precision abandonment facts - these are the least ambiguous rows in the family and are usually handled as admin rather than as signal"
+        }
+      ],
+      "min_data": {
+        "min_events": 1,
+        "note": "One termination or explicit statement is sufficient. What it needs is the incumbent's name attached; an unnamed 'cancelled' row cannot be routed and cannot be argued against."
+      },
+      "access_conditions": [
+        "Rung 3 depends on the target publishing something; silence is not evidence of retention, and a stale review or an edited job post is not evidence of a date",
+        "Automated collection from job boards and review platforms is bounded by those platforms' terms - read what is published, do not harvest at scale",
+        "A partner may be contractually barred from telling you that a shared client has served notice; ask before assuming the channel exists",
+        "Your own churn reasons were often collected under a service purpose - check before using them for outbound marketing"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Public evidence at rung 3 is lawful to read but its reuse is constrained by each platform's terms; treat account-level observation as the ceiling.",
+      "sensitivity": "low",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "none"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 3,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "The window between abandoning one solution and choosing the next is short and it closes hard. After about a quarter the replacement has usually been chosen, and the row is history rather than opportunity."
+      },
+      "false_positives": [
+        "A pause for budget or seasonality that ends in quiet reinstatement",
+        "Consolidation onto another product from the same supplier, which is not a category exit",
+        "A downgrade that reflects rightsizing after over-buying rather than dissatisfaction",
+        "A cancellation processed for an administrative reason - merger, billing entity change, re-contracting under a new agreement",
+        "A pilot or trial ending as designed, which was never an incumbent",
+        "A public review or post written long after the event it describes",
+        "A job posting edited for length rather than because the tool was dropped",
+        "A competitor's outage or price rise generating loud statements of intent that nobody acts on"
+      ],
+      "confirmation_signals": [
+        "f01.explicit_need_statement",
+        "f10.migration_preparation",
+        "f02.search_query"
+      ],
+      "recommended_action_class": "reach_out_inside_the_replacement_window_with_a_migration_path",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "subscription",
+          "services",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "product_failure",
+          "contract_expiry",
+          "replacement",
+          "competitor_failure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "telecom",
+          "financial_services",
+          "insurance",
+          "utilities",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 5 because the need is vacated rather than hypothetical - something that was being done has stopped. Reliability is lower because most instances are self-reported or publicly inferred and the date is often wrong."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f01.diagnostic_assessment_completed",
+      "family": "F01",
+      "name": "Diagnostic, assessment or measurement completed",
+      "definition": "The subject completes an activity whose output is a quantified statement of their current state against a standard or a target - a self-assessment or scorecard, a sizing or measuring exercise, a survey or benchmark, an energy or site audit, an equipment inspection, a soil, water or air test, a fitting, a maturity or readiness assessment - and a result value or band is produced. Qualifying condition: the subject supplied the inputs in order to receive that result, and the result is recorded against them. Health, clinical and diagnostic-medical assessments are out of scope for this entry. Where the thing inspected is an asset the subject owns rather than the subject's own position against a target - a site or security scan, a fault-code lookup, an emissions test - the row is f05.diagnostic_tool_use, which keys to the asset and carries a finding severity rather than a result band.",
+      "question_answered": "Has this buyer just been shown, in numbers they accept, how big the gap is between where they are and where they want to be?",
+      "intent_dimensions": [
+        "need",
+        "requirements",
+        "fit",
+        "urgency",
+        "value"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "assessment_type",
+        "completion_timestamp",
+        "result_value_or_band"
+      ],
+      "optional_supporting_fields": [
+        "input_answers",
+        "gap_items_identified",
+        "recommended_action_shown",
+        "assessor_id",
+        "site_or_asset_id",
+        "reassessment_due_date",
+        "result_delivery_channel",
+        "benchmark_cohort"
+      ],
+      "source_class": [
+        "first_party_web",
+        "first_party_backend",
+        "offline_system",
+        "partner_feed"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Persist the assessment you already run and currently discard: the quote or sizing calculator, the ROI model, the quiz, the readiness checklist, the survey a rep fills in on a visit. Store inputs, result and identified gaps against the subject with a timestamp instead of only rendering the answer on screen",
+          "requires": [
+            "a write path from the existing tool to your own datastore"
+          ],
+          "gives": "A high-strength declared signal from a tool that already exists - this is a persistence change, not a build"
+        },
+        {
+          "rung": 2,
+          "how": "Build the assessment deliberately as the acquisition mechanism: a short scorecard that returns a benchmarked result and a named list of gaps",
+          "requires": [
+            "assessment logic",
+            "a benchmark or reference standard",
+            "a result page"
+          ],
+          "gives": "The result is why the buyer hands over their data, and the gap list doubles as the requirements list for the sale"
+        },
+        {
+          "rung": 3,
+          "how": "Get field assessments back into the customer record: in-home measures, site surveys, energy and safety audits, equipment inspections, fittings, test drives, stock and waste audits already carried out by engineers, surveyors and reps",
+          "requires": [
+            "field app, inspection form or paper capture",
+            "a route from that system into the customer record"
+          ],
+          "gives": "The strongest version of this signal, because a professional measured it - and the work is data movement, not detection; the measurement is already being taken"
+        },
+        {
+          "rung": 4,
+          "how": "Accept third-party and mandated assessments the buyer already holds - a compliance inspection outcome, a certification audit, an efficiency rating, an insurer's survey - by asking the buyer to share them, or by reading them where they are genuinely on a public register",
+          "requires": [
+            "an upload path and a stated purpose",
+            "or a public register with compatible terms"
+          ],
+          "gives": "A dated external measurement with a deadline attached, which is often the strongest urgency evidence available"
+        }
+      ],
+      "min_data": {
+        "min_completed_assessments": 1,
+        "note": "One completed assessment with a stored result is actionable. Benchmarking a subject against a cohort needs roughly 100 completed assessments before the comparison is worth showing anyone."
+      },
+      "access_conditions": [
+        "An assessment result collected so the subject could see their result is not automatically licensed for scoring, enrichment or resale - state the purpose where the inputs are collected",
+        "A partner-run or mandated assessment belongs to the buyer or the assessor; obtain it by asking, not by inference",
+        "Where an assessment touches health, clinical or diagnostic content it leaves this entry's scope entirely and is excluded"
+      ],
+      "availability": "website_instrumentation",
+      "permission_requirement": "notice",
+      "terms_constrained": false,
+      "terms_note": null,
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": true,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "low"
+      },
+      "activation_direction": "engage",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 21,
+        "note": "A quantified gap is most actionable in the days after the subject is shown it. Left alone, an assessment result ages into a background fact and stops motivating anything."
+      },
+      "false_positives": [
+        "Curiosity or benchmarking with no budget - running the calculator as entertainment",
+        "A competitor, student or consultant running the tool to see the methodology or the pricing logic",
+        "Deliberately false inputs entered to reach a different result or to avoid identification",
+        "A professional running the assessment on behalf of a client rather than for themselves",
+        "An assessment completed only to satisfy a grant, insurer or procurement rule with no purchase attached",
+        "An existing customer re-running the assessment to check progress",
+        "An abandoned assessment auto-saved as complete by the tool"
+      ],
+      "confirmation_signals": [
+        "f05.product_configuration",
+        "f06.quote_request",
+        "f01.explicit_need_statement"
+      ],
+      "recommended_action_class": "return_the_result_with_the_gap_priced_and_a_named_next_step",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "ecommerce",
+          "subscription",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "regulation",
+          "replacement",
+          "property_or_relocation",
+          "capacity_pressure"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "home_improvement",
+          "energy",
+          "construction",
+          "insurance",
+          "agriculture",
+          "manufacturing",
+          "professional_services"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated on the mechanism: the subject supplied their own inputs for a result, which makes both the need and the requirements explicit. No verified independent conversion measurement was located this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f01.operational_problem_reported",
+      "family": "F01",
+      "name": "Operational problem or failure reported",
+      "definition": "A fault, failure, breach of expectation, capacity shortfall, complaint or unmet requirement is explicitly reported through a channel the seller controls or may lawfully observe - a support ticket, a warranty claim, a field-service work order, a return or RMA, an escalation, a survey or review verbatim, an outage or incident notice, a published inspection or regulator finding. Qualifying condition: a problem is described by a person or an alerting system, attached to a subject and a timestamp, rather than inferred from a metric moving.",
+      "question_answered": "Whose current setup is actively failing right now, and does the fix require something they do not yet own?",
+      "intent_dimensions": [
+        "need",
+        "urgency",
+        "requirements",
+        "risk",
+        "timing"
+      ],
+      "identity_level": "account",
+      "data_class": "transactional_record",
+      "required_raw_fields": [
+        "subject_id",
+        "problem_description_or_code",
+        "report_timestamp",
+        "report_channel"
+      ],
+      "optional_supporting_fields": [
+        "severity",
+        "asset_id",
+        "repeat_count_same_fault",
+        "resolution_type",
+        "downtime_minutes",
+        "warranty_status",
+        "reported_by_role",
+        "parts_replaced",
+        "cost_to_serve"
+      ],
+      "source_class": [
+        "support_system",
+        "first_party_backend",
+        "offline_system",
+        "crm",
+        "review_platform",
+        "public_record"
+      ],
+      "collection_method": "api",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Tag the support queue you already own. Add two fields to every ticket - problem_type, and whether the resolution requires something the customer does not currently have (a capability, a tier, a part, a service, more capacity) - and count repeats per account",
+          "requires": [
+            "ticketing system",
+            "a short tag taxonomy agreed with support"
+          ],
+          "gives": "Turns a cost centre into a need-recognition feed this week. It is entirely post-sale, which is exactly the half of the journey that unaided signal lists omit"
+        },
+        {
+          "rung": 2,
+          "how": "Route field and warranty records into the same feed: work orders, RMAs, warranty claims, engineer notes, parts replaced, second visits to the same asset",
+          "requires": [
+            "field-service or warranty system export keyed to customer and asset"
+          ],
+          "gives": "A second failure of the same asset is the strongest replacement evidence a manufacturer or service firm holds, and it almost never reaches whoever sells the replacement"
+        },
+        {
+          "rung": 3,
+          "how": "Classify the problem statement - not the sentiment - in channels you already record: call transcripts, chat logs, survey verbatims, review text about your product",
+          "requires": [
+            "existing recordings under an existing recording notice",
+            "transcription and a classifier"
+          ],
+          "gives": "Recovers problems that are spoken and never ticketed, which in phone-led businesses is the majority of them"
+        },
+        {
+          "rung": 4,
+          "how": "Watch lawful public problem reporting for accounts and sites: regulator and inspectorate findings, safety notices, recall notices, public complaint registers, published outage and incident histories",
+          "requires": [
+            "terms-compliant monitoring of named public registers"
+          ],
+          "gives": "Off-organisation evidence about companies and locations that are not yet customers - the only rung that sees the problem before the buyer tells anyone"
+        }
+      ],
+      "min_data": {
+        "min_reports": 1,
+        "note": "A single severe report is actionable; a single low-severity report is noise. Weight by repeat count for the same fault and by whether the customer's own operations stopped."
+      },
+      "access_conditions": [
+        "Rung 3 inherits the legal basis of the recording, it does not create one - two-party-consent jurisdictions bind the making of the recording, not merely the analysis of it",
+        "Rung 4 registers are public but their reuse terms vary; a public complaint register is not automatically a prospecting list",
+        "A complaint made about you to a regulator is a legal matter first and a signal second - route it accordingly",
+        "Ticket content routinely contains third-party personal data and customer confidential information; classification should read it, exports should not spread it"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Call and chat analysis at rung 3 depends on the recording consent already obtained; public registers at rung 4 carry per-source reuse terms.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "route",
+      "strength": 4,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "realtime",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 30,
+        "note": "A live problem is urgent while it hurts. A repeat report of the same fault should re-arm the signal and reset the clock rather than be averaged into a trend."
+      },
+      "false_positives": [
+        "A problem caused by the customer's own configuration or process, which no purchase will fix",
+        "A support-heavy customer whose ticket volume reflects engagement rather than unmet need",
+        "A complaint escalated to obtain a refund or credit, where the wanted outcome is money back",
+        "A problem reported by an end user with neither budget nor authority",
+        "A one-off incident during a migration, a seasonal peak or a planned change",
+        "A ticket opened by a reseller or partner on the customer's behalf, masking who actually has the problem",
+        "A regulator finding that was remediated long before you read it",
+        "Automated alert noise from a monitoring integration, counted as human reports"
+      ],
+      "confirmation_signals": [
+        "f01.explicit_need_statement",
+        "f10.maintenance_and_failure",
+        "f13.capacity_pressure"
+      ],
+      "recommended_action_class": "route_the_solvable_gap_to_a_named_owner_and_price_the_fix",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "product_failure",
+          "capacity_pressure",
+          "regulation",
+          "replacement"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "manufacturing",
+          "field_service",
+          "logistics",
+          "telecom",
+          "facilities",
+          "software",
+          "automotive"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated on the mechanism: the problem is stated by the party who has it, with a date. Held below 5 because many reported problems are solved by support at no cost to the customer and generate no purchase at all."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    },
+    {
+      "id": "f01.explicit_need_statement",
+      "family": "F01",
+      "name": "Explicit statement of need",
+      "definition": "The subject states in their own words, in a channel attributable to them, that they need, want, lack or are looking for something in the category - in a sales call, a support ticket, a form free-text box, a survey answer, a review of an incumbent, a job description's requirements, a published tender or request for information, or a community post. Qualifying condition: the statement names a need, a gap or a desired outcome and resolves to an identifiable subject; anonymous aggregate sentiment does not qualify.",
+      "question_answered": "Who has said out loud that they need this, and in what words - so we can answer the need they described rather than the one we assumed?",
+      "intent_dimensions": [
+        "need",
+        "category",
+        "requirements",
+        "urgency",
+        "timing"
+      ],
+      "identity_level": "individual",
+      "data_class": "declared_attribute",
+      "required_raw_fields": [
+        "subject_id",
+        "statement_text",
+        "statement_timestamp",
+        "statement_channel"
+      ],
+      "optional_supporting_fields": [
+        "stated_outcome",
+        "stated_deadline",
+        "stated_constraint",
+        "named_alternatives",
+        "role_of_speaker",
+        "classification_confidence",
+        "language"
+      ],
+      "source_class": [
+        "crm",
+        "support_system",
+        "first_party_web",
+        "review_platform",
+        "public_record",
+        "marketplace"
+      ],
+      "collection_method": "declaration",
+      "capability_ladder": [
+        {
+          "rung": 1,
+          "how": "Read the free text you already hold and nobody opens: the 'anything else we should know' box, first-call notes, lost-reason and churn-reason text, chat openers, survey verbatims. Export a year of it and classify a few hundred by hand",
+          "requires": [
+            "export access to existing text fields"
+          ],
+          "gives": "Zero new collection, and it returns two assets at once - a list of stated needs, and the buyer's own vocabulary, which is usually not the vocabulary on your website"
+        },
+        {
+          "rung": 2,
+          "how": "Ask one open question at the moment of highest honesty and store the answer verbatim: 'what are you trying to fix?' on the enquiry form and as a required field on the first call",
+          "requires": [
+            "one form field",
+            "one CRM field",
+            "a rule against summarising the answer away"
+          ],
+          "gives": "A verbatim need statement outperforms any inferred score in the same row, because it carries the need, the words and the constraint together"
+        },
+        {
+          "rung": 3,
+          "how": "Transcribe and classify the seller's own recorded calls and demos so that needs stated verbally become structured rows",
+          "requires": [
+            "recording consent already in place for all participants",
+            "transcription and a classifier"
+          ],
+          "gives": "Most need statements are spoken and none of them are currently stored; this is the largest single volume of the signal in any sales-led business"
+        },
+        {
+          "rung": 4,
+          "how": "Read lawful public and off-website need statements at account level: published tender and RFI notices, job descriptions whose requirement text describes an unmet need, community and forum questions, and review text about incumbents",
+          "requires": [
+            "terms-compliant reading of named public sources"
+          ],
+          "gives": "Reaches people who have never contacted you and will not until they have shortlisted - the part of the population first-party analytics cannot see at all"
+        }
+      ],
+      "min_data": {
+        "min_statements": 1,
+        "note": "One attributable statement is enough to act on. Deriving a category taxonomy from statements needs several hundred before the categories stop being your own assumptions restated."
+      },
+      "access_conditions": [
+        "Rung 3 requires call-recording consent appropriate to every participant's jurisdiction; classifying a recording inherits that basis and does not create one",
+        "Rung 4: tender portals, job boards and community platforms publish for a stated purpose and most prohibit bulk automated extraction; read terms per source, and never re-identify a pseudonymous poster",
+        "Quoting a person's own words back to them is powerful and can be alarming - act on the need, not on the quote",
+        "A statement made in a support or safety context was not offered as a sales lead; check the purpose before routing it to sales"
+      ],
+      "availability": "available_now",
+      "permission_requirement": "notice",
+      "terms_constrained": true,
+      "terms_note": "Public sources at rung 4 are individually terms-bound; recorded-call analysis at rung 3 is bound by the recording consent.",
+      "sensitivity": "medium",
+      "legal": {
+        "special_category_risk": false,
+        "terminal_equipment_access": false,
+        "person_level_resolution": true,
+        "jurisdiction_blocklist": [],
+        "gpc_survivable": true,
+        "third_party_broker_dependence": false,
+        "cipa_exposure": "medium"
+      },
+      "activation_direction": "engage",
+      "strength": 5,
+      "reliability": 4,
+      "coverage": null,
+      "latency": "daily",
+      "freshness": {
+        "type": "decaying",
+        "half_life_days": 60,
+        "note": "A stated need lasts longer than a click but not indefinitely; a need stated a year ago has usually been met, abandoned or changed shape, and acting on it reads as inattention rather than attentiveness."
+      },
+      "false_positives": [
+        "Aspirational statements - 'one day we should' - with no mandate and no budget",
+        "A need described by someone talking about their employer's problem while job-hunting",
+        "A researcher, student, journalist or consultant articulating a need on someone else's behalf",
+        "A community post written to start a discussion rather than to buy",
+        "A tender published to satisfy a procurement rule where an incumbent is already chosen",
+        "A job description copied from a template, naming requirements the company does not actually have",
+        "An LLM-generated or bot-submitted enquiry with fluent need language and nobody behind it",
+        "A need stated by a person whose role gives them no influence over the purchase"
+      ],
+      "confirmation_signals": [
+        "f02.search_query",
+        "f06.quote_request",
+        "f01.operational_problem_reported"
+      ],
+      "recommended_action_class": "answer_the_stated_need_in_the_buyers_own_words",
+      "applicability": {
+        "b2b_b2c": [
+          "b2b",
+          "b2c"
+        ],
+        "business_model": [
+          "saas",
+          "services",
+          "subscription",
+          "ecommerce",
+          "marketplace"
+        ],
+        "purchase_motion": [
+          "considered",
+          "transactional_ecommerce"
+        ],
+        "sales_motion": [
+          "self_serve",
+          "hybrid",
+          "sales_led"
+        ],
+        "consideration": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "purchase_cycle": [
+          "short",
+          "medium",
+          "long"
+        ],
+        "consumable_vs_durable": [
+          "consumable",
+          "durable"
+        ],
+        "triggers": [
+          "problem",
+          "business_event",
+          "replacement",
+          "capacity_pressure",
+          "regulation"
+        ],
+        "requires_plg_motion": null,
+        "has_review_site_category": null,
+        "dev_audience": null,
+        "has_owned_community": null,
+        "industry_boost": [
+          "software",
+          "professional_services",
+          "construction",
+          "healthcare",
+          "public_sector",
+          "manufacturing"
+        ],
+        "industry_exclude": []
+      },
+      "evidence": [
+        {
+          "claim": "strength",
+          "as_of": "2026-08-01",
+          "independence": "author_estimate",
+          "note": "Rated 5 because the subject states the need directly, which removes the inference step that every other entry in this family depends on. No verified independent benchmark was located this session."
+        }
+      ],
+      "sourcing_verified_at": "2026-08-01",
+      "coverage_trend": "stable"
+    }
+  ]
+}
