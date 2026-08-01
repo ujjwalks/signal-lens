@@ -1,9 +1,21 @@
 # CC0 1.0 Universal — Public Domain Dedication
 
-**Applies to:** `data/jurisdictions.json`, `data/sources.json`, and the legal,
-permission, and sourcing facets of `data/signals.json` — that is, every factual
-assertion in this repository about what the law requires, what a data source costs,
-and what access conditions apply.
+**Applies to: everything under `data/`.**
+
+That is currently the catalogue shards at `data/families/*.json` — one file per signal
+family, plus `data/families/restricted.json` — and it extends automatically to any
+future file added under `data/` (a jurisdiction rule table or a dated source appendix
+would land there).
+
+The dedication is scoped to the directory rather than to a list of filenames on purpose:
+an earlier version of this file named `data/signals.json`, the catalogue was later
+sharded into `data/families/`, and the licence silently stopped covering the data it was
+written for. A path list that can drift out of sync with the tree is a defect in a
+licence, not a detail.
+
+What this covers within those files: every factual assertion about what the law
+requires, what a data source costs, what access conditions apply, and how reliable a
+signal is.
 
 **Why these files are CC0 and not MIT.** MIT requires the copyright notice to travel
 with all copies and substantial portions. These files are a table of legal and

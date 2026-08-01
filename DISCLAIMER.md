@@ -1,5 +1,12 @@
 # Disclaimer
 
+> **Scope note.** This document describes the behaviour of the finished tool. The
+> report generator and scoring pipeline are **not yet built** — today the repository
+> ships a signal catalogue and its validator. The verdict vocabulary and the disclosure
+> rules below are the contract those components are being written against, not a
+> description of code you can run right now. Nothing here is weakened by that: it is
+> stated up front so no one reads a specification as a guarantee.
+
 ## This is not legal advice
 
 signal-lens emits assessments about whether a purchase-intent signal can lawfully be

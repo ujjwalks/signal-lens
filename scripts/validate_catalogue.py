@@ -262,6 +262,27 @@ def check_entry(entry, f):
                   "free-equals-lawful collapse the two axes exist to prevent. Free to obtain "
                   "is not free to use")
 
+        # The safety rule below keys on `sensitivity` and `availability`, both of which
+        # the author chooses. That is enough for an honest author and useless against a
+        # careless or adversarial one: relabelling sensitivity 'restricted' -> 'high'
+        # and availability 'should_not_be_collected' -> 'integration' walks a full
+        # special-category build path straight through. So also key on the SEMANTICS.
+        # Inferring a special-category attribute is the prohibited class by definition,
+        # whatever the entry calls itself. Declared and consented special-category data
+        # is a different thing and stays legal here.
+        if legal.get("special_category_risk") and entry.get("collection_method") == "inference":
+            f.add("error", eid, "collection_method",
+                  "special_category_risk with collection_method 'inference' IS the "
+                  "prohibited class, regardless of how the entry is labelled. Deriving a "
+                  "special-category attribute from behaviour has no GDPR Art 9(2) condition "
+                  "available to it. Either the signal is a declared/consented variant (fix "
+                  "collection_method) or it belongs in restricted.* with no build path")
+        if legal.get("special_category_risk") and perm in ("none", "notice"):
+            f.add("warn", eid, "permission_requirement",
+                  f"special_category_risk is true but permission is {perm!r}. Art 9 needs a "
+                  "condition stronger than notice - usually explicit consent, or a "
+                  "regulated-access basis. One of the two fields is wrong; decide which")
+
     # --- applicability -----------------------------------------------------
     app = entry.get("applicability")
     if not isinstance(app, dict):

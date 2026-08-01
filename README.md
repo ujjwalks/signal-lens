@@ -62,23 +62,44 @@ ranks it, so the agent only ever sees the shortlist. The other ~77 entries cost 
 
 ## Design commitments
 
-- **Relevance is not availability.** They are separate columns and the report says so.
-- **Availability is not permission.** A source being free does not make it lawful.
-  `public_cost_free` is named that way so it can never be read as clearance.
-- **The legal gate runs before scoring, not after.** A subtractive privacy penalty can
-  be outvoted by a large relevance boost; a boolean gate cannot.
-- **No verdict says "permitted."** Output is
+Split by what is enforced in code today versus what is specified and not yet built,
+because a commitment nobody can run is a plan, not a property.
+
+### Enforced today by `scripts/validate_catalogue.py`
+
+- **Relevance is not availability, and availability is not permission.** Three separate
+  required fields. `public_cost_free` is named that way so it can never be read as
+  clearance, and coherence rules reject the combinations that collapse the axes — a row
+  that touches a visitor's device or resolves a natural person cannot claim permission
+  `none`.
+- **Prohibited classes ship as prohibitions, never as recipes.** A `restricted` entry
+  carrying a `capability_ladder`, `required_raw_fields` or `min_data` is a hard failure.
+  Because that rule keys on author-chosen labels, a second rule keys on the semantics:
+  `special_category_risk` plus `collection_method: inference` fails whatever the entry
+  calls itself.
+- **Every buildable entry must say how it is obtained.** No `required_raw_fields` or no
+  `capability_ladder` is a hard failure. An entry that cannot state its acquisition path
+  is a signal name, and names are free.
+- **Evidence carries an independence flag**, and a non-estimate claim without a source
+  URL fails. Vendor-published evidence is marked as such — much of the public benchmark
+  data comes from vendors selling the thing being measured.
+
+### Specified, not yet built
+
+- **The legal gate runs before scoring, not after** — a subtractive privacy penalty can
+  be outvoted by a large relevance boost; a boolean gate cannot. *Lands with
+  `filter_signals.py`.*
+- **No verdict will say "permitted."** The verdict enum is
   `blocked_by_policy` / `requires_consent_review` / `no_known_restriction_identified`,
-  and the last one means the rule table found nothing, not that you are clear.
-  See [DISCLAIMER.md](DISCLAIMER.md).
-- **Prohibited signal classes ship as prohibitions, never as recipes.** A `restricted`
-  entry that carries a build path is a **hard validation failure** — you cannot print
-  "excluded: inferred health status" by shipping instructions for it.
-- **Unevidenced numbers don't get to look measured.** Facets without a cited source
-  clamp to the neutral midpoint, and vendor-published evidence is flagged as such —
-  much of the public benchmark data comes from vendors selling the thing measured.
-- **No vendor names in the catalogue.** They rot in months. Source *classes* are stable;
-  concrete vendors live in a dated, explicitly perishable appendix.
+  and the last means the rule table found nothing, not that you are clear.
+  See [DISCLAIMER.md](DISCLAIMER.md). *Lands with the report generator.*
+- **Unevidenced numbers will not look measured** — facets without a cited source clamp
+  to the neutral midpoint rather than taking an author-chosen value. The validator
+  already reports the unevidenced percentage (currently **23.6%**); the clamping itself
+  *lands with the renderer.*
+- **No vendor names in the catalogue.** Currently held by author discipline and verified
+  by grep, not by a rule. Source *classes* are stable; concrete vendors belong in a
+  dated, explicitly perishable appendix that does not exist yet.
 
 ## Development
 
