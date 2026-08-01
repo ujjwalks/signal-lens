@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# generated run artifacts — these belong in the user's working directory, never here
+out/
+*.plan.json
+*.profile.json
+report-scaffold.md

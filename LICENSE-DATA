@@ -1,0 +1,35 @@
+# CC0 1.0 Universal — Public Domain Dedication
+
+**Applies to:** `data/jurisdictions.json`, `data/sources.json`, and the legal,
+permission, and sourcing facets of `data/signals.json` — that is, every factual
+assertion in this repository about what the law requires, what a data source costs,
+and what access conditions apply.
+
+**Why these files are CC0 and not MIT.** MIT requires the copyright notice to travel
+with all copies and substantial portions. These files are a table of legal and
+commercial assertions with a 2026 vintage, and they will go stale: privacy statutes
+change, vendors shut down, free tiers disappear. A fork that is never refreshed should
+not carry an author's name with it into 2028. CC0 removes attribution entirely, so a
+stale rule table is unambiguously the forker's responsibility.
+
+The code in `scripts/`, the skill text in `SKILL.md` and `references/`, and everything
+else in this repository remain under the MIT License in `LICENSE`.
+
+---
+
+## The dedication
+
+To the extent possible under law, the author(s) have dedicated all copyright and
+related and neighboring rights to the files named above to the public domain worldwide.
+This dedication is made under the Creative Commons CC0 1.0 Universal Public Domain
+Dedication.
+
+You can copy, modify, distribute and perform the work, even for commercial purposes,
+all without asking permission.
+
+The work is provided "as is", without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a
+particular purpose, and non-infringement. See `DISCLAIMER.md` — none of this data is
+legal advice.
+
+Full text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
