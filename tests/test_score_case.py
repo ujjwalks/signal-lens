@@ -93,6 +93,44 @@ class Scoring(unittest.TestCase):
         self.assertEqual([x["id"] for x in r["restricted_not_named"]],
                          ["restricted.household_composition_inference"])
 
+    def test_correctly_excluded_signal_is_credited_not_punished(self):
+        """The regression that mattered: the skill exists to emit a do-not-use bucket,
+        and scoring every mention as a recommendation failed that exact answer."""
+        rc, r = self._json_score({
+            "activate_now": ["f04.product_comparison", "f06.quote_request",
+                             "f12.declared_relocation", "f14.household_coordination"],
+            "do_not_use": ["f11.replenishment_due"],
+            "must_not_collect": ["restricted.household_composition_inference"]})
+        self.assertEqual(rc, 0, "a correct plan must pass")
+        self.assertTrue(r["passed"])
+        self.assertEqual(r["exclusion_violations"], [])
+        self.assertEqual(r["correctly_excluded"], ["f11.replenishment_due"])
+        self.assertEqual(r["restricted_flagged"],
+                         ["restricted.household_composition_inference"])
+        self.assertEqual(r["weighted_recall"], 100.0)
+
+    def test_recommending_a_prohibition_fails(self):
+        """The id contains the word 'restricted', which must not read as its own
+        exclusion context."""
+        rc, r = self._json_score({
+            "activate_now": ["f04.product_comparison",
+                             "restricted.household_composition_inference"]})
+        self.assertEqual(rc, 1)
+        self.assertFalse(r["passed"])
+        self.assertEqual([x["id"] for x in r["restricted_recommended"]],
+                         ["restricted.household_composition_inference"])
+
+    def test_families_are_inferred_from_recommended_ids(self):
+        """Requiring a literal F04 punished a correct answer for a formatting choice."""
+        rc, r = self._json_score({"activate_now": ["f04.product_comparison",
+                                                   "f12.declared_relocation"]})
+        self.assertIn("F04", r["family_coverage"]["hit"])
+        self.assertIn("F12", r["family_coverage"]["hit"])
+
+    def test_excluded_signals_do_not_count_toward_family_coverage(self):
+        rc, r = self._json_score({"do_not_use": ["f06.quote_request"]})
+        self.assertIn("F06", r["family_coverage"]["missed"])
+
     def test_prose_plans_are_scorable(self):
         """Early evaluation is 'run the skill, save what it said'."""
         p = write(self.tmp.name, "plan.md",

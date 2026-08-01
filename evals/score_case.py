@@ -43,39 +43,97 @@ import sys
 ID_RE = re.compile(r"\b((?:f(?:0[1-9]|1[0-5])|restricted)\.[a-z0-9_]+)\b")
 FAMILY_RE = re.compile(r"\bF(?:0[1-9]|1[0-5])\b")
 
+# A signal id appearing in a plan does not mean the plan RECOMMENDED it. The skill is
+# specifically designed to emit a do-not-use bucket and a must-not-collect list - that
+# was failure #9, produced by 0 of 7 baseline runs - and both of those name excluded ids
+# by construction. Scoring every mention as a recommendation failed the exact answer the
+# skill exists to produce. So mentions are classified by the context they sit in.
+NEGATIVE_CONTEXT = re.compile(
+    r"do[\s_-]*not[\s_-]*(use|collect|instrument|build|track)|don'?t\s+use|"
+    r"excluded?|exclusion|must[\s_-]*not|should[\s_-]*not|not[\s_-]*recommended|"
+    r"avoid|prohibit|restricted|blocked|out[\s_-]*of[\s_-]*scope|"
+    r"not[\s_-]*applicable|rejected|suppress|no[\s_-]*known[\s_-]*use",
+    re.I)
+HEADING_RE = re.compile(r"^\s{0,3}(#{1,6}|\*\*|[-*]\s+\*\*)\s*(.+?)\s*(\*\*)?\s*$")
+
+
+def negative(text):
+    """Is this text an exclusion context?
+
+    Signal ids are stripped first. Without that, `restricted.health_status_inference`
+    matches the word 'restricted' in its own id, so a plan RECOMMENDING a prohibited
+    class scored as though it had correctly excluded it - a false negative on the one
+    check that must never produce one.
+    """
+    return bool(NEGATIVE_CONTEXT.search(ID_RE.sub(" ", text or "")))
+
 # An `obvious` signal is one the unaided baseline already produced, so recalling it is
 # not evidence the skill helped. Weights encode that, rather than pretending all
 # recalled signals are equal.
 WEIGHTS = {"obvious": 1.0, "earned": 2.0, "hard": 3.0}
 
 
+def _walk_json(node, path, out):
+    """Collect (id, negative_context) from JSON, using the key path as context."""
+    in_negative_path = negative(" ".join(path))
+    if isinstance(node, dict):
+        for k, v in node.items():
+            _walk_json(v, path + [str(k)], out)
+    elif isinstance(node, list):
+        for v in node:
+            _walk_json(v, path, out)
+    elif isinstance(node, str):
+        local = in_negative_path or negative(node)
+        for sid in ID_RE.findall(node):
+            out.append((sid, local))
+
+
+def _walk_prose(raw, out):
+    """Collect (id, negative_context) from markdown, using the enclosing heading."""
+    section_negative = False
+    for line in raw.splitlines():
+        m = HEADING_RE.match(line)
+        if m and not ID_RE.search(line):
+            section_negative = negative(m.group(2))
+            continue
+        line_negative = section_negative or negative(line)
+        for sid in ID_RE.findall(line):
+            out.append((sid, line_negative))
+
+
 def read_ids(path):
-    """Collect signal ids from a plan, whether it is JSON or prose."""
+    """Split a plan's signal ids into what it RECOMMENDED and what it EXCLUDED.
+
+    Returns (recommended, excluded, families, is_prose).
+    """
     with open(path, encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
-    ids, families = set(), set()
     try:
         data = json.loads(raw)
+        prose = False
     except json.JSONDecodeError:
-        data = None
+        data, prose = None, True
+
+    mentions = []
     if data is not None:
-        stack = [data]
-        while stack:
-            node = stack.pop()
-            if isinstance(node, dict):
-                stack.extend(node.keys())
-                stack.extend(node.values())
-            elif isinstance(node, list):
-                stack.extend(node)
-            elif isinstance(node, str):
-                ids.update(ID_RE.findall(node))
-                families.update(FAMILY_RE.findall(node))
-    ids.update(ID_RE.findall(raw))
-    families.update(m.group(0) for m in re.finditer(FAMILY_RE, raw))
-    return ids, families
+        _walk_json(data, [], mentions)
+    else:
+        _walk_prose(raw, mentions)
+
+    recommended = {sid for sid, neg in mentions if not neg}
+    excluded = {sid for sid, neg in mentions if neg} - recommended
+
+    # Families are inferred from what was RECOMMENDED, plus any explicit F## mention.
+    # Inferring from ids matters: a plan that lists f04.product_comparison has covered
+    # F04 whether or not it spells the family code out, and requiring the code punished
+    # correct answers for a formatting choice.
+    families = {sid.split(".")[0].upper() for sid in recommended
+                if not sid.startswith("restricted.")}
+    families.update(FAMILY_RE.findall(raw))
+    return recommended, excluded, families, prose
 
 
-def score(case, found_ids, found_families):
+def score(case, recommended, excluded_by_plan, found_families):
     includes = case.get("must_include_signals") or []
     excludes = case.get("must_exclude_signals") or []
     restricted = case.get("must_flag_restricted") or []
@@ -86,18 +144,20 @@ def score(case, found_ids, found_families):
     for inc in includes:
         w = WEIGHTS.get(inc.get("how_obvious", "earned"), 2.0)
         tot_w += w
-        if inc["id"] in found_ids:
+        if inc["id"] in recommended:
             hit.append(inc); got_w += w
         else:
             miss.append(inc)
 
-    violations = [ex for ex in excludes if ex["id"] in found_ids]
-    # A prohibition may legitimately be NAMED (as excluded); it may never be recommended.
-    # We cannot always tell naming from recommending in prose, so this is reported as a
-    # violation only when the plan is structured and the id sits outside an exclusion
-    # container - in prose it is reported as needing review rather than silently passed.
-    restricted_present = [r for r in restricted if r["id"] in found_ids]
-    restricted_missing = [r for r in restricted if r["id"] not in found_ids]
+    # Only a RECOMMENDED excluded signal is a violation. Naming it in a do-not-use
+    # bucket is the correct behaviour and is credited, not punished.
+    violations = [ex for ex in excludes if ex["id"] in recommended]
+    correctly_excluded = [ex for ex in excludes if ex["id"] in excluded_by_plan]
+    # A prohibition may be NAMED as excluded; it may never be recommended.
+    restricted_flagged = [r for r in restricted if r["id"] in excluded_by_plan]
+    restricted_recommended = [r for r in restricted if r["id"] in recommended]
+    restricted_missing = [r for r in restricted
+                          if r["id"] not in excluded_by_plan and r["id"] not in recommended]
 
     fams_hit = fams_expected & found_families
     fams_miss = fams_expected - found_families
@@ -107,7 +167,7 @@ def score(case, found_ids, found_families):
         d = inc.get("how_obvious", "earned")
         b = by_diff.setdefault(d, [0, 0])
         b[1] += 1
-        if inc["id"] in found_ids:
+        if inc["id"] in recommended:
             b[0] += 1
 
     return {
@@ -120,11 +180,14 @@ def score(case, found_ids, found_families):
         "missed": [{"id": m["id"], "difficulty": m.get("how_obvious"), "why": m.get("why")} for m in miss],
         "exclusion_violations": [{"id": v["id"], "why_wrong": v.get("why"),
                                   "failure_mode": v.get("failure_mode")} for v in violations],
-        "restricted_named": [r["id"] for r in restricted_present],
+        "correctly_excluded": [e["id"] for e in correctly_excluded],
+        "exclusions_of": len(excludes),
+        "restricted_flagged": [r["id"] for r in restricted_flagged],
+        "restricted_recommended": [{"id": r["id"], "why": r.get("why")} for r in restricted_recommended],
         "restricted_not_named": [{"id": r["id"], "why": r.get("why")} for r in restricted_missing],
         "family_coverage": {"hit": sorted(fams_hit), "missed": sorted(fams_miss),
                             "of": len(fams_expected)},
-        "passed": not violations,
+        "passed": not violations and not restricted_recommended,
     }
 
 
@@ -165,20 +228,35 @@ def render(r, plan_path, prose):
                 out.append(f"      {m['why']}")
         out.append("")
 
+    if r["correctly_excluded"]:
+        out.append(f"CORRECTLY EXCLUDED  {len(r['correctly_excluded'])}/{r['exclusions_of']} "
+                   "trap signals were named in a do-not-use bucket rather than recommended")
+        out.append("")
+
+    if r["restricted_recommended"]:
+        out.append("PROHIBITED CLASSES RECOMMENDED - outright failure")
+        for x in r["restricted_recommended"]:
+            out.append(f"  !! {x['id']}: {x['why']}")
+        out.append("")
+
     if r["restricted_not_named"]:
         out.append("RESTRICTED CLASSES NOT SURFACED - the plan never told the reader "
                    "these must not be collected")
         for x in r["restricted_not_named"]:
             out.append(f"  - {x['id']}: {x['why']}")
         out.append("")
-    if r["restricted_named"]:
-        out.append("RESTRICTED CLASSES MENTIONED (verify by hand that each is named as "
-                   "EXCLUDED, not recommended):")
-        for x in r["restricted_named"]:
-            out.append(f"  ? {x}")
+    if r["restricted_flagged"]:
+        out.append("PROHIBITED CLASSES CORRECTLY SURFACED AS EXCLUDED:")
+        for x in r["restricted_flagged"]:
+            out.append(f"  ok {x}")
         out.append("")
 
-    out.append("PASS" if r["passed"] else "FAIL - an excluded signal was recommended")
+    if r["passed"]:
+        out.append("PASS")
+    elif r["restricted_recommended"]:
+        out.append("FAIL - a documented do-not-collect class was recommended")
+    else:
+        out.append("FAIL - an excluded signal was recommended")
     return "\n".join(out)
 
 
@@ -200,20 +278,13 @@ def main():
         print(f"CANNOT READ PLAN: no such file {args.plan}", file=sys.stderr)
         return 2
 
-    ids, families = read_ids(args.plan)
-    if not ids:
+    recommended, excluded_by_plan, families, prose = read_ids(args.plan)
+    if not recommended and not excluded_by_plan:
         print(f"CANNOT SCORE: no signal ids found in {args.plan}. Expected ids like "
               "'f04.product_comparison' somewhere in the plan.", file=sys.stderr)
         return 2
 
-    prose = True
-    try:
-        with open(args.plan, encoding="utf-8") as fh:
-            json.load(fh); prose = False
-    except Exception:
-        pass
-
-    r = score(case, ids, families)
+    r = score(case, recommended, excluded_by_plan, families)
     print(json.dumps(r, indent=2) if args.json else render(r, args.plan, prose))
     return 0 if r["passed"] else 1
 
