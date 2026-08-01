@@ -123,7 +123,32 @@ def main():
     kept = sorted([(p, s) for p, s in scored if p is not None],
                   key=lambda t: (-t[0], t[1]["id"]))
     dropped = len(scored) - len(kept)
-    short = [project(s) for _, s in kept[:args.n]]
+
+    # Family-diverse selection. Scoring on applicability overlap produces massive ties -
+    # every row surviving the same facet gates scores identically - so a plain
+    # score-then-id sort degenerates into a LEXICOGRAPHIC PREFIX. Measured on the first
+    # run: the pricing-page profile gated out nothing, and the 15 rows returned were
+    # f01-f06 in id order, with F07-F15 physically absent from the payload. A model given
+    # that shortlist cannot walk fifteen families no matter what it is told.
+    # So take the best row per family round-robin first, then fill by score.
+    by_family = {}
+    for p, s in kept:
+        by_family.setdefault(s["family"], []).append((p, s))
+    picked, seen = [], set()
+    while len(picked) < args.n:
+        added = False
+        for fam in sorted(by_family):
+            for p, s in by_family[fam]:
+                if s["id"] in seen:
+                    continue
+                picked.append((p, s)); seen.add(s["id"]); added = True
+                break
+            if len(picked) >= args.n:
+                break
+        if not added:
+            break
+    picked.sort(key=lambda t: (-t[0], t[1]["id"]))
+    short = [project(s) for _, s in picked]
     payload = {"profile_id": profile.get("id"),
                "shortlist": short,
                "prohibitions": [project_restricted(s) for s in restricted],
@@ -136,7 +161,7 @@ def main():
         print(f"PROFILE {profile.get('id')}")
         print(f"  {len(buildable)} rows considered, {dropped} gated out by applicability, "
               f"top {len(short)} returned")
-        for p, s in kept[:args.n]:
+        for p, s in picked:
             print(f"  {p:5.1f}  {s['id']:44} {s['availability']}")
         est = len(json.dumps(payload)) // 4
         print(f"\n  payload ~{est} tokens ({len(json.dumps(payload))} chars)")

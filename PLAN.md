@@ -677,6 +677,96 @@ catalogue.
 
 ---
 
+## 11c. The three-arm control (2026-08-02) — the catalogue is cut, not killed
+
+Run on the same 7 prompts. **A** = unaided (recovered verbatim from the baseline study).
+**B** = a ~40-line structural checklist encoding every structural finding, no catalogue.
+**C** = the same checklist plus a filtered shortlist of acquisition rows. B vs C isolates
+the catalogue exactly.
+
+### Run 1 said 7–0 for the checklist. Run 1 was my bug.
+
+The filter's scoring produced massive ties, so the id tie-break returned a **lexicographic
+prefix** — the pricing-page profile gated out *zero* rows and still returned only f01–f06,
+with nine families physically absent from the payload. Arm C was also told to treat the
+shortlist as closure. **Arm B's text is byte-identical across both runs; only the C side
+changed.** Fix those two things and the same prompts, same grader, go **5–2 the other
+way**. Any claim resting on run 1 is void.
+
+### Run 2, with the confound removed
+
+| | B (checklist) | C2 (+ catalogue) |
+|---|---:|---:|
+| Wins of 7 | 2 | **5** |
+| Overall /10 | 7.50 | **7.86** |
+| Families with substantive rows | 15 | 15 |
+| Signals named | **47.4** | 35.6 |
+| Tooling leakage | **1.86** | 3.00 |
+| Fabricated numbers | **2.0** | 5.43 |
+
+**Do not over-read the reversal.** Five of six margins were "narrow", the overall gap is
+0.36, and **7/7 graders said a merge would beat either arm.** That is parity with an edge
+on privacy depth, not a win. Two of four tracked defects moved *against* the catalogue.
+
+### The finding that actually decides the design
+
+**`legal{}` never entered the model's context in either run.** It was not in the
+projection. So the privacy result — the axis C2 won on in four prompts — was produced by
+**four prose fields** (`prohibition_basis`, `access_conditions`, `false_positives`,
+`rung_1`), not by the 34-facet machine-readable schema. *The catalogue's analytic ambition
+is unvalidated; its prose is what earned.*
+
+And the checklist has two **structural** ceilings the catalogue clears repeatably:
+its three-bucket privacy gate cannot express contractual or regulated access (revops:
+seven rows misfiled), and its fixed false-positive archetype list degrades to
+students/analysts/bots (payroll grader named this as mechanism, not luck).
+
+### Both regressions trace to fields that are separable from the fields that earned
+
+- **`half_life_days`** — populated on 69/92 rows with **zero** evidence claims anywhere.
+  The model reads a bare integer in a structured field and reproduces it as fact. This is
+  the catalogue *manufacturing failure #15*, the defect it was built to fix.
+- **`sensitivity` as a stored default** — every quoted leak is this field ("the stored
+  default is medium"). It cost C2 **both** of its losses.
+
+### Decision: keep a reduced catalogue
+
+**Project 13 fields, not 34.** Keep: the 16 prohibitions whole and unfiltered (~5.9k
+tokens, the single highest-value thing the catalogue ships) · `false_positives` ·
+`access_conditions` · `capability_ladder[0]` only · `availability` ·
+`permission_requirement` · `required_raw_fields` · `identity_level` (with the enum
+enumerated inline) · `confirmation_signals` · `activation_direction` · `id`/`family`/`name`
+· `definition` capped at 320 chars · `freshness.type` only.
+
+**Cut from the projection:** `half_life_days`, `freshness.note`, `sensitivity`,
+`question_answered`, `source_class`, `data_class`, `collection_method`,
+`ladder_rungs_total`. **Cut from the product entirely:** `strength`, `reliability`,
+`coverage`, `latency` — all 92 strength values are `author_estimate`, they cannot rank,
+and they are currently unprojected, unranked and unused.
+
+That takes a row from ~700 to ~560 tokens, so the same budget buys 26 rows instead of 20 —
+spend it on breadth, which is the measured deficit (35.6 vs 47.4).
+
+**Also required before any public defence:** a `retention` facet (B beat C2 on
+`retention_expiry_at` set at intake; the catalogue has no field for it), a hard output
+grep for `stored` / `default` / `catalogue` / `shortlist` / `filter` as a release gate, and
+a fix for the 26 `terminal_equipment_access` rows carrying permission `notice` with an
+empty `jurisdiction_blocklist`.
+
+### What this study cannot answer
+
+Arm B is **replayed stored text** — no variance estimate, so a C2 win cannot be told from
+a bad B sample. n=7, one grader per prompt, no inter-rater agreement. Arm C2 changed three
+things at once and cannot attribute the recovery to any one. And the 13-field reduction is
+**inferred from grader prose, not ablated** — it is a hypothesis, and the next run is its
+test.
+
+**The missing arm is the decisive one:** checklist + the 16 prohibitions, *no per-row
+payload*. That arm decides whether the row-level catalogue survives at all, and this study
+did not run it.
+
+---
+
 ## 12. Decisions
 
 **Settled:**
