@@ -4,8 +4,9 @@
 should actually monitor — and, for every one of them, how to get it.**
 
 signal-lens is an [Agent Skill](https://agentskills.io): a folder of instructions, a
-signal catalogue, and deterministic scripts that an agent loads on demand. It runs on
-Claude Code and OpenAI Codex from the same `SKILL.md`.
+signal catalogue, and deterministic scripts that an agent loads on demand. It is being
+built to run on Claude Code and OpenAI Codex from one `SKILL.md`; no `SKILL.md` exists
+yet.
 
 > **Status: in development.** The catalogue contract and its validator are in place;
 > the catalogue, scripts and skill body are being built. **Not yet installable** —
@@ -23,8 +24,8 @@ output independently graded. **109 observed failures.** The pattern:
 
 | Measured, unaided | Result |
 |---|---|
-| Signals named per run | **40.5 average** — recall is not the problem |
-| Buying-journey families covered | **8.9 of 15** — and the misses are the same six every time |
+| Signals named per run | **40.5 mean** across the 6 on-task runs (the 7th was off-task) — recall is not the problem |
+| Buying-journey families covered | **8.9 of 15 mean** — and six families were missed in 4-5 of the 7 runs each |
 | Runs that conflated *relevant* with *obtainable* | **7 of 7** |
 | Runs that assigned an identity level to any signal | **0 of 7** |
 | Runs that produced a do-not-collect bucket | **0 of 7** |
@@ -57,8 +58,9 @@ to obtain the thing is not.
 | What breaks it | false positives · confirmation signals · activation direction |
 
 The catalogue covers all 15 master signal families and the 92 signals the source
-taxonomy enumerates. It is **data, not prose** — `scripts/filter_signals.py` filters and
-ranks it, so the agent only ever sees the shortlist. The other ~77 entries cost nothing.
+taxonomy enumerates, plus 16 prohibition classes. It is **data, not prose**:
+`scripts/filter_signals.py` (not yet written) will filter and rank it so the agent only
+ever sees the shortlist, and entries it never returns cost nothing.
 
 ## Design commitments
 
@@ -67,11 +69,13 @@ because a commitment nobody can run is a plan, not a property.
 
 ### Enforced today by `scripts/validate_catalogue.py`
 
-- **Relevance is not availability, and availability is not permission.** Three separate
-  required fields. `public_cost_free` is named that way so it can never be read as
-  clearance, and coherence rules reject the combinations that collapse the axes — a row
-  that touches a visitor's device or resolves a natural person cannot claim permission
-  `none`.
+- **Availability is not permission.** Two separate required fields: `availability`
+  (can it be obtained - a cost axis) and `permission_requirement` (may it be - a
+  lawfulness axis). Relevance is not a catalogue field at all; it is computed per
+  company at filter time, which is exactly why it cannot be conflated with either.
+  `public_cost_free` is named that way so it can never be read as clearance, and
+  coherence rules reject the combinations that collapse the axes — a row that touches a
+  visitor's device or resolves a natural person cannot claim permission `none`.
 - **Prohibited classes ship as prohibitions, never as recipes.** A `restricted` entry
   carrying a `capability_ladder`, `required_raw_fields` or `min_data` is a hard failure.
   Because that rule keys on author-chosen labels, a second rule keys on the semantics:
@@ -95,8 +99,8 @@ because a commitment nobody can run is a plan, not a property.
   See [DISCLAIMER.md](DISCLAIMER.md). *Lands with the report generator.*
 - **Unevidenced numbers will not look measured** — facets without a cited source clamp
   to the neutral midpoint rather than taking an author-chosen value. The validator
-  already reports the unevidenced percentage (currently **23.6%**); the clamping itself
-  *lands with the renderer.*
+  already reports the unevidenced percentage (currently **17.9%** of the numeric facets
+  that carry a value on buildable rows); the clamping itself *lands with the renderer.*
 - **No vendor names in the catalogue.** Currently held by author discipline and verified
   by grep, not by a rule. Source *classes* are stable; concrete vendors belong in a
   dated, explicitly perishable appendix that does not exist yet.
@@ -105,7 +109,7 @@ because a commitment nobody can run is a plan, not a property.
 
 ```bash
 python3 scripts/validate_catalogue.py          # contract + safety rules
-python3 -m unittest discover -s tests -v       # stdlib only, no dependencies
+python3 -m unittest discover -s tests -v       # 16 adversarial tests, stdlib only
 ```
 
 The catalogue is JSON rather than YAML on purpose: PyYAML is not in the standard

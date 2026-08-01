@@ -211,7 +211,7 @@
       "supersedes": [
         "f11.utilisation_against_entitlement"
       ],
-      "merge_note": "Merged 2026-08-01 with the F11 shard's 'upgrade cycle: utilisation against entitlement', which was the same acquisition row - identical required fields, identical first rung, identical action. F11's entitlement-change-history rung and its false positives were folded in here rather than discarded."
+      "merge_note": "History: on 2026-08-01 the F11 'upgrade cycles' signal was merged into this row as a duplicate. That merge was REVERTED and the signal restored as f11.upgrade_cycle_due, because the rows coincide only on the utilisation-against-entitlement rung. This row remains the utilisation signal; upgrade interval, successor mapping and declined-upgrade reopening live in f11.upgrade_cycle_due. Where evidence is purely utilisation, this row is the one that fires."
     },
     {
       "id": "f10.maintenance_and_failure",

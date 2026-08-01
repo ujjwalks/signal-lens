@@ -839,7 +839,9 @@
       },
       "access_conditions": [
         "Every rung reads records the seller already holds about its own customers. There is no third-party path in this row and none is needed",
-        "An upgrade cycle is not a replacement cycle. If the next purchase replaces a failed or worn-out unit rather than moving up from a working one, that is f10.lifecycle_stage; if it repeats the same item, that is f11.reorder_cadence_pattern"
+        "An upgrade cycle is not a replacement cycle. If the next purchase replaces a failed or worn-out unit rather than moving up from a working one, that is f10.lifecycle_stage; if it repeats the same item, that is f11.reorder_cadence_pattern",
+        "Overlap rule with f10.product_usage: where the evidence is purely utilisation against entitlement, that is f10.product_usage and this row should not also fire. This row is for the interval, successor and declined-upgrade evidence. Rung 2 is deliberately the shared one and exists so the row degrades usefully when no upgrade history exists yet - it is not a second reading of the same signal.",
+        "identity_level is 'account', but in a consumer application the customer_id this row is keyed on resolves a natural person - hence person_level_resolution true and a transparency duty, even though every field is first-party."
       ],
       "availability": "available_now",
       "permission_requirement": "notice",
@@ -849,7 +851,7 @@
       "legal": {
         "special_category_risk": false,
         "terminal_equipment_access": false,
-        "person_level_resolution": false,
+        "person_level_resolution": true,
         "jurisdiction_blocklist": [],
         "gpc_survivable": true,
         "third_party_broker_dependence": false,
@@ -949,5 +951,5 @@
       "coverage_trend": "stable"
     }
   ],
-  "reconciliation_note": "F11 carries 4 rows against the source spec's 5. The fifth listed signal, 'upgrade cycles', could not be written as a distinct acquisition row: the only way to detect it is utilisation measured against entitlement, which is the same fields, the same first rung and the same action as f10.product_usage. It was merged there on 2026-08-01 rather than duplicated across two families. F11's four rows cover the spec's remaining four: subscription renewal, replenishment, loyalty behaviour and transaction patterns."
+  "reconciliation_note": "F11 carries 5 rows, matching the source spec. History, because the shard previously said otherwise: during reconciliation on 2026-08-01 'upgrade cycles' was judged a duplicate of f10.product_usage - same fields, same first rung, same action - and merged there, leaving F11 at 4. That merge was later reverted and f11.upgrade_cycle_due authored, because the two rows are only the same at ONE rung. f10.product_usage detects utilisation against entitlement; f11.upgrade_cycle_due is anchored on the customer's own upgrade INTERVAL, a successor map, and previously declined upgrades whose blocking reason has since changed - none of which f10.product_usage carries. The overlapping utilisation rung is scoped in f11.upgrade_cycle_due's access_conditions so the two rows do not both fire on the same evidence."
 }

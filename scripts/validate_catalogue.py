@@ -91,10 +91,23 @@ REQUIRED_TOP = [
     "availability", "permission_requirement", "sensitivity", "activation_direction",
     "strength", "reliability", "latency", "freshness", "false_positives",
     "applicability", "sourcing_verified_at",
+    # `legal` is required, not optional. Every coherence rule below reads it, and an
+    # absent block used to degrade to {} - which meant deleting one key bought silent
+    # clearance on four rules while an entry that declared its facets honestly failed.
+    "legal",
 ]
-# Fields that describe HOW TO BUILD the signal. A restricted entry must carry none.
-IMPLEMENTATION_FIELDS = ["capability_ladder", "required_raw_fields", "min_data",
-                         "optional_supporting_fields", "access_conditions"]
+LEGAL_BOOLEANS = ["special_category_risk", "terminal_equipment_access",
+                  "person_level_resolution", "gpc_survivable",
+                  "third_party_broker_dependence"]
+
+# A restricted entry may carry ONLY these keys. An allow-list, not a deny-list: a
+# deny-list is only as good as the field names someone thought of in advance, and the
+# realistic failure is schema growth, not an adversary - a future `worked_example` or
+# `instrumentation_notes` added for buildable rows would silently escape.
+RESTRICTED_ALLOWED_KEYS = set(REQUIRED_TOP) | {
+    "prohibition_basis", "terms_constrained", "terms_note", "evidence",
+    "confirmation_signals", "recommended_action_class", "coverage", "coverage_trend",
+}
 
 NUMERIC_EVIDENCE_FACETS = ["strength", "reliability", "coverage"]
 
@@ -172,7 +185,10 @@ def check_entry(entry, f):
 
     for field in ("strength", "reliability"):
         v = entry.get(field)
-        if v is not None and (not isinstance(v, int) or not 1 <= v <= 5):
+        # `isinstance(True, int)` is True and `1 <= True <= 5` holds, so bools must be
+        # rejected explicitly or `strength: true` silently means 1.
+        if v is not None and (isinstance(v, bool) or not isinstance(v, int)
+                              or not 1 <= v <= 5):
             f.add("error", eid, field, f"must be an integer 1-5, got {v!r}")
 
     fresh = entry.get("freshness")
@@ -196,10 +212,12 @@ def check_entry(entry, f):
     else:
         if legal.get("cipa_exposure"):
             _enum(f, eid, "legal.cipa_exposure", legal["cipa_exposure"], CIPA_EXPOSURE)
-        for boolean in ("special_category_risk", "terminal_equipment_access",
-                        "person_level_resolution", "gpc_survivable",
-                        "third_party_broker_dependence"):
-            if boolean in legal and not isinstance(legal[boolean], bool):
+        for boolean in LEGAL_BOOLEANS:
+            if boolean not in legal:
+                f.add("error", eid, f"legal.{boolean}",
+                      "required. An omitted legal facet used to read as false and buy "
+                      "silent clearance on the coherence rules; say true or false")
+            elif not isinstance(legal[boolean], bool):
                 f.add("error", eid, f"legal.{boolean}", "must be true or false")
 
     fps = entry.get("false_positives")
@@ -240,8 +258,22 @@ def check_entry(entry, f):
     # that stays prose recurs on the next contributor.
     perm = entry.get("permission_requirement")
     avail = entry.get("availability")
-    restricted = (entry.get("sensitivity") == "restricted"
-                  or avail in ("restricted", "should_not_be_collected"))
+    # Three declarations must agree: the id prefix, `sensitivity`, and `availability`.
+    # Deriving `restricted` from only the latter two meant a `restricted.*` id with
+    # sensitivity 'high' was classified BUILDABLE - so it escaped the safety block AND
+    # the else-branch then demanded it ship a capability_ladder, inverting the whole
+    # commitment on the one entry most likely to be a genuine prohibition.
+    by_id = str(eid).startswith("restricted.")
+    by_facet = (entry.get("sensitivity") == "restricted"
+                or avail in ("restricted", "should_not_be_collected"))
+    restricted = by_id or by_facet
+    if by_id != by_facet:
+        f.add("error", eid, "sensitivity",
+              "a restricted entry must declare itself consistently: a 'restricted.' id "
+              "requires sensitivity 'restricted' and availability "
+              "'should_not_be_collected', and vice versa. These currently disagree "
+              f"(id={by_id}, facets={by_facet}), so the two are silently classifying "
+              "this row differently")
     if not restricted:
         if legal.get("terminal_equipment_access") and perm == "none":
             f.add("error", eid, "permission_requirement",
@@ -305,11 +337,12 @@ def check_entry(entry, f):
                   "('restricted.health_status_inference'), never a per-signal "
                   "inference id - the catalogue documents what must not be built, "
                   "it does not name a build target")
-        for field in IMPLEMENTATION_FIELDS:
-            if entry.get(field):
-                f.add("error", eid, field,
-                      f"restricted entries must not carry {field} - publishing the "
-                      "prohibition must never require publishing the recipe")
+        for field in sorted(set(entry) - RESTRICTED_ALLOWED_KEYS):
+            f.add("error", eid, field,
+                  f"restricted entries may not carry {field!r}. Publishing the "
+                  "prohibition must never require publishing the recipe, and this is "
+                  "an allow-list: any key not explicitly permitted on a prohibition "
+                  "is rejected, including ones invented after this rule was written")
         if not entry.get("prohibition_basis"):
             f.add("error", eid, "prohibition_basis",
                   "a restricted entry must state the basis for the prohibition")
@@ -332,21 +365,31 @@ def check_entry(entry, f):
     return restricted
 
 
-def check_catalogue(entries, f):
-    ids = [e.get("id") for e in entries]
-    for dup, n in Counter(ids).items():
+def check_duplicates(entries, f):
+    """Shard-local, so it runs even under --shard-only."""
+    for dup, n in Counter(e.get("id") for e in entries).items():
         if n > 1:
             f.add("error", dup, "id", f"duplicate id appears {n} times")
 
+
+def check_catalogue(entries, ids, restricted_ids, f):
     known = set(ids)
     for e in entries:
         for ref in (e.get("confirmation_signals") or []):
             if ref not in known:
                 f.add("error", e.get("id"), "confirmation_signals",
                       f"references unknown signal id {ref!r}")
+            elif ref in restricted_ids and e.get("id") not in restricted_ids:
+                f.add("error", e.get("id"), "confirmation_signals",
+                      f"references {ref!r}, which is a documented do-not-collect class. "
+                      "A prohibition cannot corroborate a buildable signal - that would "
+                      "recommend collecting it")
 
+    # Count families off the same computed flag the rest of the file uses, not off the
+    # id prefix. Two different tests meant `buildable` and family coverage could
+    # disagree about the same row in one run.
     by_family = Counter(e.get("family") for e in entries
-                        if not str(e.get("id", "")).startswith("restricted."))
+                        if e.get("id") not in restricted_ids)
     coverage = []
     for fam, (label, expected) in FAMILIES.items():
         got = by_family.get(fam, 0)
@@ -412,13 +455,26 @@ def main():
         return 2
 
     f = Findings()
-    n_restricted = sum(1 for e in entries if check_entry(e, f))
-    coverage = [] if args.shard_only else check_catalogue(entries, f)
+    restricted_ids = {e.get("id") for e in entries if check_entry(e, f)}
+    n_restricted = len(restricted_ids)
+    check_duplicates(entries, f)
+    ids = [e.get("id") for e in entries]
+    coverage = ([] if args.shard_only
+                else check_catalogue(entries, ids, restricted_ids, f))
 
     buildable = len(entries) - n_restricted
-    unevidenced = sum(1 for r in f.warnings() if r["field"] in NUMERIC_EVIDENCE_FACETS)
-    numeric_facets = max(1, buildable * len(NUMERIC_EVIDENCE_FACETS))
-    unevidenced_pct = 100.0 * unevidenced / numeric_facets
+    # Numerator and denominator must cover the SAME population, and the denominator
+    # must count only facets that actually carry a value. Counting `coverage` slots
+    # that are null everywhere inflated the figure, and mixing a whole-catalogue
+    # numerator with a buildable-only denominator could push it past 100% - on a
+    # restricted-only shard it printed 3200%.
+    scored = [e for e in entries if e.get("id") not in restricted_ids]
+    with_value = sum(1 for e in scored for k in NUMERIC_EVIDENCE_FACETS
+                     if e.get(k) is not None)
+    unevidenced = sum(1 for r in f.warnings()
+                      if r["field"] in NUMERIC_EVIDENCE_FACETS
+                      and r["id"] not in restricted_ids)
+    unevidenced_pct = (100.0 * unevidenced / with_value) if with_value else 0.0
 
     if args.json:
         print(json.dumps({
