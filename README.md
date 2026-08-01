@@ -7,7 +7,7 @@ signal-lens is an [Agent Skill](https://agentskills.io): instructions plus refer
 material that an agent loads on demand. It is the derivation engine behind
 [findonline.ai](https://findonline.ai).
 
-> **Status: v0.1, in development.** The skill runs. It has not yet been evaluated.
+> **Status: v0.1.** Measured once — see [Measured](#measured). Not yet packaged for install.
 
 ## The problem it solves
 
@@ -78,6 +78,38 @@ the cheap option — the budget conversation already went the wrong way.
 And it surfaced the highest-scoring signal in the set, which no draft contained:
 **second-opinion / pre-commitment validation** — someone with one quote in hand asking
 strangers to talk them out of it.
+
+## Measured
+
+Paired evaluation via [skill-doctor](https://github.com/ujjwalks/skill-doctor)'s harness
+(`examples/eval-signal-lens.json`; claude-sonnet-4-6, 3 runs per prompt):
+
+**Trigger rate — 18/18 positives fired (100%), 0/9 negatives false-fired (0%).**
+Including `"our outbound is dead, where are our buyers actually talking?"`, which an earlier
+description missed entirely. Decoys included buyer-lens and seo-sxo, which carries both
+"signal" and "intent"; it correctly declined `"review my pricing page and tell me if my
+customers would buy"`, the live buyer-lens seam.
+
+**Pass rate — +37 and +20 points over baseline** on two prompts (89% vs 52%, 100% vs 80%).
+
+That pass number required fixing the harness twice, and the failures are worth recording:
+
+1. skill-doctor's dry harness disallows `Read` — correctly, so the baseline cannot quietly
+   load the installed skill — and injects only `SKILL.md`. A thin router pointing at three
+   unreachable files scored **−33** on one prompt. A dry harness structurally cannot
+   measure a router.
+2. Re-running it with file access restored contaminated the other arm instead: **3 of 4
+   baseline agents read the repo and one invoked the Skill tool.** That run is void.
+3. The number above comes from flattening the references into the injected body so both
+   arms stay blocked. The flattened layout is a *measurement artifact*, not what ships.
+
+**The 53-point swing on the HVAC prompt — −33 with references unreachable, +20 with them
+inlined — is the most useful thing the eval produced.** It says the body alone is not
+self-sufficient, which for a router is by design, but it means the skill is fragile to any
+runtime that fails to load references.
+
+Small-n and dry by design: two prompts, three runs, one grader. One run used the word
+"permitted", which the skill explicitly forbids — a real one-in-three violation.
 
 ## Install
 

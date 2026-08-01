@@ -1,0 +1,53 @@
+{
+  "_comment": "Paired-eval spec in skill-doctor's format. Run: python3 <skill-doctor>/scripts/eval.py examples/eval-signal-lens.json --plan (drop --plan to run). Trigger prompts are written the way a growth lead actually types, per The Art of Writing Skills ch. 3/6. NOTE: the pass arm runs DRY (no Bash/Read/WebFetch), so assertions check what the agent SAYS it will do and which references it routes to - not the output of a real site fetch. A wet arm against fixture sites is needed to measure the plan itself.",
+  "skill_path": "/Users/ujjwal/self/signal",
+  "model": "claude-sonnet-4-6",
+  "runs": 3,
+  "decoys": [
+    {"name": "buyer-lens", "description": "Reviews a website, landing page, or product concept through the eyes of its real buyers and reports purchase intent. Builds attribute-conditioned buyer personas, runs a synthetic panel using the SSR method, and returns scored segments, verbatim objections, and prioritized fixes. Use whenever the user wants a landing page, website, pricing page, or product idea reviewed from the customer's perspective, asks would people buy this, validate my idea, test this concept, or how will my target audience react."},
+    {"name": "seo-sxo", "description": "Search Experience Optimization: reads Google SERPs backwards to detect page-type mismatches, derives user stories from search intent signals, and scores pages from multiple persona perspectives. Use when user says SXO, search experience, page type mismatch, SERP analysis, user story, persona scoring, or why isn't my page ranking."},
+    {"name": "seo-geo", "description": "Optimize content for AI Overviews, ChatGPT web search, and Perplexity. Generative Engine Optimization analysis including brand mention signals, AI crawler accessibility, and passage-level citability scoring. Use when user says AI Overviews, SGE, GEO, AI search, LLM optimization, or AI visibility."},
+    {"name": "frontend-design", "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use when the user asks to build web components, pages, or applications."}
+  ],
+  "trigger": {
+    "positive": [
+      "how do I find leads on reddit for my product?",
+      "we're at findonline.ai — what should we be monitoring to find people who need us?",
+      "what buying signals should I look for in communities?",
+      "our outbound is dead, where are our buyers actually talking?",
+      "give me search terms for social listening for a B2B accounting tool",
+      "who's complaining about our competitors online and how do I find them?"
+    ],
+    "negative": [
+      "review my pricing page and tell me if my customers would buy",
+      "write me a cold email sequence for SaaS founders",
+      "why isn't my landing page ranking on Google?"
+    ]
+  },
+  "pass": [
+    {
+      "prompt": "We sell multi-entity consolidation software on top of QuickBooks to 10-200 person companies. What buying signals should we be watching for in public conversations?",
+      "assert": [
+        {"desc": "routes to the translation reference before writing signals - seller-to-buyer vocabulary is the crux and is correctly deferred to tier 3", "pattern": "translation\\.md|seller.{0,20}language|buyer'?s? (own )?words"},
+        {"desc": "derives the competitor set including the PERSON they pay, not just products - tier 3 never appears on a website", "pattern": "freelanc|agency|firm|consultant|fractional|bookkeeper|CPA"},
+        {"desc": "requires a countable severity noun so the ranking is not ordered by pain intensity", "pattern": "count|entit(y|ies)|how many|number of"},
+        {"desc": "applies the workaround-failure reframe rather than searching for pain", "pattern": "workaround|breaks|broke|arrangement|maintainer|leaves|spreadsheet"},
+        {"desc": "gives signals a doppelganger / false positive rather than shipping them bare", "pattern": "false positive|doppelg|looks identical|opposite|supply.side"},
+        {"desc": "names a lead who is not the poster, or states no lead", "pattern": "not the poster|no lead|employer|third part|channel|commenter"},
+        {"desc": "runs the prohibitions pass and produces a do-not-use section", "pattern": "prohibition|do not use|must not|excluded"},
+        {"desc": "never asserts the word 'permitted' as clearance", "pattern": "^(?!.*\\bpermitted\\b).*$"},
+        {"desc": "leads with a small number of signals to start with rather than dumping the full list", "pattern": "three|start with|first three|begin with"}
+      ]
+    },
+    {
+      "prompt": "I run a local HVAC company across three counties. Where should I be looking online for people about to buy, and what am I looking for?",
+      "assert": [
+        {"desc": "produces buyer-language phrasing, not category nouns the buyer would never type", "pattern": "freezing|not cooling|bill|quote|noise|leak|old unit|\\$"},
+        {"desc": "requires a clock extracted from the text rather than the crawl timestamp", "pattern": "clock|date|expir|season|decay|window"},
+        {"desc": "distinguishes the demand side from the trade itself - r/HVAC is mostly practitioners", "pattern": "side|practitioner|technician|contractor|supply.side|demand.side"},
+        {"desc": "flags the channel-versus-lead distinction rather than treating every match as a prospect", "pattern": "channel|recommend|not a lead|distribution"},
+        {"desc": "does not propose DMing or off-platform contact of a pseudonymous poster", "pattern": "^(?!.*\\b(cold call|DM them|direct message them|scrape their (email|number))\\b).*$"}
+      ]
+    }
+  ]
+}

@@ -7,13 +7,31 @@ misdiagnosed as a broken body.
 | Arm | Question | Broken by | Cost |
 |---|---|---|---|
 | **Trigger** | Did the skill load at all? | the description | tokens |
-| **Pass** | Given that it loaded, was the plan right? | the skill body and catalogue | tokens |
-| **Contract** | Does the catalogue satisfy its own rules? | a bad entry or a weakened rule | free |
+| **Pass** | Given that it loaded, was the approach right? | the skill body and references | tokens |
+| **Contract** | Does the parked catalogue satisfy its own rules? | a bad entry or a weakened rule | free |
 
-Only the contract arm runs today: `python3 -m unittest discover -s tests`. The other two
-need a `SKILL.md`, which does not exist yet.
+All three arms run. Contract: `python3 -m unittest discover -s tests` (free). Trigger and
+pass: `python3 <skill-doctor>/scripts/eval.py examples/eval-signal-lens.json`.
 
-## Gold-standard cases
+The pass arm runs **dry** — skill-doctor's harness disallows Bash, Read and WebFetch so the
+baseline cannot quietly load the installed skill. So it measures what the agent says it
+will do and which references it routes to, **not** the plan produced from a real site
+fetch. A wet arm against fixture sites is still missing.
+
+## ⚠️ The cases below are STALE
+
+`cases/*.json` were written when signal-lens filtered a 92-row catalogue of
+**first-party** purchase-intent signals. The skill now derives signals for **public
+conversations** and emits no catalogue ids at all, so these cases would report failure on
+a working skill. Do not run them against v0.1 and believe the number.
+
+They are kept because the durable/consumable inverse pair and the regulated-health privacy
+case are good tests of a real property, and they should be rewritten for the new direction
+rather than discarded.
+
+The live spec for the current skill is `examples/eval-signal-lens.json`.
+
+## Gold-standard cases (stale — see above)
 
 `cases/*.json` — one per business shape, each built against a real, publicly reachable
 company website. A case is not a list of nice-to-have signals; it is a trap for a

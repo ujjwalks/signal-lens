@@ -1,18 +1,18 @@
 ---
 name: signal-lens
 description: >-
-  Works out which public conversations mean someone is about to buy, for a
-  specific seller. Given a website or product description, it translates what
-  the seller says about itself into what their buyer would actually type in a
-  post, then derives the signals to monitor and who the lead really is. Use this
-  whenever the user wants to find leads or prospects in public conversations,
-  asks what buying signals or intent signals to look for, wants to monitor
-  Reddit, LinkedIn, forums, communities or social for people with a problem they
-  solve, asks who is in-market or ready to buy, wants keywords or search terms
-  for social listening or lead discovery, or points at a site and asks what to
-  watch for. Do not hand-write a keyword list or a signal list yourself, and do
-  not answer from the seller's own marketing words - run this skill first. For
-  how buyers would react to a page or price, use buyer-lens instead.
+  Use this whenever someone asks how to find leads, prospects or customers in
+  public conversations; what buying signals or intent signals to watch for; how
+  to do outbound, prospecting, lead gen or social listening; who is in-market or
+  ready to buy; what keywords or search terms to monitor on Reddit, LinkedIn,
+  forums or communities; where their buyers are actually talking; or who is
+  complaining about a competitor - including when they only give a website and
+  ask what to watch for. Works out which public conversations mean someone is
+  about to buy from that specific seller, and who the lead actually is, which is
+  often not the person who posted. Do not hand-write a keyword list or a signal
+  list yourself, and never answer from the seller's own marketing words - run
+  this skill first. For how buyers would react to a page or a price, use
+  buyer-lens instead.
 license: MIT
 compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
@@ -47,8 +47,8 @@ feelings. Those are dated, checkable, cohort-forming, and safe to act on.
 
 ## Step 1 — Profile the seller, then derive five artifacts
 
-Fetch the site. If it will not render, work from the user's description and say
-so rather than inventing pages.
+Fetch the site. If it will not render, say so and work from the user's
+description — do not infer pages that might plausibly exist.
 
 Then read `references/translation.md` and derive all five before writing a single
 signal. They are what everything downstream is built from:
@@ -61,7 +61,8 @@ signal. They are what everything downstream is built from:
 | **D. Vocabulary split** | The same complaint in the credentialed register and the lay register. If they share tokens, you have not found the lay one |
 | **E. Prohibited bridge** | The most persuasive true sentence the seller could say — and whether they are allowed to say it |
 
-Ask at most one clarifying question, then proceed on a stated assumption.
+Every inferred field carries what you inferred it from. An artifact you cannot
+evidence is a guess, and guesses at this step propagate into every signal.
 
 ## Step 2 — Derive the signals
 
