@@ -1,0 +1,313 @@
+{
+  "case_id": "local-services",
+  "company": "Parker & Sons",
+  "url": "https://www.parkerandsons.com",
+  "business_shape": "local_services",
+  "captured_at": "2026-08-01",
+  "why_this_case": "Almost every signal worth money here is off-website: permits, weather thresholds, equipment age, property transfers, utility/tax incentives and named referrers — none of which a page crawl can see, and none of which an unaided answer reaches. The case fails any responder that mines the site for behavioural events and then pads the list with a B2B/PLG/ecommerce template (trials, ROI calculators, buying groups, checkout payment-method attach, technographics, careers-page job postings).",
+  "expected_profile": {
+    "b2b_b2c": {
+      "accept": [
+        "b2c",
+        "b2c_primary",
+        "b2c_with_b2b_secondary",
+        "mixed"
+      ],
+      "why": "LD+JSON on the homepage declares @type [\"HomeAndConstructionBusiness\",\"HVACBusiness\",\"Plumber\",\"Electrician\"] and the whole site addresses homeowners ('your home', 'family', residential offers). A single /commercial-services page exists, so a responder that says the motion is b2c-dominant with a secondary b2b line is right, not wrong."
+    },
+    "business_model": {
+      "accept": [
+        "services",
+        "local_services",
+        "field_service",
+        "services_plus_subscription"
+      ],
+      "why": "Dispatched labour sold per job, plus a recurring membership (Parker Family Plan, $153.89/yr or $13.99/mo) and a monitoring subscription (/pro-connect, $23.99/mo). No goods are sold standalone."
+    },
+    "purchase_motion": {
+      "accept": [
+        "local",
+        "local_services",
+        "considered",
+        "high_ticket"
+      ],
+      "why": "Two motions coexist on one site: emergency repair ('Service in Minutes, Not Days…24/7!', /emergency-plumber-phoenix) and a considered high-ticket replacement (system installation financed at '$69 - $99/month net investment' on /financing-options)."
+    },
+    "sales_motion": {
+      "accept": [
+        "sales_led",
+        "hybrid"
+      ],
+      "why": "Every conversion path terminates in a dispatched human: 'Schedule Now', a phone number in the header (602-344-9027), and 'Contact Us for Financing Options'. No price for an installation is published anywhere on the site."
+    },
+    "requires_plg_motion": {
+      "accept": [
+        false
+      ],
+      "why": "No /signup, no login, no app, no self-serve product. The only software on the site is a third-party booking embed."
+    },
+    "has_ecommerce_checkout": {
+      "accept": [
+        false
+      ],
+      "why": "Homepage HTML (~160KB, server-rendered) contains no cart, checkout, Shopify, Stripe or Braintree reference; the 682-URL sitemap has no cart, product or checkout route. /offers issues discount CODES redeemed on an invoice, not in a basket."
+    },
+    "consumable_vs_durable": {
+      "accept": [
+        "durable",
+        "durable_primary",
+        "durable_with_service_consumables"
+      ],
+      "why": "AC systems, furnaces, heat pumps, water heaters, panels, softeners — 10-20 year assets. Filters and RO cartridges exist but are replaced during a membership visit, not reordered by the customer; there is no route to buy one."
+    },
+    "has_review_site_category": {
+      "accept": [
+        true,
+        null
+      ],
+      "why": "Consumer review/listing categories exist and are badged on the homepage: 'A+ BBB Rating', 'Nextdoor Neighborhood Favorite', 'HomeAdvisor Top Rated', 15,000+ Google reviews, plus /about-us/reviews and an Elfsight reviews widget. The B2B software-review category (G2/TrustRadius/Capterra) does not exist for this business — a responder that answers false because there is no G2 listing has answered the wrong question."
+    },
+    "dev_audience": {
+      "accept": [
+        false
+      ],
+      "why": "No docs, no API, no changelog, no technical content of any kind in the 682-URL sitemap."
+    },
+    "primary_identity_key": {
+      "accept": [
+        "location",
+        "household",
+        "asset",
+        "service_address",
+        "location_or_asset"
+      ],
+      "why": "The natural key of this business is a service address and the equipment installed at it, not a visitor cookie or a user account. The service-area page asks for a ZIP code, the 19 /service-area/* pages and ~50 areaServed entries are geographic, and the recurring revenue attaches to installed units."
+    },
+    "system_of_record": {
+      "accept": [
+        "servicetitan",
+        "field_service_management",
+        "fsm",
+        "offline_system"
+      ],
+      "why": "Homepage JSON config embeds 'scheduleEngine' pointing at https://embed.scheduler.servicetitan.com/scheduler-v1.js with per-city API keys (Phoenix and Tucson). Work orders, equipment records, memberships and invoices therefore live in a field-service platform, not on the website."
+    },
+    "web_stack_and_consent": {
+      "accept": [
+        "adobe_experience_manager",
+        "adobe_launch",
+        "adobe",
+        "aem_with_onetrust_cmp",
+        "no_product_analytics"
+      ],
+      "why": "Server-rendered AEM (/etc.clientlibs/..., 'wrenchgroup' clientlibs), Adobe Launch (assets.adobedtm.com) and Adobe RUM. OneTrust CMP (cdn.cookielaw.org/scripttemplates/otSDKStub.js) with /privacy-policy/my-privacy-choices offering 'Cookie Preferences' and a 'Do Not Sell Request'. No Segment, Amplitude, Mixpanel, PostHog or any product-analytics tag is present."
+    }
+  },
+  "must_include_signals": [
+    {
+      "id": "f02.search_query",
+      "why": "Both halves of the row exist: paid/organic search demand (the site carries its own JS attribution that classifies utm_source/gclid into organic/cpc buckets) and an on-site search box (form class 'search-typeahead__form', /search page). Query text separates 'AC not cooling' from 'AC replacement cost' — the emergency motion from the replacement motion, which is the single most useful split this business has.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f06.quote_request",
+      "why": "No installation price is published. /financing-options ends at 'Contact Us for Financing Options'; system replacement is quoted after a visit. Any request that names a system, a water heater or a panel and expects a seller-produced number is this row.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f01.operational_problem_reported",
+      "why": "The demand engine of the repair line. A homeowner reporting 'no cooling', a leak, or a tripped panel through the booking embed or the 24/7 phone line is a dated, attributed problem report, and the fault code recorded on the resulting work order is what decides whether the fix requires something they do not yet own.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f09.installation_scheduling",
+      "why": "The discriminating half of F09, and the one naive answers file under 'lead form' instead. A booked install (as distinct from a repair visit) opens a dated preparation window at a service LOCATION — permit pull, panel capacity, attic/duct access, crane or crew sizing, thermostat and air-quality add-ons — and the negative variant (a job rescheduled twice, or unconfirmed inside the lead-time window) is a slipping install carrying the opposite action. Requires job_type on the ServiceTitan appointment record, not a web event.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f05.eligibility_check",
+      "why": "/service-area carries a real serviceability gate: 'Enter Your Zip Code on the Map Below to See if Service Is Offered in Your Area!' plus a 'Use my Current Location' button, and an out-of-area result is diverted to a phone number. The FAIL result is the valuable one — declared demand at an address the company cannot currently serve is a route-planning and expansion signal that is thrown away today.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f06.financing_calculation",
+      "why": "/financing-options names four lenders (Service Finance, Wells Fargo, credit-card and home-improvement financing) and frames the purchase in monthly terms: 'as low as $69 - $99/month net investment', 'no-interest options, low payment options, and same-as-cash options'. Opening a financing option against a priced system is the row. Note the boundary the entry draws: any prequalification or credit-file check is a regulated credit act and is NOT this signal.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.consultation",
+      "why": "A replacement sale here runs through an in-home visit that produces a written scope — load calculation, duct condition, panel capacity, equipment placement — against the customer's record. That artefact, not the form fill, is the commitment signal, and it lives in the field-service system.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f15.weather_trigger",
+      "why": "The highest-value row in this case and pure off-website acquisition. Phoenix and Tucson: a forecast run of days above a temperature threshold, the first sustained heat event of the season, and monsoon storm tracks move AC failure demand across a defined service area days before the phone rings. The row requires the variable, the threshold and the geography to be declared IN ADVANCE from the company's own demand history — not a correlation read afterwards — and it fires from a public meteorological API at LOCATION identity.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.permit_or_licence_filed",
+      "why": "Maricopa County, Pima County and the City of Phoenix publish building, mechanical, electrical and plumbing permits with a site address and a work classification. A pulled permit for a re-roof, addition, pool, solar array, service upgrade or ADU implies HVAC, panel and drain work before the owner has searched for anyone. The catalogue's own industry_boost for this row lists hvac, electrical, roofing and solar. Availability is public_cost_free; permission is notice, NOT none.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.policy_incentive_change",
+      "why": "This category is saturated with dated, externally imposed deadlines — federal efficiency tax credits, SRP and APS utility rebates on high-SEER equipment and heat pumps, EV-charger and solar incentives (/electrical/electric-vehicle-chargers, /residential-solar-panels), and the refrigerant phase-down that dates the equipment already in the ground. Tellingly, /offers on 2026-08-01 carried nine promotions and NOT ONE was tied to a rebate or credit: this is an unexploited trigger, which is exactly what the tool exists to surface. Eligibility must be declared by the applicant, never inferred.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.infrastructure_change",
+      "why": "Address-bounded built-environment change: new subdivisions and master-planned releases across the West Valley (Buckeye, Goodyear, Surprise all have service-area pages), utility grid and substation upgrades, water and sewer main renewals, and gas-to-electric conversion programmes. Each changes what is possible or required at a parcel and precedes the purchase by a lead time the company can measure from its own job history.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f10.lifecycle_stage",
+      "why": "The company has been installing systems in Phoenix since 1974. Every unit it installed 12-18 years ago is a dated replacement conversation sitting in its own records, and Phoenix duty cycles shorten that interval below the national figure — which is why the row insists the interval be derived empirically from the company's own repurchase history rather than borrowed. Needs asset serial plus service_start_date on the work order; the blocker is intake discipline, not tooling.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f10.maintenance_and_failure",
+      "why": "Two or more corrective visits on the same serial inside twelve months, or a repair estimate above roughly a third of replacement value, is the repair-versus-replace queue — the highest-margin list this business can build, and it is already sitting in the work-order history. Identity level is ASSET, not person, which is what a naive answer gets wrong.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f11.subscription_renewal_window",
+      "why": "The Parker Family Plan is a live recurring agreement ('The Plan will continue perpetually until the Purchaser cancels'), annual or monthly, at $153.89/yr or $13.99/mo, and Pro Connect adds a second at $23.99/mo. Own-book renewal and lapse windows are the F11 case that unaided answers skip entirely because they are looking for buyers rather than at the customers already on the books.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "why": "The load-bearing F14 row for a home-services business, and the site demonstrates its absence precisely. The homepage JS classifies traffic into channel buckets — 'organic', 'cpc', 'referral', 'social', 'none' — and the entry explicitly rules that out: the referrer must be 'a named party that can be resolved to a record, not a channel bucket'. Named referrers here are neighbours, past customers, realtors and home inspectors; the capture is one field on the booking form and one field in the CRM, and it does not exist today.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.advisor_involvement",
+      "why": "Residential home services runs on intermediaries the seller never talks to: home inspectors writing up a failing system in an escrow report, realtors and property managers with a preferred-vendor list, HOAs, and insurance adjusters after a storm or water loss. The catalogue models this at buying_group identity and by DECLARATION — obtained by asking the customer or the advisor, never harvested from a credential register.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f12.declared_relocation",
+      "why": "The F12 row that actually applies. Arizona property transfers are recorded in an open county register and join at address level to a service area, and the catalogue's industry_boost for this row leads with home_services. A new owner of a 15-year-old house is the highest-conversion cold audience this business has. Availability available_now / permission notice — an open land register is a cost fact, not permission to market to a named owner.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f10.product_usage",
+      "why": "The trap that runs the other way, and the reason a responder must actually read the site. /pro-connect sells a $23.99/mo monitoring membership: 'wireless sensors installed on AC units, furnaces, and water heaters', 24/7 monitoring, real-time alerts and app-based health tracking. That is rung 4 of this row verbatim — cumulative duty read from a connected asset where the owner has authorized telemetry for service purposes. It is ASSET-level, user_authorized_connection, withdrawable; it is not product analytics and not a web event.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f03.community_recommendation",
+      "why": "Included as the availability-versus-relevance test, which the baseline study found conflated in 7 of 7 runs. 'Who should I call for AC repair?' on Nextdoor is the dominant word-of-mouth surface in this category and the site badges 'Nextdoor Neighborhood Favorite'. The correct verdict is NOT 'build it': the catalogue rates this row availability PARTIAL with permission contractual_access, because there is no official public feed for neighbourhood posts and reading them by any other route is not lawfully available. A responder that lists it as relevant and buildable has made the exact error the tool exists to prevent.",
+      "how_obvious": "hard"
+    }
+  ],
+  "must_exclude_signals": [
+    {
+      "id": "f11.replenishment_due",
+      "why": "The row is explicit that it applies to consumables only and that 'projecting a depletion date for a durable is a category error'. Air filters and RO cartridges exist but are changed during a membership visit; there is no consumable SKU, no repeat-purchase record and no route to buy one. The correct homes for 'when do they need us again' are f11.subscription_renewal_window (the membership term) and f10.lifecycle_stage (the equipment age).",
+      "failure_mode": "Transplanting a DTC-consumables replenishment model onto a durable-goods service business — the canonical shape error, and doubly wrong here because it would be built on a purchase history that does not exist."
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "why": "Two errors in one recommendation. The row is b2b-only and reads a TARGET ORGANISATION's hiring as evidence it must buy; this company's buyers are households, which post no jobs. And the site's prominent 'Careers' link to parkerandsonscareers.com is the company's OWN recruiting, which is not a buying signal about anyone.",
+      "failure_mode": "Catches a responder that scrapes the site for anything resembling a data source and mistakes the company's own careers page for an intent feed, and catches the wholesale import of a B2B-tech prospecting playbook into a residential category."
+    },
+    {
+      "id": "f07.trial",
+      "why": "The row requires a trial or pilot INSTANCE provisioned against a named account with a start timestamp; its industry_boost is software, media subscription and fitness membership. There is nothing to trial — an installed HVAC system is not provisionable and not reversible. A responder that maps the Parker Family Plan or Pro Connect onto 'trial' has mislabelled a live paid subscription, which belongs in f11.",
+      "failure_mode": "SaaS/PLG template applied to a field-service business; also catches the softer error of treating a paid membership as a free trial."
+    },
+    {
+      "id": "f06.roi_analysis",
+      "why": "b2b-only in the catalogue, and defined as building an internal business case — TCO, payback, a cost-comparison asset retrieved to present to someone else. The bait is real: the site talks about 'high-efficiency' systems and '$69 - $99/month net investment'. But a homeowner working out whether they can afford the monthly payment is f06.financing_calculation, and there is no ROI or payback calculator on the site to instrument.",
+      "failure_mode": "Consumer affordability misread as B2B business-case construction — a within-family discrimination error that a plausible-sounding answer makes constantly, and which would send the company building an asset no residential buyer wants."
+    },
+    {
+      "id": "f14.buying_group_formation",
+      "why": "b2b-only, buying_group identity, defined over 'two or more distinct people belonging to the same buying ORGANISATION'. Two homeowners deciding together is a real and important thing here, and the catalogue has a specific b2c row for it — f14.household_coordination, which requires the relationship to be DECLARED for this purpose and carries explicit_consent.",
+      "failure_mode": "Enterprise buying-committee machinery applied to a household. Beyond being the wrong row, it invites reconstructing who lives together from shared devices or address matching, which is a documented prohibition (restricted.household_graph_inference)."
+    },
+    {
+      "id": "f08.payment_preparation",
+      "why": "The row fires when a tokenised payment instrument is created or authorised at or before purchase. There is no checkout: no cart, no Stripe, no Braintree, no payment route anywhere in the 682-URL sitemap. Payment is collected on the invoice at the job, or set up inside the membership enrolment, which is a different surface.",
+      "failure_mode": "Assuming an ecommerce funnel exists and recommending checkout instrumentation to a business that has no checkout — the ecommerce-shape default. F08 as a whole is where the shape error lands."
+    },
+    {
+      "id": "f13.technology_stack_change",
+      "why": "b2b-only, defined over an organisation's publicly observable stack — web server, DNS and mail configuration, published integrations, named suppliers. Households have no observable stack, and nothing that would stand in for one could be obtained without identifying individuals' home networks.",
+      "failure_mode": "Technographic prospecting reflexively recommended for any company. Catches both the applicability error and the privacy blindness in the workaround a responder would reach for next."
+    },
+    {
+      "id": "f09.implementation_preparation",
+      "why": "b2b-only and defined over software preparation — sandbox credentials, a test import, a migration ticket, a security questionnaire, an SOW. The preparation that matters here is physical and belongs to f09.installation_scheduling: permit pull, panel capacity, attic and duct access, crane and crew, disposal of the old unit.",
+      "failure_mode": "Tests whether the responder picks the right row WITHIN the family it correctly identified. F09 has four rows and only two apply to a b2c physical install; naming the family is not the same as reading it, and this is the cheapest way to tell those apart."
+    }
+  ],
+  "families_expected": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F09",
+    "F10",
+    "F11",
+    "F12",
+    "F13",
+    "F14",
+    "F15"
+  ],
+  "families_not_applicable": [
+    {
+      "family": "F08",
+      "why": "Transaction and payment readiness has no surface here as captured. There is no cart, no checkout, no published price for an installation and no payment route in the sitemap; money changes hands on an invoice at the job or inside the membership enrolment. All four F08 rows presuppose a self-serve transaction surface. NOTE FOR THE SCORER: a responder that marks F08 applicable specifically because the membership auto-pay enrolment implies a stored instrument (f08.billing_setup) and says so with that reasoning is making a defensible call and should not be marked wrong — the enrolment flow could not be inspected without signing up. What is wrong is recommending checkout-funnel instrumentation on the public site."
+    }
+  ],
+  "must_flag_restricted": [
+    {
+      "id": "restricted.environmental_health_vulnerability_inference",
+      "why": "The specific trap this company is standing next to. f15.weather_trigger is a top signal here and its own access_conditions warn that 'attaching a person-level susceptibility to a weather condition - who reacts badly to pollen, heat or air quality - is a different and prohibited class'. The temptation is concrete: Phoenix heat, an /air-quality product line whose copy names 'family members with auto-immune deficiencies' and 'spores, bacteria, pollutants, toxins, and germs you could be breathing in every day', and a /service-area/sun-city page for an age-restricted retirement community. Building a heat-vulnerable or respiratory-vulnerable household audience is inferred health data. Weather stays at the level of a PLACE."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "Home services is a documented locus of surveillance pricing, and this company has the inputs sitting in front of it: ~50 city pages spanning Paradise Valley to Guadalupe, a service address that resolves to a parcel with a public assessed value, and a financing page that frames everything in monthly payments. Setting the repair quote, the discount or the financing offer from an inferred means attribute — neighbourhood, property value, device, a purchased affluence score — is the prohibited act, and the neighbourhood input is proxy discrimination whether or not anyone intended it."
+    },
+    {
+      "id": "restricted.health_status_inference",
+      "why": "The /air-quality and /air-quality/captura pages sell on health framing. Deriving that a household contains someone with asthma, an allergy or an immune condition from which pages they read, which purifier they bought, or which season they call in, and holding that as an audience attribute, is inferred health status with no lawful route to it. If the sizing question genuinely matters, ask the customer at the consultation and let them change the answer."
+    },
+    {
+      "id": "restricted.household_composition_inference",
+      "why": "Directly reachable from two rows this case includes. f12.declared_relocation and f10.lifecycle_stage both key on a service address, and an address key is a household key: several people share it and some of them never consented to anything. Deriving occupant count, the presence and ages of children, dependants, carers or an income band — from job history, equipment sizing, consumption, or from the fact that a property sits in an age-restricted community — is the prohibited inference. The catalogue's action class for this one is exclude_and_ask_instead: the technician can ask how many people are in the home, and the answer is a declared field."
+    }
+  ],
+  "expected_capability_notes": [
+    "There is no self-serve product and no PLG motion, so product-analytics-sourced signals must be marked unavailable rather than recommended — with the single, specific exception of f10.product_usage scoped to the /pro-connect connected-sensor fleet, which is user_authorized_connection at asset level and withdrawable, not web or in-app telemetry.",
+    "There is no ecommerce checkout. Cart, basket, payment-instrument and checkout-abandonment instrumentation must be reported as not applicable, not as a backlog item.",
+    "The system of record for almost every high-value signal is the field-service platform, not the website. The homepage embeds https://embed.scheduler.servicetitan.com/scheduler-v1.js with per-city API keys, so f09.installation_scheduling, f10.lifecycle_stage, f10.maintenance_and_failure, f11.subscription_renewal_window and f14.referral_source_named are reachable by EXPORT from a system the company already pays for. The blocker on all five is intake discipline — equipment serial, install date, structured fault code, job type, and a named-referrer field — not tooling and not budget. An answer whose whole backlog is web analytics has missed where the value is.",
+    "The booking widget and the ZIP serviceability checker are third-party JS embeds; their form fields are not in the server-rendered HTML. Any claim about what those forms capture must be reported as unknown rather than asserted. This is a positive test of the null-is-not-false rule: 'the fields could not be determined' is correct, 'the form does not capture a referrer' is not.",
+    "f13.permit_or_licence_filed is availability public_cost_free but permission NOTICE, not none. Publication of a permit register does not create a reuse licence, and resolving a permit to a named homeowner in order to market to them at that address converts a low-sensitivity location signal into personal data with a transparency duty. Free to obtain is not free to use — an answer that reads public_cost_free as clearance has made the exact collapse the two axes exist to prevent.",
+    "f15.weather_trigger must be authored at location identity with the variable, the threshold and the geography declared in advance from the company's own demand history. A correlation discovered after the fact is not this signal, and a person-level susceptibility attribute is a prohibition, not an upgrade.",
+    "Third-party B2B intent feeds — category-level intent, technographics, firmographic enrichment — have no coverage for residential households in a metro service area. They should be named as unavailable for this business rather than recommended, and no amount of budget changes that.",
+    "The site runs a OneTrust CMP and offers a 'Do Not Sell Request' and 'Cookie Preferences' at /privacy-policy/my-privacy-choices. Every website_instrumentation row in the backlog must therefore carry a consent-state field and state whether it survives an opt-out; a signal whose collection stops when a visitor opts out is a coverage fact that belongs in the row, not a footnote.",
+    "/offers on the capture date carried nine promotions (water heater, tune-up, generator, surge, lighting, water quality, air quality, insulation, general repair) and not one was tied to a utility rebate, a tax credit or an equipment-standard deadline. f15.policy_incentive_change is therefore a real and currently unexploited trigger, and its eligibility population must be joined on a field the applicant declares, never inferred.",
+    "The site's own attribution JS classifies traffic into 'organic', 'cpc', 'referral', 'social', 'none'. A responder must not present that channel bucket as f14.referral_source_named — the row requires a referrer resolvable to a record. The correct output is that the named-referrer capture does not exist and is a one-field capability upgrade with the highest ratio of value to effort in the whole backlog."
+  ],
+  "notes": "CAPTURE CONDITIONS. This is deliberately NOT a degraded-capture case: the site is server-rendered Adobe Experience Manager (/etc.clientlibs/..., 'wrenchgroup' clientlibs — Parker & Sons is a Wrench Group company), the homepage returns ~160KB of readable HTML to a plain GET, /sitemap.xml lists 682 URLs, and homepage LD+JSON declares @type [\"HomeAndConstructionBusiness\",\"HVACBusiness\",\"Plumber\",\"Electrician\"] with ~50 areaServed City entries. robots.txt explicitly allows GPTBot, OAI-SearchBot and ChatGPT-User. A responder has no excuse for a thin profile here, which is why the profile fields are gold rather than optional.\n\nTHE TWO JS SURFACES. The ServiceTitan scheduler embed and the ZIP-code serviceability control are the only things a static fetch cannot read. Their field lists must be reported as unknown. Do not penalise a responder for declining to guess them; do penalise one that asserts them.\n\nPRO CONNECT IS EASY TO MISS. /pro-connect is not in the main navigation and reads at first glance like a partner or trade programme. It is a $23.99/mo connected-sensor monitoring membership. It is the reason f10.product_usage is a REQUIRED inclusion rather than the exclusion it would be at almost any other local-services company, and a scorer should check the responder's REASON as well as the id: 'product usage telemetry, because they have a self-serve product' is wrong even though the id is right.\n\nGENUINE AMBIGUITIES — do not invent gold values for these. (1) Whether a customer web portal exists could not be determined without enrolling in a membership, so f08.account_verification and f08.billing_setup are genuinely undecidable from the public site; see families_not_applicable/F08. (2) The company has a /commercial-services page. A responder that adds a small, clearly-scoped set of b2b rows for that line — property managers, multi-site facilities, municipal work — is not wrong, provided the residential motion dominates the answer. f13.job_posting_signal remains wrong regardless: there is no evidence of an outbound b2b prospecting motion anywhere on the site. (3) Tucson is a second metro under the same brand with its own scheduler API key; treating the service area as one region or as two is both defensible.\n\nVOLATILE FACTS, CAPTURED 2026-08-01. Membership $153.89/yr or $13.99/mo; Pro Connect $23.99/mo; financing framed at '$69 - $99/month'; all nine /offers promotions coded and dated to expire 11/1/2026; header phone (602) 344-9027; ROC licence numbers 152654, 152656, 233298, 258885, 300696. These will drift and none of them is load-bearing for scoring — they are here so a future reader can tell whether the site changed under the case.\n\nWHY THIS COMPANY. Fifty-plus years in one metro, a public 682-page site with no login wall and no region lock, a full physical-services stack (HVAC, plumbing, electrical, drain, water, insulation, solar), a recurring membership, a connected-device programme, financing, a serviceability gate, and an extreme-climate service area that makes the weather row unarguable. Almost every off-website family has a concrete, checkable hook here, which is what makes the exclusions fair: a responder that reaches none of them cannot claim the site gave it nothing.",
+  "partial_families": [
+    {
+      "family": "F13",
+      "applies": [
+        "f13.permit_or_licence_filed"
+      ],
+      "why": "F13 is only partially applicable and the split is the point: the permit row is the highest-value off-website signal for this business, while the other seven rows in the family are b2b-account signals with no referent for a residential services company. Recorded here rather than by listing F13 in both families_expected and families_not_applicable, which contradicted itself as machine-readable data."
+    }
+  ],
+  "acceptable_signals": [
+    {
+      "id": "f04.product_comparison",
+      "why": "Demoted from required. Browsing heat pumps against AC units is real behaviour here, but the catalogue row is scoped to business models with a comparable SKU, and widening it to 'services' would break the b2b-professional-services case, which excludes this same row because expertise has nothing to compare. The behaviour is already covered by the required f02.website_browsing and f04.information_depth_escalation."
+    }
+  ]
+}

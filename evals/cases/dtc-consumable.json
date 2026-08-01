@@ -1,0 +1,259 @@
+{
+  "case_id": "dtc-consumable",
+  "company": "Ritual",
+  "url": "https://ritual.com",
+  "business_shape": "dtc_ecommerce_consumable",
+  "captured_at": "2026-08-01",
+  "why_this_case": "A subscribe-and-save consumable whose catalogue is saturated with health-stage SKUs (prenatal, postpartum, fertility, perimenopause, GLP-1 support), so the same 30-day cadence data that makes the F11 replenishment family CORRECT here is also the shortest path to a prohibited pregnancy or health-status inference - the case fails any answer that gets the replenishment half right and treats cadence as neutral. It simultaneously punishes the durable-goods playbook (trade-in, lifecycle, asset maintenance), the B2B-trigger reflex (job postings, customer inventory depletion), and the assumption that a subscription brand has product-usage telemetry.",
+
+  "expected_profile": {
+    "b2b_b2c": {
+      "accept": ["b2c"],
+      "why": "Every purchase path on the site is an individual consumer buying a bottle for themselves: Shopify storefront, per-person subscription, no seat/licence/account structure. The primary classification must be b2c. A secondary b2b practitioner/wholesale channel exists (/pages/health-care-practitioners, Fullscript dispensary) but it is a side door, not the shape."
+    },
+    "business_model": {
+      "accept": ["subscription", "ecommerce"],
+      "why": "Product pages carry a Recharge selling_plan and the copy 'automatic delivery of a 30-day supply every 30 days ... consistent replenishment', but a one-time purchase path also exists ('Buy once for $44.32 + $10.99 Shipping'). Either label is defensible; 'saas' or 'services' is not."
+    },
+    "purchase_motion": {
+      "accept": ["transactional_ecommerce", "considered"],
+      "why": "$31.20-$43.20 self-serve checkout argues transactional; the clinical-study pages (/pages/clinical-study, /pages/clinically-proven-results), the Made Traceable supplier disclosure and 925 on-page reviews argue a considered first purchase. Both are defensible; 'high_ticket' is not."
+    },
+    "sales_motion": {
+      "accept": ["self_serve", "hybrid"],
+      "why": "Self-serve checkout with an Intercom widget and a practitioner programme reachable only by email (my@ritual.com) and a Typeform. 'sales_led' is wrong."
+    },
+    "consumable_vs_durable": {
+      "accept": ["consumable"],
+      "why": "The load-bearing field. A 30-day bottle consumed daily; the only durable object in the whole product sitemap is /products/the-shaker. Any answer that admits 'durable' has failed the case."
+    },
+    "consideration": {
+      "accept": ["low", "medium"],
+      "why": "Low price point but heavy evidence scaffolding (clinical studies, third-party Clean Label Project certification, traceability by supplier and country). Either is defensible; 'high' is not."
+    },
+    "purchase_cycle": {
+      "accept": ["short", "medium"],
+      "why": "A 30-day supply on a 30-day charge; repurchase decision recurs monthly."
+    },
+    "requires_plg_motion": {
+      "accept": [false],
+      "why": "There is no product to log into and no usage to instrument. The only account surface is the Recharge subscription portal, which manages billing and delivery, not product use."
+    },
+    "has_owned_community": {
+      "accept": [false],
+      "why": "Footer links out to Instagram, TikTok, YouTube, Pinterest and Facebook only. No forum, no user group, no community feed the brand can lawfully read as a first party."
+    },
+    "dev_audience": {
+      "accept": [false],
+      "why": "No docs, no API, no technical audience."
+    },
+    "has_review_site_category": {
+      "accept": [true, false],
+      "why": "Genuinely ambiguous and both answers are acceptable. First-party reviews run on Okendo (925 reviews, 4.4 rating, aggregateRating in the page JSON-LD). There is no G2/Capterra analogue for supplements, but independent testing and retailer review corpora exist. What is NOT acceptable is treating review-site intent as an available buyer-level feed - see expected_capability_notes."
+    },
+    "regulated_health_service": {
+      "accept": [false],
+      "why": "Ritual sells dietary supplements. There is no prescription, no diagnosis, no clinician relationship, no HIPAA covered entity - so this is NOT the regulated_dtc_health shape. It nevertheless publishes /pages/consumer-health-data-policy naming Washington, Nevada and Connecticut consumer-health-data law, which is the point: consumer-health-data duties attach to an ordinary D2C consumable brand."
+    },
+    "industry": {
+      "accept": ["cpg", "beauty", "retail", "grocery", "wellness"],
+      "why": "Matches the industry_boost vocabularies on f11.replenishment_due (grocery, beauty, retail) and f12.household_consumption_rate (retail, grocery, cpg). Classifying it as 'healthcare' or 'pharma' is wrong and would pull regulated_access rows that do not apply."
+    }
+  },
+
+  "must_include_signals": [
+    {
+      "id": "f11.replenishment_due",
+      "why": "The definitional row for this shape and it is already fully instrumented: the prenatal PDP states '1-Month Subscription: Enjoy automatic delivery of a 30-day supply every 30 days with free shipping for convenient, consistent replenishment.' Pack quantity, dose rate and reorder interval are all first-party facts in Shopify/Recharge, so this is available_now with no new instrumentation. The non-subscriber cohort (one-time buyers at $44.32) is where the projection actually earns money.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f11.reorder_cadence_pattern",
+      "why": "Distinct from replenishment_due and needed for the one-time-purchase population: median inter-purchase interval and its dispersion, computed per customer from Shopify order history. It also carries the deviation case - a subscriber whose interval stretches because they are stockpiling skipped bottles.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f11.subscription_renewal_window",
+      "why": "The highest-value dated trigger on the site and easy to miss because it looks like billing rather than intent. The subscription terms say the discount 'applies to a new subscriber's first subscription order only. Subscriptions automatically renew at the full retail price on future orders' - so every new subscriber has a known, per-person date on which their price rises 20-30%. Recharge holds the next-charge date; the row is available_now.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f12.household_consumption_rate",
+      "why": "Ritual sells a men's line, a women's line, an over-50 line and a 30%-off bundle for 'two or more different Ritual products', all shipping to one address. Units-per-interval at a delivery address is the lawful, volume-and-timing-only row - and it is the one that must be chosen INSTEAD of deriving who lives there. Off-website in the sense that scorers rarely reach F12 for a supplement brand.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f09.delivery_preparation",
+      "why": "F09 is one of the families the baseline study found missed, and it is live here in a non-obvious form: 'You can pause, skip, change your delivery date, or cancel anytime.' A subscriber moving a delivery date, or a delivery-slot/address change in the Recharge portal, is delivery preparation on an existing order - a first-party transaction-level event, not a marketing inference.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.advisor_involvement",
+      "why": "Most answers treat a D2C vitamin brand as having no intermediary. It has an explicit one: /pages/health-care-practitioners invites providers to 'sell Ritual to your patients, become a Ritual Ambassador', offers verified-provider pricing through a resolvable code (HCP-6PGJKDF25EXV) and lists Fullscript dispensary availability. A named practitioner attached to an order is a distinct, resolvable third party in the decision.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "why": "Already wired and invisible from the rendered page: the storefront HTML loads an impact.com Advocate block (advocate_jwt_script) plus the Impact affiliate programme described at /pages/partner-with-us, and Okendo Surveys is installed (oke-surveys-settings) which is the standard 'how did you hear about us' capture. The referrer resolves to a named party, which is what the row requires.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f15.policy_incentive_change",
+      "why": "The single hardest correct call on this site and it is grounded in the HTML: a Truemed widget renders 'HSA/FSA eligible - Use your pre-tax dollars' on the PDP. A tax-advantaged spending scheme is exactly the after-subsidy-price lever this row describes, it carries a hard annual deadline (FSA use-it-or-lose-it), and its eligibility rules move with IRS guidance. Public, cost-free, and nothing to do with the website funnel.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.supply_disruption",
+      "why": "Supplements are a recall-and-contamination category, and Ritual's own positioning depends on it: /pages/traceable-ingredients names a single supplier and country per nutrient (folate from Gnosis in Italy, DHA from Canada) and /pages/clean-label-project-certified sells third-party purity testing. A recall, contamination hold or supplier failure - the brand's own or a competitor's - is a dated demand event that no website instrumentation will ever produce.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.competitor_disruption",
+      "why": "In this category the switching event is usually somebody else's problem: a competing prenatal being discontinued, reformulated, price-raised, or failing an independent heavy-metals test. Ritual's entire evidence stack (Made Traceable, Clean Label Project, published clinical studies) exists to convert exactly that moment, so the trigger belongs on the watch list.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f05.eligibility_check",
+      "why": "/pages/idme runs an ID.me verification for 'Hospital Employees, Medical Providers, Nurses, First Responders, Active Military, Veterans, Military Spouses and Military Dependents' in exchange for an extra 5% off subscriptions for three months. The subject supplies accreditation/occupational facts for the stated purpose of qualifying - a textbook eligibility check, and a surface almost no answer finds. Its adjacency obligation is purpose limitation: the verified status is a one-time pricing decision, not a durable audience attribute (see notes).",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f07.sample_request",
+      "why": "The F07 commitment device here is the sample, not the trial: /pages/health-care-practitioners offers free sample kits to verified providers via Typeform. A zero-value sample order carrying the requested item and a resolvable practitioner is the only genuine reciprocal-commitment artefact on the site.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f01.diagnostic_assessment_completed",
+      "why": "A quiz funnel exists but is invisible in the rendered page: the theme carries an Embeddables integration that stamps a quiz_source cart attribute, and /pages/gut-health-quiz plus the starter-set pages are its entry points. Quiz completion with a carried recommendation is a declared self-assessment - lawful because the subject supplied it, and therefore the right row rather than inferring the same facts.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f01.routine_disruption",
+      "why": "The pre-churn row for a cadence business: a subscriber whose skip/delay behaviour departs from their own baseline for a full cycle. Because the site advertises pause/skip/delay as a feature, the deviation is a first-party event stream, and it must be read as a routine break, not as a life event.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f08.payment_preparation",
+      "why": "On a subscription the payment instrument is a recurring signal, not a checkout step: a card re-authorisation, an updated instrument, or a failed pre-charge on the next Recharge cycle is the strongest near-term indicator of whether the next order lands. Its adjacency obligation is that dunning history must never be read as a means or affordability estimate.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f04.risk_reduction_behavior",
+      "why": "The site's whole mid-funnel is risk material rather than product material - /pages/return-policy, the '30 day money-back guarantee' block, /pages/our-standards, /pages/traceable-ingredients, /pages/clean-label-project-certified, /pages/clinical-study. A session that goes there instead of to the PDP is lowering the cost of being wrong, which is a distinct state from browsing depth.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f06.price_sensitivity",
+      "why": "The pricing architecture is a deliberate wedge: $31.20 subscribed against $44.32 + $10.99 shipping one-time, a welcome offer, a summer sale, and stacked bundle discounts. Price-organised behaviour here reads as subscription-conversion intent rather than as discount-hunting, and that distinction is the whole reading. Must be recommended WITHOUT the inferred-means variant.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f03.review_reading",
+      "why": "Okendo is installed with an interactive widget (925 reviews, 4.4, 784 recommendations on the prenatal PDP), so opening, sorting or paging the review module is capturable as an interaction event rather than a pageview. In a category where trust is the objection, review interrogation is the evaluation.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f02.search_query",
+      "why": "Site search is available and cheap - but on this site the query string is itself the problem, because 'prenatal', 'fertility', 'perimenopause' and 'GLP-1' are health disclosures. The row is correct AND it is the clearest place a competent answer must attach a data-class caveat rather than treating captured queries as neutral behavioural events.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f02.website_browsing",
+      "why": "Baseline commercial-intent instrumentation on a Shopify storefront. Included for family completeness, not because it discriminates - and it only counts as correct if the answer notes that browsing is gated behind the site's DataGrail consent banner wired to Shopify's Consent Tracking API.",
+      "how_obvious": "obvious"
+    }
+  ],
+
+  "must_exclude_signals": [
+    {
+      "id": "f10.trade_in_activity",
+      "why": "There is nothing to trade in. A 30-day bottle of capsules has no residual value, no appraisal, no buyback. The catalogue itself scopes this row to consumable_vs_durable: ['durable'].",
+      "failure_mode": "The durable-goods playbook applied wholesale to a consumable - the exact inverse error of the durable case. Any answer emitting this has pattern-matched 'D2C ecommerce' without reading what is being sold."
+    },
+    {
+      "id": "f10.lifecycle_stage",
+      "why": "Scoped to durables and to an asset identity level: time-since-purchase against a category replacement interval, end-of-support dates, expiring warranties, lease terms. A supplement bottle has a best-before date, not a service life, and the depletion event belongs to f11.replenishment_due.",
+      "failure_mode": "Catches the responder who maps 'the bottle runs out' onto asset lifecycle instead of replenishment - the right instinct routed into the wrong family, which produces the wrong required fields (serial, install date, warranty end) and an unbuildable row."
+    },
+    {
+      "id": "f10.product_usage",
+      "why": "Ritual has no telemetry of any kind. There is no app, no connected device, no login that observes consumption, and no entitlement to measure utilisation against. Whether a customer actually took the capsule is unobservable; only the purchase is observable.",
+      "failure_mode": "Recommending product-usage or adherence telemetry to a company that cannot collect it - the conflation of relevant with obtainable that the baseline study found in 7 of 7 runs. The correct treatment is to mark it unavailable and name purchase cadence as the only proxy."
+    },
+    {
+      "id": "f11.upgrade_cycle_due",
+      "why": "There is no tier, capacity, model or plan ceiling to move up from - a 30-day bottle is the only unit, and the bundle discount is cross-sell, not an upgrade ladder. The only 'next tier' narrative the catalogue offers here is prenatal to postnatal, which is a pregnancy-stage transition, not an entitlement ceiling.",
+      "failure_mode": "The trap exclusion: an answer that dresses the prenatal-to-postnatal progression as a merchandising upgrade cycle has smuggled restricted.pregnancy_and_early_parenthood_inference into a buildable row and will pass a sensitivity check while doing it."
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "why": "F13 rows resolve to an account-level business subject. Ritual's buyer is a person buying a bottle; no job posting anywhere implies that purchase.",
+      "failure_mode": "The 15-family walk performed mechanically: the responder reaches F13, needs to fill it, and reaches for the most famous B2B trigger. Catches family-coverage theatre - covering a family with a row that cannot resolve to this company's buyer."
+    },
+    {
+      "id": "f13.customer_inventory_depletion",
+      "why": "The most seductive wrong answer in the catalogue for this case. It is the B2B twin of f11.replenishment_due - an account's on-hand stock against a reorder point, keyed to an account identity with contractual visibility of the customer's stock system. Ritual's D2C subscriber is an individual with a household delivery address, and the correct rows are f11.replenishment_due and f12.household_consumption_rate.",
+      "failure_mode": "Catches keyword matching on 'consumable depletion' instead of reading identity_level and b2b_b2c. An answer that names this row is one that never checked which subject the signal attaches to. See notes for the one narrow reading a scorer should allow."
+    },
+    {
+      "id": "f07.trial",
+      "why": "No free trial, no sandbox, no evaluation instance exists or could exist - the catalogue scopes this row to durables and to saas/subscription/marketplace product access. Ritual's risk reversal is a 30-day money-back guarantee on a paid order, which is f04.risk_reduction_behavior, and its reciprocal-commitment artefact is the practitioner sample, which is f07.sample_request.",
+      "failure_mode": "Catches 'it is a subscription, therefore there is a trial'. Within-family discrimination: the right F07 row is present in the include list, so the responder cannot pass by covering F07 at all - only by covering it correctly."
+    },
+    {
+      "id": "f09.installation_scheduling",
+      "why": "Scoped to durables with an installer network, a service location and a pre-install survey. Nothing is installed, commissioned or fitted; the F09 event here is a delivery date being moved.",
+      "failure_mode": "Same within-family test as f07.trial: catches an answer that covers the delivery/onboarding family with the durable row while missing f09.delivery_preparation, which is the one that is actually live."
+    }
+  ],
+
+  "families_expected": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F08", "F09", "F11", "F12", "F14", "F15"],
+  "families_not_applicable": [
+    {
+      "family": "F10",
+      "why": "Product usage, ownership and replacement is written around a durable asset with a service life, a fault history and a replacement decision. A consumable has none of these, and its replacement event lives in F11 instead. The only F10 row with any defensible reading here is f10.service_deterioration (rising support contacts before a cancellation), and that is already covered better by f01.routine_disruption on the same subscriber cadence - so an answer that names f10.service_deterioration should not be penalised, but F10 as a family is not where this business's post-sale signal lives."
+    },
+    {
+      "family": "F13",
+      "why": "Every F13 row resolves to an organisation as the subject - RFPs, permits, job postings, funding events, stack changes, capacity against a purchased limit, compliance deadlines applying to an account. Ritual's buyer on this website is a natural person. The only route into F13 is the wholesale channel (Target, Walmart, Whole Foods) and the Fullscript practitioner dispensary, and the website exposes no account-level feed for either."
+    }
+  ],
+
+  "must_flag_restricted": [
+    {
+      "id": "restricted.pregnancy_and_early_parenthood_inference",
+      "why": "The defining hazard of this site and it is one join away from live. Ritual's own URL structure discloses fertility stage: /collections/trying-planning, /collections/first-to-third-trimester, /collections/postpartum, /collections/fertility-support, plus products for pregnancy microbiome and postpartum breastfeeding support. Worse, the PDP already pushes those collection names into its marketing platform - the Klaviyo item payload for the prenatal product carries Categories: ['First to Third Trimester', 'Trying & Planning', 'Pregnancy', ...]. Deriving pregnancy or fertility stage from that browsing or purchase mix is behavioural inference of health data with no GDPR Art. 9(2) condition available and no lawful route under Washington's My Health My Data Act."
+    },
+    {
+      "id": "restricted.health_status_inference",
+      "why": "The catalogue is a menu of conditions: /pages/glp-1-support (implies the visitor is on a GLP-1 medication), /collections/perimenopause-support, /products/synbiotic-plus-for-gut-health with a gut-health quiz, sleep and stress SKUs. Ritual's own /pages/consumer-health-data-policy names Washington, Nevada and Connecticut and concedes 'we may infer or derive Consumer Health Data by analyzing other data, such as purchase records' - so the company has already documented the exact processing that must be excluded rather than optimised."
+    },
+    {
+      "id": "restricted.life_event_inference_from_consumption",
+      "why": "The direct dark twin of the F11 rows this case REQUIRES, which is why the case exists. A prenatal subscription that cancels at month four, or one that switches to postnatal, or a household consumption rate that halves, is a birth, a loss or a separation read off a cadence change. The same Recharge event stream that makes f11.replenishment_due lawful and useful becomes a prohibited life-event inference the moment it is read for stage rather than for volume and timing. Any answer that recommends the cadence family without gating this has failed the case even if every id is correct."
+    },
+    {
+      "id": "restricted.household_composition_inference",
+      "why": "The dark twin of f12.household_consumption_rate. Two bottles per 30 days to one address, or a men's plus a women's plus an over-50 SKU on one bundle subscription, invites deriving occupants, ages, cohabitation or a child in the home. The catalogue's own remedy applies exactly: ask instead. Ritual can put 'how many people is this for?' on the subscription and let the customer change it; it cannot model it from the basket."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "A promo-dense storefront - welcome offer, summer sale, tiered bundle discounts, gift-with-purchase, an ID.me concession - makes personalising discount depth by inferred willingness-to-pay the obvious next growth move, and it is prohibited. Because f06.price_sensitivity is on the include list, the case specifically tests whether the answer can keep 'observe price-organised behaviour' and refuse 'set this person's price from what we think they can afford', including from coupon-seeking, cart-abandonment or payment-failure history."
+    }
+  ],
+
+  "expected_capability_notes": [
+    "No product telemetry of any kind exists and none can be built: there is no app, no connected device and no login that observes consumption. Product-usage and adherence signals must be marked unavailable rather than recommended, with purchase cadence from Shopify/Recharge named as the only obtainable proxy.",
+    "Every web-side row (F02, F03, F04, F06) sits behind a real consent gate: the storefront loads a DataGrail consent banner (api.consentjs.datagrail.io) wired into Shopify's Consent Tracking API with functional/performance/marketing categories. Availability for these rows is website_instrumentation and permission is at least notice - never 'none' - and for EEA/UK visitors consent precedes capture.",
+    "Category-page URLs are themselves health disclosures. A page-path audience, a retargeting pixel or a server-side event fired on /collections/first-to-third-trimester, /collections/trying-planning, /collections/postpartum, /collections/fertility-support, /collections/perimenopause-support or /pages/glp-1-support creates consumer health data under WA MHMD, Nevada SB 370 and Connecticut, even where no attribute is written to a profile. Browsing-depth and search-query capture must be scoped away from those paths or held first-party under explicit consent.",
+    "Ritual has published its own admission that purchase records are a health-data source ('we may infer or derive Consumer Health Data by analyzing other data, such as purchase records'). A competent answer cannot treat the order table as a neutral behavioural dataset on this site.",
+    "The renewal window costs nothing to obtain and is the strongest dated trigger present: the next-charge date sits in Recharge, and the terms state the introductory discount applies to the first subscription order only with automatic renewal 'at the full retail price'. That is a known per-subscriber price cliff, so f11.subscription_renewal_window is available_now with no instrumentation work.",
+    "There is no free trial and no entitlement to outgrow, so the reciprocal-commitment surface is the practitioner sample kit and the 30-day money-back guarantee. An answer that reaches for trial-conversion or usage-limit signals has misread the motion.",
+    "Retail and marketplace presence is real (Target, Walmart, Whole Foods) but the website exposes no listing-level shopper telemetry. If f04.marketplace_activity is raised at all it must be marked integration + contractual_access through a retailer's own data-sharing or retail-media programme, never as available from the site - and /pages/authorized-reseller-policy explicitly forbids resellers selling 'on or through any website, online marketplace, mobile application, or other online forum' without written consent.",
+    "There is no independent review-site intent feed for this category. First-party reviews run on Okendo and are instrumentable; third-party review-site intent data of the G2/Capterra kind does not exist here and must not be recommended as a purchasable audience.",
+    "Body-metric personalisation must be refused as a capability upgrade, not offered as one. Capturing height, weight, photos or measurement change to 'personalise the formula' converts fit data into health inference and is out of scope regardless of how the consent is worded.",
+    "The verified-status route at /pages/idme must be treated as a one-time servicing and pricing decision. Retaining 'verified nurse', 'verified veteran' or 'military dependent' as a durable segment, audience or suppression list is purpose creep on data collected for a discount check."
+  ],
+
+  "notes": "Site condition: ritual.com is a server-rendered Shopify storefront, so the HTML is fully readable without JS execution and robots.txt explicitly permits crawling of product, collection, page, blog and policy HTML. Everything cited above was read from fetched HTML or fetched policy pages on 2026-08-01. The stack is visible in the source and is load-bearing for several judgments: Recharge (window.recharge.customer, selling_plan inputs), Okendo reviews + Okendo Surveys, Klaviyo, impact.com Advocate, DataGrail consent, Truemed HSA/FSA, Intercom, Digioh, and an Embeddables quiz that stamps a quiz_source cart attribute. An answer that only reads rendered text will miss the referral, quiz and consent surfaces; that is a legitimate part of the test, not a defect in the case.\n\nFair-scoring carve-outs. (1) f13.customer_inventory_depletion is listed as a must-exclude for the D2C subscriber population, which is what the website is built for. If an answer names it explicitly and ONLY for the wholesale/Fullscript practitioner channel, and says so, do not penalise it - the failure being caught is naming it for the individual subscriber. (2) f10.service_deterioration is not in either list; naming it is acceptable but not required. (3) f12.declared_relocation is likewise acceptable-not-required: a subscription shipping address can change in the Recharge portal, but no address-change surface was directly verified on 2026-08-01. (4) restricted.eligibility_route_special_category_inference is deliberately NOT in must_flag_restricted. The ID.me route at Ritual verifies occupational and military status, which is not on its face GDPR Art. 9 special category, so requiring the flag would risk marking a well-reasoned answer wrong. Credit an answer that raises it; do not penalise one that instead applies purpose limitation to the same facts.\n\nAmbiguity recorded rather than invented: the site does not state a gift-purchase mechanic (no gift-message or gift-wrap surface was found), so f12.gift_purchase_declared is deliberately absent from must_include even though ship-to-differs-from-bill-to is technically present in every Shopify order record. The one durable object in the catalogue is /products/the-shaker, and there is a book (/products/help-your-self-the-new-rules-for-wellness); neither changes the shape, but an answer that notices the durable accessory and scopes it correctly is showing good reading, not making an error.\n\nWhy the shape label matters: this brand is health-adjacent but is not regulated_dtc_health - no prescription, no diagnosis, no clinician relationship, no HIPAA covered entity. Classifying it as regulated health would be a second, subtler failure mode, because it would pull regulated_access permission requirements onto ordinary ecommerce rows. The correct reading is a consumable D2C shape carrying live consumer-health-data obligations, which is precisely the combination the catalogue's orthogonal availability/permission axes exist to express."
+}

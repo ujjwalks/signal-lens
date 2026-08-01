@@ -481,7 +481,8 @@
           "long"
         ],
         "consumable_vs_durable": [
-          "durable"
+          "durable",
+          "consumable"
         ],
         "triggers": [
           "problem",

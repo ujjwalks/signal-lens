@@ -1,0 +1,259 @@
+{
+  "case_id": "dtc-durable",
+  "company": "Ethan Allen Interiors Inc.",
+  "url": "https://www.ethanallen.com/",
+  "business_shape": "dtc_ecommerce_durable",
+  "captured_at": "2026-08-01",
+  "why_this_case": "This is the shape PLAN.md §6.4 names as the unaided failure: a furniture retailer handed a 270-day home-goods replenishment benchmark and told to ship 'replenishment due'. It discriminates on two axes at once — whether the responder suppresses every consumable-cadence and telemetry row for a durable with no consumable, no subscription and no instrumented product, and whether it reaches the seven considered-purchase surfaces PLAN.md §6.2 says no crawler design detects (design-centre locator, appointment booking, ZIP serviceability, financing, configurator and 3D room planner, free swatch ordering, trade programme) plus the F12 relocation trigger that is the vertical's single most valuable signal.",
+
+  "expected_profile": {
+    "consumable_vs_durable": {
+      "accept": ["durable"],
+      "why": "Every catalogue item is a durable good: sofas, sectionals, dining tables, beds, mattresses, rugs, lighting, custom drapery. The PDP for 202ARC states 'Custom made: We will contact you within an estimated 5-7 weeks to schedule Premier In-Home Delivery' and lists component weights of 85-160 lbs per section. Nothing on the site is consumed and repurchased. This field is load-bearing: it is the one that must gate off F11 and f12.household_consumption_rate."
+    },
+    "business_model": {
+      "accept": ["ecommerce", "retail", "ecommerce_and_retail"],
+      "why": "A live cart and checkout ('Add to Cart', 'My Cart', 'Check an Order') on a Salesforce Commerce Cloud storefront — PDP scripts call /on/demandware.store/Sites-ethanallen-us-Site/en_US/... endpoints — combined with a design-centre network reachable from 'Store Locator', 'Find a Design Center'. No subscription, no SaaS, no marketplace of its own."
+    },
+    "purchase_motion": {
+      "accept": ["considered", "high_ticket"],
+      "why": "Sectionals list at 'Configure For Pricing' with configured prices in the thousands (EA Signature Platinum mattress $3,195 list); the site's own conversion path runs through a booked appointment ('Make an appointment at a design center') and a 5-7 week custom build. transactional_ecommerce is defensible only for the accessories and clearance tail, not for the motion the site is built around."
+    },
+    "sales_motion": {
+      "accept": ["hybrid", "showroom_led", "consultation_led", "designer_led", "assisted", "sales_led"],
+      "why": "Both halves are on the site: self-serve add-to-cart, and a designer-led motion — 'Our world-class interior designers can help you with a single piece, reimagine any room, or furnish your entire home. Meet us in the Design Center, at home, or online—our service is always complimentary.' PLAN.md §6.4 says the coarse three-value enum destroys this distinction, so both the coarse answer (hybrid) and the fine one (showroom/consultation-led) are accepted; pure self_serve is wrong."
+    },
+    "purchase_cycle": {
+      "accept": ["long", "medium"],
+      "why": "Free design service, 3D room planner projects that are saved and revisited, free swatch orders shipped and evaluated, then a 5-7 week custom build. The stated post-order lead time alone exceeds a 'short' cycle."
+    },
+    "consideration": {
+      "accept": ["high", "medium"],
+      "why": "Price is withheld until configuration ('Configure For Pricing'); the PDP carries buying guides, construction detail down to spring gauge and cushion foam, per-piece dimensions, and a swatch-order prompt — 'Dizzy with color & pattern possibilities? Order up to 10 swatches for free!'"
+    },
+    "b2b_b2c": {
+      "accept": ["b2c"],
+      "why": "The household is the buyer for the retail motion this case scopes. Ethan Allen does also run two b2b arms — EA Trade (/en_US/ea-trade.html, 'For designers, builders, architects, real estate agents and home staging professionals') and EA+ Hospitality (/en_US/footer-contract.html, 'developers • design firms • contractors • purchasing agents') — so an answer that reports b2c primary with a secondary b2b motion is better, not wrong. An answer that reports b2b primary is wrong."
+    },
+    "requires_plg_motion": {
+      "accept": [false],
+      "why": "No product to self-serve into: no signup, no trial, no app, no connected object. The only account is a shopping account ('Sign In or Create Account', 'Check an Order'). Positively determined false, not unknown — the whole site was crawled and no product surface exists."
+    },
+    "has_review_site_category": {
+      "accept": [false, null],
+      "why": "Verified absent across 14 captured pages including a real PDP (202ARC): zero occurrences of ratingValue, reviewCount, aggregateRating, or any review-platform script (Bazaarvoice, Yotpo, PowerReviews, Trustpilot). The only ld+json on the site is a bare schema.org Organization block. The shipping page carries hand-picked testimonials ('—Lisa S., Peachtree City, GA') but no review module. null is also accepted because PLAN.md §6.1 forbids reading an unresolved field as false — but here the crawl positively established the absence."
+    },
+    "has_owned_community": {
+      "accept": [false, null],
+      "why": "'#EthanAllenDesign — Show us how you style it' and a 'Customer Photo Gallery' are a social hashtag and a curated gallery, not an owned forum with attributable member posts."
+    },
+    "industry": {
+      "accept": ["furniture_and_interiors", "furniture", "home_furnishings", "retail", "home_improvement"],
+      "why": "'Hand-tailored in North America by Ethan Allen artisans'; categories are Living, Dining, Bedroom, Home Office, Outdoor, Lighting, Rugs & Flooring, Decor, Custom Window Treatments. These are the exact industry_boost tokens the catalogue uses on f05.product_configuration, f05.measurement_taken, f07.sample_request, f07.consultation, f09.delivery_preparation and f12.declared_relocation."
+    },
+    "has_physical_locations": {
+      "accept": [true],
+      "why": "'Store Locator', 'Find a Design Center', /en_US/stores with a 'Search by location' state picker, 'Or search by zip' and a 25/50/100/300-mile radius selector, plus a country picker covering Canada, UAE, China, Jordan, Cambodia, South Korea, Kuwait, Philippines, Romania, Thailand and Taiwan. 'We love walk-ins! Our stores are staffed by professional designers.'"
+    },
+    "has_appointment_booking": {
+      "accept": [true],
+      "why": "/en_US/make-appointment is a server-rendered form: state → design centre → preferred contact days (Monday–Sunday, multi-select) → time bands (8am-12pm / 12pm-5pm / 5pm-8pm) → first name, last name, phone, email, ZIP code → 'Information about your project' free text → contact-preference radio, ending in an explicit permission grant."
+    },
+    "has_configurator": {
+      "accept": [true],
+      "why": "'Build-Your-Own Sectional' (/shop-furniture-living-room-custom-sectional-builder, 25 results, every tile reading 'Configure For Pricing'), plus Custom Upholstery, Custom Dining, Custom Desks, Custom Rugs, Custom Mirrors, Custom Frame Studio, Custom Drapery, and a '3D Room Planner' with 'Do It Yourself — Create your own floor plans from a variety of rooms you can size with your measurements... then save for future reference' running on Floorplanner."
+    },
+    "has_financing": {
+      "accept": [true],
+      "why": "'Ethan Allen Platinum Credit Card' in the persistent header with 'Learn More & Apply' and 'Manage Your Card', a dedicated /en_US/footer-financing.html, 'Down payment or advance payment may be required.' in the cart drawer, a financeMinA* input inside the PDP add-to-cart form, and a Synchrony reference in the page source."
+    }
+  },
+
+  "must_include_signals": [
+    {
+      "id": "f02.website_browsing",
+      "why": "A Commerce Cloud storefront with deep category and PDP trees; two or more commercially classified pageviews per session is the floor of any capture here.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f04.product_comparison",
+      "why": "There is a real comparison surface, not just repeat viewing: the PDP ships COMPARE_BUTTON_LABEL 'Compare Items' and COMPARE_CONFIRMATION 'This will remove the first product added for comparison. Is that OK?' — the entry's 'a dedicated comparison surface is opened' condition is met by an existing control.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f01.explicit_need_statement",
+      "why": "The appointment form's 'Information about your project' free-text box is exactly this row's 'form free-text box' case, and it resolves to an identifiable subject because name, phone, email and ZIP are captured in the same submission. This is the highest-value unstructured field on the site and it is already being collected.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f05.product_configuration",
+      "why": "'Configure For Pricing' means the configurator IS the pricing step — a configuration carried to a price is the entry's qualifying condition, and it cannot be skipped on 25 build-your-own sectionals. Configuration completed but not added to cart is the single sharpest on-site intent event this company has.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.demo",
+      "why": "The catalogue's own definition of this row names 'a showroom or in-store appointment' with a held slot and a held/no-show/rescheduled outcome. That is the design-centre appointment booked at /en_US/make-appointment. A responder that skips F07 because 'demo' sounds like software has mis-read the row, not the company.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.consultation",
+      "why": "Distinct from f07.demo and both apply here. The free design service is advisory about the buyer's own situation and produces a written artefact against their record — 'Work With A Designer... a 360° tour of your project', 'Your designer can email the images', and for window treatments 'From design and measuring through production, delivery, and installation'. That output is the scope the quote is built from.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f06.financing_calculation",
+      "why": "A co-brand credit product with a persistent header CTA, a dedicated financing page, and a finance input embedded in the PDP add-to-cart form. Opening a financing option against an identified priced item is the entry's qualifying condition and it is instrumentable today on the existing storefront.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f09.delivery_preparation",
+      "why": "Both halves of this row exist. Post-order: 'As your Ethan Allen products arrive in our local service center, our dedicated team works to schedule your delivery on the next available day.' Pre-order: the storefront exposes StoreInventory-SetZipCode / SetStore / GetPreferredStore endpoints behind 'Enter ZIP Code' and 'Continue with preferred store', and delivery rates are banded by distance from a service centre (0-50 mi $99/$149/$299 through over-150 mi at 5% of order total, minimum $549) with island ferry surcharges. The entry explicitly values 'which addresses were checked for serviceability but never ordered' — that miss is sitting unlogged in an existing endpoint.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f05.eligibility_check",
+      "why": "Three distinct eligibility surfaces: address serviceability ('We currently ship to destinations within the 48 contiguous United States', 'Premier In-Home Delivery is subject to certain location-based exclusions'), trade status ('Already applied? Find out if you've been approved. Check My Status'), and the credit-card affordability pre-check. Each returns a pass/fail against facts the subject declared for that purpose.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f03.content_consumption",
+      "why": "A genuinely deep owned-content estate to threshold against: Buying Guides per category, Digital Magazines, the 2026 Stylebook, the Spring 2026 Magazine, Videos, and 'Delivery Day: Behind the Scenes'. Depth on a category buying guide is stage-tagged intent, not brand browsing.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f08.payment_preparation",
+      "why": "Custom orders take money up front — 'Down payment or advance payment may be required.' sits in the cart drawer on every page — so a deposit authorisation on a 5-7 week build is a commitment event weeks ahead of fulfilment, not a checkout formality. Permission on this row is contractual_access and the fields are the token reference and state only; a responder that proposes storing card detail has failed the row, not passed it.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.sample_request",
+      "why": "'Order up to 10 swatches for free!' on the PDP, backed by a swatch-order popup and by whole categories of $0.00 swatch SKUs (Anson Leather, Old English Leather, Lazaro Leather... 21 leathers alone, plus fabrics, furniture finish samples and drapery fabric swatches). A zero-value order carrying the chosen item identifiers and a shipping address is this row's exact qualifying condition, it names the specific fabrics under consideration, and it is already being recorded by the commerce platform. The catalogue boosts this row for furniture_and_interiors. Almost nobody names a swatch order as an intent signal.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f05.measurement_taken",
+      "why": "Measurement is a required step here, not a nicety: 'Make sure you measure before you order if your product is arriving via Premier In-Home Delivery, so you can avoid additional handling fees', a standing 'Measuring for your furniture delivery' guide, a 3D Room Planner that asks you to 'size with your measurements', and in-home measuring for custom window treatments. A room dimension entered into the planner is a declared numeric fit constraint on the largest purchase in the catalogue.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f09.installation_scheduling",
+      "why": "F09 was missing from 5 of 7 baseline runs. Custom window treatments are 'Only in Design Centers' and run 'From design and measuring through production, delivery, and installation', with 'schedule a complimentary in-home appointment' — a pre-install survey and a fitting appointment at a service location, which is precisely this row and not f09.delivery_preparation. Premier In-Home Delivery itself unpacks, assembles and places, so a booked slot carries a site-preparation and accessory window.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f12.declared_relocation",
+      "why": "PLAN.md §1.2 names the house-move trigger as the furniture vertical's most valuable signal and the family it sits in was missed in 4 of 7 baseline runs. The catalogue boosts this row for 'furniture' by name. Three declared hooks already exist: a ZIP field and a project free-text on the appointment form, a new delivery address on the order, and — decisively — a trade programme that recruits 'real estate agents and home staging professionals', the two occupations that know about a move first. The declared or public-register variant only; see must_flag_restricted.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.advisor_involvement",
+      "why": "F14 was missing from 5 of 7 baseline runs, and here the advisor is a named, instrumented channel rather than a hypothesis. EA Trade serves 'designers, builders, architects, real estate agents and home staging professionals', pays 'Commissions of up to 10%, which increase the more you work with us', assigns a concierge who handles 'quote generation' and 'free samples', and issues an approved trade account — which is the advisor-designated account flag this row asks for, already on the order record.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f10.lifecycle_stage",
+      "why": "The own-customer post-sale family was missed in 5 of 7 baseline runs, and this is the row that answers the replacement question correctly for a durable — asset age from the company's own order record measured against the category replacement interval, plus dated Furniture Protection Plan and warranty expiries ('Product Information & Warranties', 'Furniture Protection Plans', 'Use & Care'). It is a transacted fact about an asset, not an inference about a person, which is exactly why it is available where f10.product_usage is not.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.supply_scarcity",
+      "why": "F15 was missed in 4 of 7 baseline runs and this company merchandises scarcity honestly and already measures it: 'Custom made: We will contact you within an estimated 5-7 weeks to schedule Premier In-Home Delivery' on the PDP, an 'In Stock Items Only' filter, a 'Quick Ship Furniture' category, and a trade promise to 'keep you updated on lead times'. A supplier-confirmed date slipping past the date promised to a buyer waiting on a 5-7 week custom sectional is a real deadline the seller can state truthfully.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.permit_or_licence_filed",
+      "why": "The one F13 row that is genuinely right for a household buyer, and the reason F13 is not written off here. Residential building permits and certificates of occupancy carry a site address and a work class, are public-record and cost-free, and identify a home about to need furnishing inside a specific design centre's radius — before the household has searched for anyone. The same row serves EA+ Hospitality on hotel and restaurant fit-out permits. Note the permission facet is 'notice', not 'none': public-cost-free is not clearance.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.household_coordination",
+      "why": "A whole-home furnishing decision is made by a household, not a person, and this row is the lawful way to represent that: a second named person on the quote, the appointment, or the credit agreement, declared by those people for that purpose. The catalogue boosts it for 'furniture' and sets permission to explicit_consent. It is the correct answer to the question that f14.buying_group_formation and restricted.household_graph_inference are the two wrong answers to.",
+      "how_obvious": "hard"
+    }
+  ],
+
+  "must_exclude_signals": [
+    {
+      "id": "f11.replenishment_due",
+      "why": "The catalogue's own applicability is consumable_vs_durable ['consumable'] and this company sells nothing consumable. There is no pack size, no dose, no service interval and no second purchase of the same item to compute an interval from. A sofa is not exhausted.",
+      "failure_mode": "The headline domain-nonsense failure PLAN.md §6.4 predicts: a home-goods replenishment benchmark applied to furniture, producing 'reorder reminder' recommendations for a durable. It is also the load-bearing test of whether consumable_vs_durable was resolved at all, because every other error here follows from getting that one field wrong."
+    },
+    {
+      "id": "f12.household_consumption_rate",
+      "why": "Also consumable-only in the catalogue, and purchase_motion ['transactional_ecommerce']. It needs 'at least two dated purchases of the same item by the same account or address, with a known pack quantity' — a furniture buyer does not repeat-buy the same SKU at a known pack quantity.",
+      "failure_mode": "Catches the responder that dodges the word 'replenishment' and then re-imports depletion modelling under a household or occasion label. Excluding f11.replenishment_due while emitting this one means the durability constraint was pattern-matched on a keyword rather than applied."
+    },
+    {
+      "id": "f10.product_usage",
+      "why": "There is no metered entitlement and no instrumented asset. No seats, no allowance, no tier ceiling, no connected object, no app account bound to an owned piece; permission_requirement on this row is contractual_access, and no such contract exists with a furniture buyer. The row's own upgrade-cycle clause does not rescue it here — asset age against a replacement interval is available from the order book, and f10.lifecycle_stage is the row that carries it.",
+      "failure_mode": "Catches the web-analytics- and PLG-shaped mental model PLAN.md §1.2 documents — the baseline furniture run that narrowed the space 'to what GA4 can emit'. A responder that recommends telemetry rather than marking it unavailable has conflated relevant with obtainable, which 7 of 7 baseline runs did."
+    },
+    {
+      "id": "f11.subscription_renewal_window",
+      "why": "No subscription, contract, policy or licence with a term end, next billing date or notice deadline. The Platinum Credit Card is a financing instrument, not a renewable service the customer decides about; a Furniture Protection Plan is bought once alongside an order and expires rather than renewing.",
+      "failure_mode": "Catches SaaS retention framing transplanted whole. There is no renewal date to sit inside, so any 'renewal window' output for this company is invented rather than derived."
+    },
+    {
+      "id": "f07.trial",
+      "why": "The row requires 'a trial or pilot instance provisioned against a named account with a start timestamp'. Nothing here is provisioned. Every mattress and PDP page captured was checked for sleep-trial or risk-free-trial language and none exists. The physical-evaluation motions this company genuinely runs are f07.sample_request (free swatches) and f07.demo (design-centre appointment), both of which are in must_include.",
+      "failure_mode": "Catches importing the DTC mattress playbook ('100-night trial') and the SaaS free-trial playbook onto a company that runs neither, and catches a responder that reaches for the F07 row whose name it recognises instead of the two F07 rows the site evidences."
+    },
+    {
+      "id": "f03.review_reading",
+      "why": "The qualifying condition is 'an interaction event on a review surface, not a pageview of a page on which reviews happen to sit' — and no review surface exists. Verified across 14 captured pages including the 202ARC PDP: zero ratingValue, reviewCount or aggregateRating, no Bazaarvoice / Yotpo / PowerReviews / Trustpilot script, and the site's only ld+json is a bare Organization block. Curated testimonials on the shipping page are not a review module, and no marketplace or review platform exposes review-interaction telemetry to a brand.",
+      "failure_mode": "The relevance-versus-availability collapse the README says 7 of 7 baseline runs committed. Review reading is plainly relevant to a considered furniture purchase — and there is nothing to instrument. A correct answer either marks it unavailable with the missing surface named, or recommends building the surface first; naming it as a signal to monitor today is wrong."
+    },
+    {
+      "id": "f14.buying_group_formation",
+      "why": "Gated b2b-only in the catalogue, identity_level buying_group, and it requires 'two distinct person identifiers resolve to one account' inside a buying organisation. A married couple choosing a sectional is not a buying organisation, and the correct row for them is f14.household_coordination.",
+      "failure_mode": "Catches a B2B buying-committee template applied to a household. It is a paired test with f14.household_coordination: naming this one instead of that one means the responder found the right question and reached for the wrong identity level, which the catalogue exists to prevent."
+    },
+    {
+      "id": "f13.technology_stack_change",
+      "why": "Gated b2b-only, and its observables are a target organisation's website software, mail and DNS configuration, published integrations and developer endpoints. A household has no stack, and no furniture purchase is triggered by one.",
+      "failure_mode": "Catches wholesale B2B-firmographic contamination — the enrichment-vendor menu (tech installs, hiring, funding) pasted into a consumer retail answer because F13 is titled 'Business, operational, and regulatory triggers' and the responder filled it rather than reasoning about it. F13 is expected here, but via f13.permit_or_licence_filed; filling it with this row is the wrong way to cover it."
+    }
+  ],
+
+  "families_expected": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F08", "F09", "F10", "F12", "F13", "F14", "F15"],
+
+  "families_not_applicable": [
+    {
+      "family": "F11",
+      "why": "Recurring purchase, renewal and replenishment has no purchase here. No consumable (f11.replenishment_due, f11.reorder_cadence_pattern need a repeat interval on the same item), no subscription or contract term (f11.subscription_renewal_window), and no tier or plan to move up (f11.upgrade_cycle_due requires a customer 'on a known plan, tier or model' with a ceiling). The own-customer post-sale motion is real and important for this company — it lives in F10 (f10.lifecycle_stage, f10.maintenance_and_failure), not F11. An answer that routes the repeat-purchase question to F10 and prints F11 as not-applicable with a reason is exactly right; an answer that prints F11 empty with no reason, or fills it to satisfy the 15-family walk, is not."
+    }
+  ],
+
+  "must_flag_restricted": [
+    {
+      "id": "restricted.life_event_inference_from_consumption",
+      "why": "This company is unusually well placed to commit it and unusually tempted to. A whole-home order, a sudden second delivery address, a downsizing pattern or an abandoned custom order let it derive separation, bereavement or a new child from what changed in the buying — and f12.declared_relocation sits directly beside it in must_include. The adjacency is the point: the declared move is lawful and the inferred life event is not, and the catalogue's action class here is exclude_and_suppress."
+    },
+    {
+      "id": "restricted.household_graph_inference",
+      "why": "Named inside f14.household_coordination's own definition as the excluded variant: 'A relationship reconstructed from shared devices, IP addresses, delivery addresses or an identity graph does not qualify.' A furniture retailer holds delivery-address matches for every order and shared-device sessions from in-store tablets, so rebuilding the household from co-occurrence is the cheapest wrong path available to it."
+    },
+    {
+      "id": "restricted.household_composition_inference",
+      "why": "Deriving occupant count, children and their ages, or an income band from purchase mix and delivery pattern. Concretely tempting here because the catalogue spans nursery-adjacent and child-safety merchandise and the company runs an 'Ethan Allen Furniture Safety Initiative' on tip-over risk, which makes 'child in household' look like a merchandising attribute. Its action class is exclude_and_ask_instead — asking the customer how many people use a room, and letting them change the answer, is lawful and is the substitute the tool should name."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "The prohibition that does not trip a sensitivity check, and every precondition for it is present: a co-brand credit product that generates decline and limit data, prices withheld behind 'Configure For Pricing', a permanent sitewide discount, and a clearance tier — so varying which discount a visitor sees by an inferred means attribute is one product decision away. f06.financing_calculation is in must_include and this is the line it must not cross."
+    }
+  ],
+
+  "expected_capability_notes": [
+    "There is no self-serve product, no trial and no connected object, so product-usage telemetry must be reported as unavailable-because-no-instrumented-asset rather than recommended. The age-based replacement question it is often reached for is answerable today from the order book via f10.lifecycle_stage.",
+    "No review surface exists on the site at all, so review-interaction signals must carry an availability verdict distinct from their relevance verdict. 'Relevant but there is nothing to instrument' is the correct output; silently dropping it as irrelevant is also wrong, because the fix is to build the surface.",
+    "The storefront runs on Salesforce Commerce Cloud — /on/demandware.store/Sites-ethanallen-us-Site/ endpoints appear in the PDP source — so commerce_platform is an available source class. Order history, swatch orders, configurator state and the StoreInventory ZIP calls are already server-side events; f05.product_configuration and f07.sample_request are website_instrumentation and available_now, not integration work.",
+    "Roughly half the decisive surfaces are off the website: design-centre appointments, in-home design calls, in-home window-treatment measuring, and Premier In-Home Delivery all resolve to offline_system and CRM. A shortlist limited to what web analytics can emit fails this company specifically — the baseline furniture run's stated failure was anchoring on 'a typical Shopify + GA4 + Klaviyo setup'.",
+    "The pre-order ZIP serviceability and store-inventory calls already exist as endpoints but the misses are not retained. Recommending that a failed or out-of-area serviceability check be logged is a capability upgrade this company can make today, and f09.delivery_preparation names it explicitly.",
+    "The appointment form takes name, phone, email, ZIP and a free-text project description under an explicit grant — 'you are granting Ethan Allen Inc. ... permission to email, call, or text you, and consent to our [Privacy Policy] and Terms.' So f07.consultation and f01.explicit_need_statement arrive with a documented basis. That basis does not extend to device-level tracking of the same visitor, and f02 rows must not be described as covered by it.",
+    "f13.permit_or_licence_filed is availability public_cost_free but permission_requirement notice. Free to obtain is not free to use: joining a permit record to a household needs its own transparency basis under GDPR Art. 14 or its US-state equivalents. Any verdict phrased as 'permitted' is wrong on this row and on every other — the allowed verdicts are blocked_by_policy, requires_consent_review, or no_known_restriction_identified.",
+    "Every signal keyed to the delivery address is household-level, and the household rows split cleanly into a declared lawful variant (f14.household_coordination, permission explicit_consent) and an inferred prohibited one (restricted.household_graph_inference). The report must not let one degrade into the other, and must not offer identity-graph or shared-device resolution as the 'upgrade' rung for the declared row.",
+    "The trade channel is not a web signal. f14.advisor_involvement here depends on a trade-account flag propagating onto the retail order — the EA Trade application and its 'Check My Status' approval already establish that identifier, so the capability gap is joining it to orders, not acquiring it."
+  ],
+
+  "notes": "CAPTURE CONDITIONS. Fetched 2026-08-01 with a desktop UA. www.ethanallen.com returns full server-rendered HTML (homepage 220 KB) and needs no browser escalation — deliberately chosen over Room & Board, DFS and Crate & Barrel, which all returned 403 to a plain fetch and would have made this a bot-blocking test instead of a signal test. Pages read: /, /en_US/stores, /en_US/make-appointment, /en_US/footer-shipping.html, /en_US/footer-financing.html, /en_US/free-design-service-inspiration, /en_US/design-service-3d-room-planner, /en_US/ea-trade.html, /en_US/footer-contract.html, /en_US/custom-window-treatments, /en_US/shop-furniture-living-room-custom-sectional-builder, /en_US/shop-furniture-fabrics-leather-leather-swatches, /en_US/shop-furniture-bedroom-mattresses, and the PDP /en_US/shop-furniture-living-room-sectionals/arcata-build-your-own-sectional/202ARC.html.\n\nONE PAGE IS A JS SHELL. /en_US/footer-financing.html served 206 KB of which everything unique to the page was a breadcrumb — the APR, term and issuer detail render client-side. The financing surface is nonetheless established beyond doubt from the persistent header CTA, the cart-drawer down-payment notice and the financeMinA* input in the PDP form, so a capture that reports financing present without APR terms is complete, not thin.\n\nMIXED SHAPE, SCOPED DELIBERATELY. Ethan Allen also runs EA Trade and EA+ Hospitality (developers, design firms, contractors, purchasing agents; supplier to 275 US embassies and consulates). This case scopes the DTC retail motion. Consequence for scoring: f14.buying_group_formation is genuinely correct for a hospitality fit-out, so a response that names it explicitly and only for the contract arm is right and must not be penalised — the exclusion catches it being offered for the household retail buyer. The same courtesy applies to f06.negotiation and f04.vendor_shortlisting, which were left out of both lists for this reason.\n\nDELIBERATE NON-FLAG. The mattress range offers a 'Sleep Survey' — 'Find the best EA Signature mattress for your body type and sleep style.' This is the LAWFUL declared variant: the customer types the answers for the stated purpose of fit. restricted.body_measurement_health_inference covers geometry taken from a photo, video or scan and read for something other than fit, which is not what this is. Flagging the Sleep Survey as a prohibited class is over-flagging and should be scored as a miss on precision, not rewarded as caution. f05.diagnostic_tool_use is also a defensible include for it and was left out only to keep the list tight.\n\nUNRESOLVED, SCORE EITHER WAY. Search results surface an official-looking Amazon brand store (amazon.com/stores/EthanAllen/...) plus Wayfair and eBay listings. Amazon returned 503 at capture time so this could not be verified, and nothing on ethanallen.com references any marketplace. f04.marketplace_activity is therefore in neither list: including it with the Amazon store cited, or excluding it as a DTC-only distribution model, are both acceptable. An answer that asserts marketplace presence without evidence is not.\n\nEVIDENCE FOR THE REVIEW FINDING. The has_review_site_category = false claim rests on grepping all 14 captured pages for ratingValue, reviewCount, aggregateRating, bazaarvoice, yotpo, powerreviews and trustpilot with zero hits, including on a real PDP. If Ethan Allen adds a review module this case's f03.review_reading exclusion must be retired — re-verify before scoring against a capture later than 2026-08-01.\n\nWHAT A COMPETENT-BUT-UNAIDED ANSWER LOOKS LIKE HERE, so the scorer can tell a pass from a near-miss: it will name 30-50 signals, cover F02/F04/F06/F08 well, produce cart abandonment, pricing-page views, email engagement and a replenishment or post-purchase cadence recommendation, and say nothing about swatch orders, ZIP serviceability misses, the trade channel, permit records, custom lead times, or which of its recommendations are lawfully collectable. Coverage of F09, F12, F13, F14 and F15 with acquisition paths attached is what separates a passing answer, not the count of signals named."
+}

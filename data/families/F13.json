@@ -675,7 +675,8 @@
         "Coverage is a function of which authorities publish, not of what you pay. There is no complete national permit feed in most countries; small authorities are frequently PDF-only, and some are still paper.",
         "Publication does not create a reuse licence. Some registers are explicitly open data; others permit inspection but not bulk extraction or direct marketing. Check the licence before you store the record, and especially before you store a natural person's name.",
         "This row resolves to a site and an entity. Resolving a permit to a named individual and marketing to them at their home is a different processing purpose with a different lawful basis, and it is not covered here.",
-        "Where the applicant or owner named on the permit is a natural person rather than a company, this row holds consumer personal data obtained from a source other than the individual, and a transparency notice is owed within a short statutory period in the EEA and UK, with a legitimate-interests balancing test behind it. The site-and-entity form of this row carries no such duty; the named-applicant form does, and they are not the same signal. availability stays public_cost_free because the record is free to obtain - that says nothing about whether you may use it."
+        "Where the applicant or owner named on the permit is a natural person rather than a company, this row holds consumer personal data obtained from a source other than the individual, and a transparency notice is owed within a short statutory period in the EEA and UK, with a legitimate-interests balancing test behind it. The site-and-entity form of this row carries no such duty; the named-applicant form does, and they are not the same signal. availability stays public_cost_free because the record is free to obtain - that says nothing about whether you may use it.",
+        "Retail and ecommerce are in scope because a durable-goods retailer buying residential building, planning or renovation records to reach households that just completed work is a real and long-standing use - the permit is the trigger, the retailer is not the one doing the work."
       ],
       "availability": "public_cost_free",
       "permission_requirement": "notice",
@@ -726,7 +727,9 @@
           "services",
           "project_based",
           "transaction_based",
-          "reseller"
+          "reseller",
+          "ecommerce",
+          "retail"
         ],
         "purchase_motion": [
           "local",

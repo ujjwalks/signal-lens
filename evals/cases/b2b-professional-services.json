@@ -1,0 +1,249 @@
+{
+  "case_id": "b2b-professional-services",
+  "company": "Grant Thornton (US) — Grant Thornton LLP / Grant Thornton Advisors LLC",
+  "url": "https://www.grantthornton.com",
+  "business_shape": "b2b_professional_services",
+  "captured_at": "2026-08-01",
+  "why_this_case": "A top-tier audit, tax and advisory firm sells partner hours against a signed engagement letter: there is no SKU, no plan, no trial, no published price and no product instance to instrument, so every signal a responder transfers from the SaaS or ecommerce template is not merely low-value but unobtainable. It exists chiefly to force the advisor/intermediary channel (F14) — the PE sponsor, the software alliance partner, the overseas member firm, the attorney or banker or alumnus who brings the buyer — which the baseline study found in zero unaided runs and which this site evidences in plain numbers.",
+
+  "expected_profile": {
+    "b2b_b2c": {
+      "accept": ["b2b"],
+      "why": "Every service line and all sixteen industry pages address organisations (Asset Management, Banking, Construction & Real Estate, Private Equity, Not-for-Profit & Higher Education, ...). The only individual-facing line is Private Wealth Services under Tax, and it is sold through the same firm-to-firm relationships; an answer of ['b2b','b2c'] that explicitly cites Private Wealth Services is defensible and must not be scored wrong."
+    },
+    "business_model": {
+      "accept": ["services", "project_based", "subscription"],
+      "why": "Discrete engagements (financial statement audit, buy-side and sell-side due diligence, ERP implementation) are project_based; recurring annual audit and tax compliance and the 'Outsourcing' service line behave like subscription. 'services' is the catalogue's general value and is always acceptable."
+    },
+    "purchase_motion": {
+      "accept": ["considered", "high_ticket"],
+      "why": "Nav offers only 'Submit RFP', 'Request a meeting' and 'Contact us' — no cart, no checkout, no signup. The /rfp page accepts an uploaded RFP document and says 'A professional from Grant Thornton LLP ... will contact you to discuss your service needs.'"
+    },
+    "sales_motion": {
+      "accept": ["sales_led", "hybrid"],
+      "why": "No self-serve path exists anywhere on the site. Every conversion surface routes to a human: RFP submission, meeting request, contact us, or 'Connect with our Private Equity leader' on the PE industry page."
+    },
+    "consideration": {
+      "accept": ["high"],
+      "why": "Auditor and advisor selection is board- or audit-committee-approved, competitively tendered, and switching carries regulatory and continuity cost. The site's whole conversion architecture assumes a proposal process."
+    },
+    "purchase_cycle": {
+      "accept": ["long", "medium"],
+      "why": "RFP-to-appointment for an audit typically spans a budget or fiscal cycle; the site sells nothing that can be bought the same day."
+    },
+    "consumable_vs_durable": {
+      "accept": ["consumable", "durable"],
+      "why": "GENUINELY INDETERMINATE for a recurring professional engagement — an annual audit recurs like a consumable but is a single high-consideration commitment like a durable. Both values are defensible here and neither should be marked wrong; this field must not be used to discriminate on this case."
+    },
+    "requires_plg_motion": {
+      "accept": [false],
+      "why": "There is no product. No trial, no free tier, no signup, no buyer-facing login. The only login on the site is the alumni network at alumni.us.grantthornton.com, which is for former employees."
+    },
+    "publishes_prices": {
+      "accept": [false],
+      "why": "No pricing page, no plan or tier, no fee schedule, no promo field anywhere in the nav or the footer. Every price is produced as a proposal in response to an RFP or meeting request."
+    },
+    "self_serve_purchase_path": {
+      "accept": [false],
+      "why": "No cart, checkout, pay-invoice or client-billing surface exists on the public site. An engagement begins with a countersigned engagement letter."
+    },
+    "has_review_site_category": {
+      "accept": [false],
+      "why": "Statutory audit and tax advisory have no buyer-review marketplace category; the firm hosts no review module and links to none. Buyer diligence in this category runs on PCAOB inspection reports, peer review, references and trade rankings — none of which is a review surface the firm can instrument."
+    },
+    "dev_audience": {
+      "accept": [false],
+      "why": "No docs site, API reference, SDK, status page or developer portal. 'Technology Modernization' and the Alliances pages sell implementation of other vendors' software; they publish no developer surface of their own."
+    },
+    "has_owned_community": {
+      "accept": [false, null],
+      "why": "No forum, user group or public community. The 'Subscription preference center' is a newsletter list and the alumni network is a login-gated relationship register, not a discussion surface whose posts could be read as community recommendation. An answer of true that cites the alumni network should be treated as arguable, not correct."
+    },
+    "industry": {
+      "accept": ["professional_services", "accounting_and_payroll"],
+      "why": "Self-described as 'Audit & Assurance, Tax and Advisory Services'. Both values exist in the catalogue's industry vocabulary and both are defensible."
+    }
+  },
+
+  "must_include_signals": [
+    {
+      "id": "f14.advisor_involvement",
+      "why": "THE signal this case exists for. The buyer of a portfolio-company audit or a due-diligence engagement is routinely delivered by an intermediary, and the site states the scale of it: the Private Equity industry page publishes '1,600+ Number of PE-backed portfolio company clients we serve' against '600+ Number of PE firm relationships we have' — i.e. the sponsor, not the portco, is the party that recurs. /services/alliances lists eighteen software vendors (Workday, Oracle NetSuite, Oracle JD Edwards, ServiceNow, Microsoft, OneStream, Anaplan, UiPath, Avalara, Vertex, CrowdStrike, Exabeam, OneTrust, Saviynt, Domo, Onesource) whose own account teams route implementation and post-implementation advisory work. /rfp names a third channel in its own words — 'Grant Thornton LLP (the U.S. member firm of Grant Thornton International Ltd)' — cross-border referral between member firms. Attorneys and bankers on the deal complete the set.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "why": "The distinct, cheaper half of the same channel: capturing WHICH named person or firm sent this enquiry. The firm runs an alumni network (alumni.us.grantthornton.com) — accounting-firm alumni become the controllers and CFOs who later hire their old firm — and every /rfp and /request-a-meeting submission arrives today with the referrer unrecorded. Rung 1 of the catalogue entry is one free-text field plus a grep of existing CRM notes for 'referred' and 'recommended'.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.internal_approval_step",
+      "why": "Appointment of an auditor is approved by the audit committee or board, and the buyer-side artefacts are dated and requestable: supplier-onboarding and tax forms, independence and conflict questionnaires, insurance certificates, references, and — for the Not-for-Profit & Higher Education and public-sector-adjacent clients the site names — a procurement portal requisition. The firm answers these requests today in a shared inbox and throws them away.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f13.rfp_or_tender_issued",
+      "why": "'Submit RFP' sits in the primary nav on every page and /rfp accepts an uploaded RFP document with a stated scope. The inbound half is unmissable; the valuable half is the outbound one — audit and advisory tenders for not-for-profits, higher education, municipalities and public bodies are published with a scope and a closing date before any buyer ever visits the site.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f13.regulatory_compliance_deadline",
+      "why": "Dated obligations ARE the demand curve for an audit and tax firm, and the firm publishes them itself: an accounting-standards effective-date schedule under /insights/articles/audit/.../comment-letters/effective-date-schedule, a July 2026 piece on FASB guidance for government grants, SOX-compliance content, and a whole 'D.C. Dispatch' hub. The catalogue requires both halves — a dated obligation AND an account that carries it — which is exactly the join a firm with an industry-segmented client book can make.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f13.funding_or_capital_event",
+      "why": "New spendable capital is the trigger for audit, transaction advisory and 'Accessing Capital Markets' work. Equity rounds, debt facilities, completed acquisitions and grant awards are statutory filings or public announcements, so the row is public_cost_free at the entity level and needs no permission.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f13.technology_stack_change",
+      "why": "Reads straight off the Alliances page: an organisation that is visibly standing up Workday, Oracle NetSuite, ServiceNow or OneStream is the prerequisite condition for the implementation, optimisation and post-go-live control work the firm sells alongside those platforms, and the change is observable in the target's public stack. Most responders treat stack-change monitoring as a software-vendor signal and never connect it to a services firm.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "why": "A public posting for a SOX manager, internal-audit director, technical accounting manager, IPO-readiness lead or Workday finance analyst names the capability the organisation is about to buy — and a finance-controller role left open for two quarters is the entry condition for the firm's 'Outsourcing' line. Public, free, entity-level, permission 'none'.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f11.subscription_renewal_window",
+      "why": "The firm's own book is its cheapest signal source and the family most often skipped once a responder decides the company 'has no subscriptions'. Audit and tax compliance engagements recur annually with a known term end and a known re-engagement decision window; every existing client already carries the date in the engagement record, with no new instrumentation at all.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f09.onboarding_scheduling",
+      "why": "The post-signature family that gets missed. An engagement kickoff, planning meeting or transition-from-predecessor session is booked against a named account the moment the engagement letter is countersigned; a kickoff that slips or is missed is the earliest observable sign that a won engagement is going wrong, and the calendar record already exists.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f10.service_deterioration",
+      "why": "The other post-sale blind spot. Rising escalations against an account's own baseline, missed reporting deadlines, restatements or repeated re-scoping on a live engagement predict non-renewal a full cycle before the renewal window opens. The catalogue lists professional_services as an industry boost on this row precisely because the deterioration measure is the firm's own delivery record.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.competitor_disruption",
+      "why": "Auditor change is a public, dated, entity-level event — a registrant's auditor dismissal or resignation is a required current-report disclosure — and the accounting sector is consolidating in public (the firm's own July 2026 press release announces its acquisition of CBIZ). Incumbent-firm mergers, resignations, PCAOB inspection findings and enforcement orders all degrade the status quo for someone else's client. Responders almost never reach for a market-structure family when profiling a services firm.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.policy_incentive_change",
+      "why": "Tax law, tariff and incentive changes move demand for the Tax and advisory lines directly, and the firm has already built the content estate around them: a 'Tariff insights' hub, a USMCA-review article, R&D-credit content and weekly tax 'Hot Topics' newsletters. The signal is the dated policy change joined to the accounts it applies to, not the article.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f15.security_incident",
+      "why": "The firm sells cyber and risk advisory (CrowdStrike, Exabeam, Saviynt and OneTrust alliances; '/insights/capabilities/technology-alliance/detect-and-respond-to-data-threats-with-exabeam'). A public breach disclosure, regulatory notification or exploited-vulnerability advisory affecting a named product or provider is the lawful, entity-level trigger — and it is the permitted counterpart to the prohibited victim-list class flagged below, so a good answer names both together.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f04.vendor_shortlisting",
+      "why": "An RFP invitation, a reference request, or a procurement questionnaire issued to a supplier set tells the firm it is inside a defined competing set — which for audit is usually a set of four to six named firms. The catalogue row is buying_group-level and available_now from artefacts already arriving in the proposal inbox.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f03.webinar_attendance",
+      "why": "The /events hub runs live and on-demand webcasts that carry 'Recommended CPE credits', a field of study, a prerequisite and a delivery method, with a CPE support address (CPEEvents@us.gt.com). CPE credit cannot be awarded without verified attendance, so a registration-plus-attendance-depth record with a declared identity already exists as a by-product of compliance — the cheapest identified-person signal the firm owns.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f06.quote_request",
+      "why": "With no published price, every price is a quote. /rfp and /request-a-meeting are the two quote surfaces, and the RFP upload arrives carrying the buyer's own scope document.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f07.consultation",
+      "why": "'Request a meeting' — 'Ready to talk? We're ready to listen ... a member of our team will be in touch' — is a scoped advisory session about the buyer's own circumstances, which is what the catalogue's consultation row describes, and what the firm sells a paid version of as an assessment.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f01.explicit_need_statement",
+      "why": "The uploaded RFP document, the free-text on the enquiry forms, and published tender notices are the buyer stating the need in their own words. The catalogue row explicitly includes a job description's requirements and a published tender, which is why it is the cheap on-ramp to the F13 rows above rather than a duplicate of them.",
+      "how_obvious": "earned"
+    }
+  ],
+
+  "must_exclude_signals": [
+    {
+      "id": "f10.product_usage",
+      "why": "The row requires measured utilisation against a purchased limit — seats consumed against seats bought, metered volume against an included allowance, machine hours against rated duty. Grant Thornton sells partner and staff hours under an engagement letter. There is no tier, no allowance, no ceiling and no product instance to meter, so the required raw fields cannot exist. Hours billed against an engagement budget is a delivery-margin measure, not a purchase-intent signal, and relabelling it as product usage is the failure this exclusion catches.",
+      "failure_mode": "Wholesale transfer of the B2B SaaS template to a firm that sells expertise; also the conflation of relevant with obtainable, which the baseline study found in 7 of 7 runs."
+    },
+    {
+      "id": "f07.trial",
+      "why": "The row requires a trial or pilot instance provisioned against a named account with a start timestamp and an end date or conversion condition. A statutory audit cannot be trialled — independence rules and the engagement letter make a 'try before you buy' audit incoherent — and the site offers no trial, sandbox, pilot or free tier anywhere. Note the near-miss the tool must get right: a paid scoped assessment or readiness review IS available here and is f07.consultation, not f07.trial.",
+      "failure_mode": "Product-led-growth template applied to a firm with no product; also mislabelling a paid diagnostic engagement as a trial."
+    },
+    {
+      "id": "f06.price_sensitivity",
+      "why": "The row needs at least two price-oriented actions against the same product or plan set — repeat visits to a pricing surface, sorting by price, a promo-code field, viewing a lower tier after a higher one. This site publishes no price, no plan, no tier and no discount route, so there is no pricing surface to return to and no lower tier to step down to. 'Watch pricing-page views' is the single most likely wrong answer for any B2B company and it is unobtainable here; the available substitute is f06.quote_request, which is on the include list.",
+      "failure_mode": "Recommending a signal whose required raw fields cannot be produced by this website — naming a signal without checking its acquisition path."
+    },
+    {
+      "id": "f04.product_comparison",
+      "why": "The row needs two or more distinct product or plan identifiers in one comparison context, or a dedicated comparison surface. There are no product identifiers to compare and the site hosts no comparison page; the catalogue's own applicability for this row does not include services. Comparison in this category happens inside the buyer's RFP scoring matrix, which the firm cannot see — the observable proxy is f04.vendor_shortlisting, which is on the include list.",
+      "failure_mode": "Assuming a purchasable SKU; also the 'competitor comparison page' habit imported from software marketing."
+    },
+    {
+      "id": "f03.review_reading",
+      "why": "The row requires an interaction event on a review surface — opening a review module, sorting it, expanding a critical review. The firm hosts no review module and there is no buyer-review marketplace category for statutory audit or transaction advisory. Diligence on an audit firm runs through PCAOB inspection reports, peer review, references and trade rankings, none of which emits an instrumentable interaction event the firm may lawfully attribute to a prospect.",
+      "failure_mode": "Recommending review-site intent in a category that has no listing — a direct instance of the failure the case brief names."
+    },
+    {
+      "id": "f11.replenishment_due",
+      "why": "The row projects exhaustion of a consumable from quantity purchased, pack or dose size, and an observed reorder interval. Nothing is consumed and there is no pack size. This exclusion is deliberately paired with the f11.subscription_renewal_window INCLUSION: the annual audit and tax cycle is a renewal window with a known term end, not a replenishment projection, and an answer that reaches for the wrong row inside the right family has misunderstood what recurs.",
+      "failure_mode": "Consumable-ecommerce template; and intra-family confusion between a dated contract renewal and a modelled depletion date."
+    },
+    {
+      "id": "f13.customer_inventory_depletion",
+      "why": "The row requires an account's on-hand stock of something you supply to fall below its reorder point, computed from units supplied minus units consumed. A professional services firm supplies no units and holds no stock at the client. This is the B2B-flavoured version of the same mistake as replenishment and is more tempting because it sits in F13, which is otherwise the richest family for this company.",
+      "failure_mode": "Wholesale-distribution template; assuming a physical supply relationship because the family is labelled 'business and operational triggers'."
+    },
+    {
+      "id": "f08.payment_preparation",
+      "why": "The row requires a tokenised payment instrument created, updated or authorised against a pending transaction. There is no checkout, no wallet handshake, no stored card and no pay-invoice surface on this site; engagements are invoiced on terms after a countersigned engagement letter. Note the fair near-miss: f08.billing_setup is arguable here, because a purchase-order or cost-centre reference and an invoicing contact are genuinely captured at engagement setup — the exclusion is specific to payment-instrument preparation and must not be read as excluding all of F08.",
+      "failure_mode": "Ecommerce checkout template; treating 'transaction readiness' as necessarily card-based."
+    }
+  ],
+
+  "families_expected": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F09", "F10", "F11", "F13", "F14", "F15"],
+
+  "families_not_applicable": [
+    {
+      "family": "F12",
+      "why": "F12 is personal, household and occasion triggers keyed to a declared date at the individual or household level — relocation, wedding or registry date, trip dates, enrolment cycle, gift purchase, delivery-address consumption. The motion here is firm-to-firm and the site captures nothing dated at the person level: no booking widget, no address, no registry, no occasion field. The honest caveat a scorer must apply: Private Wealth Services under Tax does serve individuals and families, so an answer that flags F12 narrowly for that one line and says the capture surface does not currently exist is defensible. An answer that treats F12 as a core family for this company, or that proposes inferring life events in order to time a private-wealth approach, is wrong — the latter is a restricted class, not a signal."
+    }
+  ],
+
+  "must_flag_restricted": [
+    {
+      "id": "restricted.granted_access_secondary_inference",
+      "why": "The sharpest prohibition on this case and the one a competent responder is most likely to miss, because the capability is already installed. An audit, tax or outsourced-accounting engagement grants the firm access to the client's general ledger, payroll, bank and ERP systems for a stated purpose. Mining that access to derive cross-sell targets — spotting a bank covenant under strain to pitch restructuring, or reading payroll to time a human-capital pitch — is processing incompatible with the purpose the access was granted for, and the connected systems contain personal data about the client's employees and counterparties who never met the firm. The token already works; only restraint separates it from lawfulness, which is exactly why it must be printed as a prohibition and never as a capability ladder."
+    },
+    {
+      "id": "restricted.financial_distress_inference",
+      "why": "A firm with restructuring and transaction-advisory appetite has an obvious incentive to target businesses in difficulty. Inferring that a named natural person behind the business — a sole trader, partner, director or personal guarantor — is in financial difficulty, from credit-derived data, arrears patterns or judgment records, and using it to select or time an approach, is outside any permissible purpose. The lawful variant is the entity-level fact and only the entity-level fact: the company's own published insolvency, administration or winding-up notice in an official gazette, used as a business event with no inference drawn about any person."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "Because no price is published and every fee is quoted per engagement, this firm has more discretion over price than almost any company shape in the suite — which is precisely the condition under which inferred means becomes a pricing input. Estimating what a prospect or their principals can afford, from behaviour or a purchased affluence score, and using that estimate to set the fee, the terms or the offer shown, is the prohibited act. The lawful variant is a budget the buyer states for this purchase, which is f06.budget_allocation."
+    },
+    {
+      "id": "restricted.breach_exposure_victim_targeting",
+      "why": "The cyber and risk advisory line makes credential dumps and leak-site postings a live temptation for sourcing incident-response work. Assembling or enriching a list of people identified as exposed in a breach in order to market a remedy has no lawful basis and re-contacts people at their most exploitable. The permitted route carries no person-level list at all and is already on the include list as f15.security_incident: monitor the entity-level disclosure the provider or the regulator publishes."
+    }
+  ],
+
+  "expected_capability_notes": [
+    "No PLG motion and no product instance. Product-usage telemetry and trial signals must be returned as unavailable or not-applicable for this company rather than recommended, and the tool should say why: no signup, no buyer login, no trial, no tier, no allowance.",
+    "No published price anywhere on the site, so every price is quoted per engagement. Signals that require a pricing surface have no obtainable raw fields; f06.quote_request off the existing /rfp and /request-a-meeting forms is the available substitute and is available_now.",
+    "F14 is the highest-value family here and an answer that omits it should fail regardless of how many on-site signals it lists. The intermediary is named on the company's own pages: '600+ PE firm relationships' standing behind '1,600+ PE-backed portfolio company clients', eighteen named software alliance partners whose account teams route implementation work, and the RFP page's own description of Grant Thornton LLP as 'the U.S. member firm of Grant Thornton International Ltd'.",
+    "The advisor and referral rows must be presented as cheap, not as an integration project. Rung 1 of both is one form field plus two queries against contacts the firm already holds — which external firm domain appears on two or more unrelated client accounts, and what do twelve months of CRM notes say when grepped for 'referred' and 'recommended'.",
+    "The firm's own book is its cheapest signal source. Recurring annual audit and tax engagements give every existing client a known term end, so f11.subscription_renewal_window needs no new instrumentation; the post-sale families F09, F10 and F11 should not be dropped merely because the company sells services rather than software.",
+    "Most of the F13 and F15 rows here are public_cost_free at the entity level with permission 'none' — tender notices, statutory filings, job postings, published standards effective dates, breach disclosures. The tool should not mark these as requiring consent. It must equally not slide from the entity-level fact to a person-level inference, which is precisely where restricted.financial_distress_inference bites.",
+    "The firm holds granted access to client general ledgers, payroll and ERP systems for the engagement. That is the most tempting and least lawful signal source available to this business shape, and the tool must return restricted.granted_access_secondary_inference as a prohibition with no acquisition path rather than as a data source with caveats.",
+    "The site is a server-rendered AEM estate but the forms on /rfp and /request-a-meeting are injected client-side: the served HTML contains the CTA labels, the instructional copy and the file-upload sentence, but no field names. A tool that crawls HTML only should infer the sales-led, quote-based, no-self-serve motion from the labels and state plainly which field-level detail it could not observe, rather than inventing a field list."
+  ],
+
+  "notes": "CAPTURE CONDITIONS (2026-08-01): https://www.grantthornton.com returned HTTP 200 with ~416 KB of server-rendered HTML and no login wall, region lock or consent interstitial on the pages used here. Verified subpages: /rfp, /request-a-meeting, /events, /events/advisory/2026/08-20-modern-forecasting-for-cfos, /services/alliances, /industries/private-equity, /offices, /careers, /insights/*. One degraded-capture condition is deliberate and is itself part of the test: the form bodies on /rfp and /request-a-meeting are JS-injected, so field labels are not in the HTML — the surrounding copy ('If you have an RFP to upload you can do that below', 'A professional from Grant Thornton LLP (the U.S. member firm of Grant Thornton International Ltd) will contact you') is.\n\nQUOTED EVIDENCE RELIED ON: /industries/private-equity — '1,600+ Number of PE-backed portfolio company clients we serve' and '600+ Number of PE firm relationships we have'. /services/alliances — 'Our strategic alliances empower our clients with the world's leading solutions, paired with our proven audit, tax, strategy, implementation, optimization and support services', over eighteen named partners. Event page — 'Recommended CPE credits', 'Recommended Field of Study', 'Delivery method', CPE support at CPEEvents@us.gt.com. Nav — 'Submit RFP', 'Request a meeting', 'Contact us', 'Subscription preference center', 'Alliances', 'Events & webcasts', 'Alumni network'. Alumni login is an external host, alumni.us.grantthornton.com.\n\nSCORING GUIDANCE. (1) Three profile fields are genuinely ambiguous and are marked as such above — consumable_vs_durable (both values acceptable), b2b_b2c (b2c acceptable if and only if the answer cites Private Wealth Services), has_owned_community (true is arguable if the answer cites the alumni network). Do not penalise either side on these. (2) The must_include list is not exhaustive. F02 and F05 appear in families_expected without enumerated rows because on-site browsing depth, site search and requirement capture from an uploaded RFP scope are all defensible but do not discriminate; extra plausible signals are not errors. Two adjacent rows a good answer may legitimately add instead of ours: f11.reorder_cadence_pattern for the annual engagement rhythm (the catalogue lists professional_services as a boost on that row), and f08.billing_setup for purchase-order and cost-centre capture at engagement setup — neither is wrong. (3) The exclusions are the scoring core. Emitting any of the eight excluded rows as a recommendation should cost more than omitting an inclusion, because each one is unobtainable on this site rather than merely low-value. (4) The four restricted classes should appear in a do-not-collect bucket with no acquisition path; a restricted class returned with a capability ladder is a hard failure of the tool's central commitment, not a partial credit.\n\nENTITY NOTE: since 2024 the US practice operates as an alternative practice structure — Grant Thornton LLP (the licensed CPA firm performing attest work) and Grant Thornton Advisors LLC (tax and advisory) — and a July 2026 press release on the site announces the acquisition of CBIZ. Neither fact changes the signal set, but a tool that mentions them is reading the site rather than a memory of the brand, and the CBIZ item is live corroboration for the f15.competitor_disruption inclusion."
+}

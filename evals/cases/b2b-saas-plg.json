@@ -1,0 +1,253 @@
+{
+  "case_id": "b2b-saas-plg",
+  "company": "Supabase",
+  "url": "https://supabase.com",
+  "business_shape": "b2b_saas_plg",
+  "captured_at": "2026-08-01",
+  "why_this_case": "Supabase is the mirror image of the enterprise-SaaS case: a free tier, public docs and a self-serve signup mean product-usage (F10) and own-customer expansion (F11) signals are genuinely OBTAINABLE here, while the procurement machinery a competent responder reflexively recommends for 'B2B SaaS' — tenders, quote requests, budget allocation — has no surface to attach to. It also sets three near-miss traps where the right family is obvious but the right MEMBER of it is not: replenishment vs product usage, trade-in vs migration preparation, and identity verification (which Supabase SELLS as a product feature) vs account verification (which is its actual own-account signal).",
+
+  "expected_profile": {
+    "b2b_b2c": {
+      "accept": ["b2b", "b2c"],
+      "why": "Primary is b2b — /contact/sales asks for a 'Company Email', /solutions covers Startups, Agencies, Enterprise, B2B SaaS, FinServ and Healthcare, and the customer wall names companies (Firecrawl, Mobbin, E2B, Mozilla, Epsilon3). Marking b2c ALSO is defensible because the Free plan is described on /pricing as 'Perfect for passion projects & simple websites' and /solutions/vibe-coders and /solutions/beginners target individuals. b2c ALONE is wrong."
+    },
+    "business_model": {
+      "accept": ["saas", "subscription"],
+      "why": "/pricing sells recurring monthly plans (Free $0, Pro from $25/mo, Team from $599/mo, Enterprise custom) with metered overages ($0.125/GB disk, $0.09/GB egress, $0.00325/MAU) and hourly-billed compute. Not ecommerce, not services, not marketplace."
+    },
+    "sales_motion": {
+      "accept": ["self_serve", "hybrid"],
+      "why": "The primary CTA sitewide is 'Start your project' and the Free/Pro/Team prices are published with self-serve upgrade ('Spend caps are on by default on the Pro Plan'; you 'can turn spend caps off'). 'hybrid' is equally defensible because a secondary 'Request a demo' CTA sits beside it on the homepage, /contact/sales exists, and Enterprise is 'Contact Us / Custom'. 'sales_led' is wrong and should fail."
+    },
+    "requires_plg_motion": {
+      "accept": [true],
+      "why": "This is the load-bearing field. A $0 plan is provisioned without a salesperson, docs are fully public at supabase.com/docs (no login wall), the docs landing page ships a copy-paste CLI bootstrap ('npm install -g supabase'), and the nav carries a live GitHub star count (107.3K). Anything other than true here invalidates most of the rest of the answer."
+    },
+    "dev_audience": {
+      "accept": [true],
+      "why": "Framework quickstarts for React, Next.js, Flutter, Expo and LangChain on the homepage; a code sample as hero content; /docs with an API 'Reference' section; open-source repo linked as 'View on GitHub'; /open-source; a self-host path."
+    },
+    "has_owned_community": {
+      "accept": [true],
+      "why": "'Join us on Discord' section on the homepage, Discord and GitHub in the footer social row, /supasquad (community champion programme), and the careers page claims '540,000+ community members' and '1,500+ Contributors'. This is a first-party community, not a rented audience."
+    },
+    "has_review_site_category": {
+      "accept": [true, null],
+      "why": "HONEST AMBIGUITY. Supabase does sit in review-site categories (backend-as-a-service / DBaaS) off-site, but the site itself displays no G2/Capterra badge, no star rating and no review widget anywhere in the HTML. A tool that reads only the site and returns null ('not established') is being correct about its evidence; true is also acceptable if the tool says where it got it. false should fail."
+    },
+    "purchase_motion": {
+      "accept": ["considered"],
+      "why": "Evaluation runs through docs, a free project and a framework quickstart over days-to-weeks — not a transactional cart, not a local service call. 'high_ticket' is acceptable ONLY if the answer scopes it to the Enterprise tier and says so; unqualified high_ticket misreads the $25/mo dominant motion."
+    },
+    "industry": {
+      "accept": ["software", "technology", "data_infrastructure"],
+      "why": "Postgres development platform: database, auth, storage, edge functions, realtime, vector. Note the catalogue's f13.permit_or_licence_filed carries industry_exclude ['software'], so this profile value alone should knock that row out."
+    },
+    "pricing_transparency": {
+      "accept": ["published", "published_with_custom_enterprise_tier"],
+      "why": "Three of four tiers carry list prices and a per-unit overage table on /pricing; only Enterprise is 'Custom'. A profile that says 'quote-based' or 'contact for pricing' is reading the 4th tier as the whole company and will drag the wrong F06 signals in behind it."
+    }
+  },
+
+  "must_include_signals": [
+    {
+      "id": "f07.trial",
+      "why": "The Free plan IS the trial: a project instance is provisioned against a named account with a start timestamp and a stated scope condition (500 MB database, 5 GB egress, 50,000 MAU, 'Limit of 2 active projects', 'Free projects are paused after 1 week of inactivity'). The pause rule is the conversion condition the catalogue's qualifying test asks for.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f02.website_browsing",
+      "why": "Baseline first-party instrumentation across /pricing, the /solutions/* cluster and /docs. Anchors the case; does not discriminate on its own.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f04.information_depth_escalation",
+      "why": "This is the test of whether the tool noticed the PUBLIC DOCS. supabase.com/docs is on the same origin as the marketing site and carries Reference/API material — the exact 'detail-class asset' the row is about. A prospect moving from /database to /docs/guides/getting-started/quickstarts/reactjs to the client-library reference is the highest-signal path on the property, and it is instrumentable with no login.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f04.product_comparison",
+      "why": "Dedicated comparison surfaces exist and are linked from the main nav: /solutions/switch-from-firebase and /solutions/switch-from-neon. Opening one satisfies the row's 'a dedicated comparison surface is opened' branch without needing two plan identifiers in a session.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f10.product_usage",
+      "why": "The signal the enterprise mirror-case cannot have. Supabase operates the product its customers run, and /pricing states the entitlements to measure against: MAUs, disk size per project, egress, cached egress, file storage, compute hours. 'metered volume against an included allowance' and 'hits against a hard feature ceiling' both apply, and because of the free tier this arrives BEFORE any purchase, not only after one.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f08.account_verification",
+      "why": "The only row in the catalogue whose applicability carries requires_plg_motion: true, so it is the single most on-shape signal here. Supabase's own account state transitions are real and observable: email verification, organisation members invited, MFA enrolment, and 'SSO for Supabase Dashboard' listed as a Team-plan feature — the single-member-to-multi-member transition the row keys on.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f10.migration_preparation",
+      "why": "Migration is the dominant acquisition story on the site: /solutions/switch-from-firebase, /solutions/switch-from-neon, and a customer story that leads with 'Migrated 200,000 users from Firebase for a better authentication experience' (Mobbin). Sessions in switching documentation plus a completed test import against one account is exactly the row's qualifying condition.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f05.product_configuration",
+      "why": "/pricing ships a working plan builder: 'Choose a plan' (Pro/Team) then '2. Configure compute for your projects — Add projects and adjust compute to estimate your monthly cost', returning a 'Monthly estimate' line (Plan subscription $25 + Total Compute $10 − Compute Credits $10). At least one configuration option chosen against a priced outcome — the row qualifies on the site as it stands.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f06.price_sensitivity",
+      "why": "Observable price-organised behaviour toward Supabase's own prices: repeated returns to /pricing, opening 'See how pricing scales' and 'Compare Plans', viewing Team then dropping back to Pro, and — the strongest self-serve tell — leaving spend caps ON, which /pricing says are 'on by default on the Pro Plan'. Note the row's own warning: this must not be turned into an affordability estimate.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.demo",
+      "why": "DELIBERATE COUNTERWEIGHT to the PLG stereotype. The homepage hero carries 'Request a demo' as the secondary CTA next to 'Start your project', and /contact/sales is titled 'Talk to our Sales team' with a 'Book a demo' promise. A tool that strips every sales-touch signal because the company is product-led over-corrects and should lose a point here. A held slot with a recorded outcome is available.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f01.alternative_solution_abandonment",
+      "why": "The named incumbent is explicit — Firebase, Neon, Pinecone (Firecrawl 'Switched from Pinecone to Supabase Vector'). A downgrade, cancellation or stated intent to leave a named incumbent, captured from a signup free-text field, a support thread or a public post, attaches to a date and a named product.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f11.upgrade_cycle_due",
+      "why": "The own-customer expansion signal that gets missed. The tier ladder is published with hard ceilings (Free 500 MB / 2 projects → Pro 8 GB, then $0.125/GB → Team, 'Add features such as SSO'), so 'sustained use at or above the ceiling of the current tier across two or more billing periods' is directly computable from Supabase's own billing records. This is the F11 row that fits a metered SaaS; see the exclusions for the two that do not.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f09.implementation_preparation",
+      "why": "F09 is one of the families the baseline study found missed, and here it is unusually rich: issuing service-role/anon keys, running `supabase init` and `supabase start` locally, a test import from a Firebase export, inviting colleagues into an organisation, connecting the Supabase MCP server. The row explicitly spans both sides of the sale, which is what a free tier requires — the same events are a pre-purchase buying signal and a post-signup onboarding-health signal.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.buying_group_formation",
+      "why": "The PLG-native answer to the enterprise stakeholder map, and the correct substitute for the excluded f14.stakeholder_role_coverage. Supabase organisations have members and roles, so 'two distinct person identifiers resolve to one account and touch the same product instance' is a first-party database query — no CRM opportunity needed. A solo project growing a second and third member is the single best paid-conversion predictor available to a self-serve business.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.advisor_involvement",
+      "why": "F14 advisor/referral is the family that gets skipped, and Supabase publishes the evidence: /solutions/agencies, a Partner programme (/partners) whose stated benefit is to 'Offer your own products and services to Supabase customers', and a Partner Catalog listing consulting partners. An agency or MSP standing up projects across several unrelated client accounts is the row's 'advisor acting across several unrelated client accounts' branch, detectable from the org/project graph.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "why": "Distinct from advisor involvement: this is arrival attribution to a NAMED party. /partners advertises 'Apply to the Partners program to list your integration in our marketplace', and /partners/catalog plus the OAuth-app publishing path give partner-sourced signups an identifiable referrer that resolves to a record rather than a channel bucket.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f03.community_recommendation",
+      "why": "Supabase owns its community surfaces (Discord linked from the homepage 'Join us on Discord' and the footer; GitHub Discussions on the linked repo; /supasquad), so 'a community the company may lawfully read' is satisfied by its OWN forum rather than by scraping someone else's. A 'what should I use instead of Firebase' post naming a competitor is the qualifying event. Availability is only 'partial' and permission is contractual_access — the tool should say so rather than promising full coverage.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "why": "Off-website operational trigger. A target organisation posting for a backend/full-stack role that names Postgres, Supabase, Firebase or 'RLS' both names a tool in scope and implies the function is being stood up. public_cost_free with permission 'none' — cheap, and available to a company with no outbound team at all.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.technology_stack_change",
+      "why": "The dev-tool-specific version of the row, and easy to miss because it needs no relationship with the prospect: two dated observations of the same organisation's publicly observable stack differing on a named component — a site that starts or stops serving Firebase/Auth0/Neon endpoints, a changed DNS or published integration list. Directly joins to Supabase's own competitive set.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f13.funding_or_capital_event",
+      "why": "Supabase's stated market is startups (/solutions/startups, /solutions/ai-builders, the Free-to-Pro ladder). A seed or Series A gives an existing free-tier account both the budget and the growth that breaks the free ceiling. The row is public_cost_free, so this is reachable from filings and award records without buying a lead list.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.competitor_disruption",
+      "why": "F15 is a missed family, and this is the highest-yield row on the whole list for this company: the entire /solutions/switch-from-* strategy is a bet on incumbent plan restructures. A dated Firebase/Neon/Heroku-class price rise, tier restructure or sunset notice, joined to first-party records of which accounts use that provider, is a migration trigger. public_cost_free, permission 'none'.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.security_incident",
+      "why": "Supabase leads its footer with 'SOC2 Type 2 Certified · HIPAA Compliant · ISO 27001 Certified' and sells SOC2/ISO on the Team plan, so a disclosed breach, exploited CVE or lapsed certification at an incumbent provider is directly on-message. b2b-only row, public_cost_free, permission 'none'. Pair it with the restricted flag below — the legitimate signal is about the PROVIDER, never about the named individuals exposed.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f07.consent_and_access_granting",
+      "why": "Almost always missed, and unusually concrete here: GitHub OAuth at signup, the Supabase MCP server, third-party OAuth apps that 'can control organizations or projects programmatically' (/partners), and scoped API keys. Each is a recorded grant with a scope, a timestamp and a revocation state — the row's exact qualifying condition. availability user_permission, permission explicit_consent; the tool must not present it as free telemetry.",
+      "how_obvious": "hard"
+    }
+  ],
+
+  "must_exclude_signals": [
+    {
+      "id": "f13.rfp_or_tender_issued",
+      "why": "Requires a procurement document or notice opened for the category with a named scope and closing date. Nothing on the site supports a bid motion: no public-sector or government page in the 17-entry /solutions list, no capability statement, no framework or contract-vehicle page, no bid desk. Supabase's own enterprise logos (Mozilla, Epsilon3, GitHub, PwC per /solutions/enterprise) arrive bottom-up from developers already using it, not through tenders. The catalogue's applicability for this row is sales_motion sales_led/hybrid.",
+      "failure_mode": "The 'B2B SaaS therefore procurement' reflex. This is the single most likely wrong answer for any company with an Enterprise tier, and it recommends buying a tender-monitoring feed for a business whose pipeline is a signup form."
+    },
+    {
+      "id": "f06.quote_request",
+      "why": "The row's qualifying condition is a request event that names a plan or configuration AND expects a seller-produced price in return, explicitly excluding a general contact enquiry. /contact/sales does not meet it: the form fields are First Name, Last Name, Company Email and a free-text 'Share more about what you want to accomplish', the submit button reads 'Request a demo', and there is no plan selector. Prices for Free, Pro and Team are published. The correct id for that form is f07.demo, which IS in the include list.",
+      "failure_mode": "Mislabelling the only sales-touch surface the company has. A responder that sees any 'Contact Us' button and emits quote_request will also mis-specify the data fields (quoted amount, configuration, expiry) that Supabase never produces, and will miss that the real event is a calendar slot."
+    },
+    {
+      "id": "f06.budget_allocation",
+      "why": "Requires an amount attached to an opportunity: a stated budget band, a requisition or purchase-order reference, or a budget holder joining. A Pro upgrade is a card charge inside the dashboard with a spend cap toggle; no PO, no requisition, no finance participant, no opportunity record. Applicability is sales_motion sales_led/hybrid only.",
+      "failure_mode": "Importing enterprise-procurement stage-gates into a self-serve motion, and with them a recommendation to 'monitor fiscal-year budget cycles' for a $25/month purchase."
+    },
+    {
+      "id": "f11.replenishment_due",
+      "why": "Requires a consumable already bought, with a pack or dose size and at least two prior purchases of the same item, so exhaustion can be projected. Supabase sells metered capacity on a live subscription, not units that run out and get re-bought. The right rows for 'they are running out of something' here are f10.product_usage (metered volume against an included allowance) and f11.upgrade_cycle_due (the ceiling implies a move UP a tier).",
+      "failure_mode": "Picking the wrong member of a family the tool correctly identified. F11 is titled 'Recurring purchase, renewal, and replenishment' and a competent responder reaches for replenishment when it sees usage limits — producing a signal spec with pack size and reorder interval fields that Supabase can never populate."
+    },
+    {
+      "id": "f13.customer_inventory_depletion",
+      "why": "Same trap from the operational-trigger side: the row measures an account's on-hand STOCK of something you supply against its reorder point. Supabase supplies no stock; hitting 500 MB of database or 5 GB of egress is entitlement consumption, not depleting inventory, and its applicability is consumable_vs_durable ['consumable'] with business_model ecommerce/transaction_based/reseller.",
+      "failure_mode": "A semantically-plausible id that fails on data: it demands units-supplied and units-consumed fields against a reorder threshold. Catches responders that pattern-match the word 'depletion' to usage quotas."
+    },
+    {
+      "id": "f10.trade_in_activity",
+      "why": "Requires converting an owned item into value toward a replacement — an appraisal or buyback quote, a valuation tool, a collection booking. Supabase offers no credit, buyback or valuation for leaving Firebase; the /solutions/switch-from-firebase and /solutions/switch-from-neon pages are migration guides. The correct id is f10.migration_preparation, which is in the include list. Applicability is business_model ecommerce/marketplace/services.",
+      "failure_mode": "The switching pages are the most prominent thing on the site after pricing, so this is the near-miss a responder makes when it reads 'switch from X' as a trade-in rather than a migration. It also catches the reverse error: a tool that names trade-in and then omits migration_preparation has covered F10 on paper and missed it in fact."
+    },
+    {
+      "id": "f09.delivery_preparation",
+      "why": "Every branch of the row is physical: choosing or changing a delivery slot, entering access instructions or measurements, arranging removal or disposal. A Supabase project is provisioned by API in seconds; there is no address, slot or courier anywhere in the flow. The F09 member that does apply is f09.implementation_preparation, which is in the include list.",
+      "failure_mode": "Family-walk mechanics. Any tool that enumerates all 15 families has to pick a member of 'Delivery, onboarding, and implementation preparation', and 'delivery' is the first word in the family name."
+    },
+    {
+      "id": "f08.identity_verification",
+      "why": "The row is regulated identity proofing — KYC, age assurance, document submission, manual review — with permission_requirement regulated_access. Supabase's own signup is email or GitHub OAuth with no KYC step at any tier. Note the row's own scope note: 'This is account hygiene, not identity proofing'... on f08.account_verification, which is the correct id here and is in the include list.",
+      "failure_mode": "Mistaking the VENDOR'S PRODUCT for the vendor's own signals. Supabase sells Authentication with '20+ social providers' and the homepage says 'Add user sign ups and logins'; a site-reading tool can easily emit identity verification as a signal Supabase should monitor when it is in fact a feature Supabase ships to other people. Emitting it also drags a regulated_access permission requirement into an answer that should have none."
+    }
+  ],
+
+  "families_expected": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F08", "F09", "F10", "F11", "F13", "F14", "F15"],
+
+  "families_not_applicable": [
+    {
+      "family": "F12",
+      "why": "Personal, household and occasion triggers. Supabase collects no delivery address, no household, no occasion or reminder date, no travel dates and no care episode; its subjects are organisations and developers acting professionally. The nearest miss is f12.education_enrolment_cycle — /solutions/hackathon-contestants and student use are real — but Supabase never captures a declared enrolment fact to join to an academic calendar, so the row's qualifying condition cannot be met. A tool that marks F12 not-applicable and says why should score full marks; a tool that recommends any F12 row should lose one."
+    }
+  ],
+
+  "must_flag_restricted": [
+    {
+      "id": "restricted.granted_access_secondary_inference",
+      "why": "The adjacency to f07.consent_and_access_granting, which is in the include list. Supabase receives standing access constantly — GitHub OAuth, MCP connections, OAuth apps that can 'control organizations or projects programmatically', service-role keys — and it hosts the customer's actual database. Reading what sits inside a customer's project (schema, table names, end-user records) to derive attributes for targeting is the prohibited class, however commercially tempting. The include and the prohibition must appear together or the answer is unsafe."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "Enterprise is the only 'Custom' price on /pricing, and the platform generates exactly the behavioural residue that tempts this: spend-cap toggling, payment failures, downgrades, project pauses after inactivity, firmographic enrichment of a company email domain. Using any of it to estimate what a buyer can afford and set their price or offer is prohibited. Note that f06.price_sensitivity is included and its own catalogue text draws this exact line — observed behaviour toward YOUR prices is fine; an affordability estimate is not."
+    },
+    {
+      "id": "restricted.financial_distress_inference",
+      "why": "Supabase's buyer is very often a natural person behind a small business — a solo founder or indie developer on the Free or Pro plan. The platform emits failed-payment, downgrade and 'paused after 1 week of inactivity' events, and joining those to consumer-credit or distress signals about the founder to time or price an approach is the prohibited class. This is the F13 prohibition and a self-serve business is the shape most exposed to it."
+    },
+    {
+      "id": "restricted.breach_exposure_victim_targeting",
+      "why": "Sits directly beside the included f15.security_incident. The legitimate signal is a dated public disclosure attributable to a named PROVIDER, joined to Supabase's record of which accounts run it. Assembling or buying a list of individuals identified as exposed in that incident — from leak sites, credential dumps or a notification register — and marketing a remedy to them is prohibited. The two are one step apart, which is why the prohibition has to be named rather than assumed."
+    }
+  ],
+
+  "expected_capability_notes": [
+    "Product-usage signals are AVAILABLE here and must be recommended, not hedged. Supabase operates the product its customers run and /pricing publishes the entitlements to measure against, so f10.product_usage and f11.upgrade_cycle_due resolve to first-party billing and telemetry records. The enterprise mirror-case must mark the same rows unavailable; a tool that gives the same hedged answer to both cases has learned nothing from the shape.",
+    "The free tier moves F10 and F11 upstream of the sale. Usage exists BEFORE any purchase, so these are acquisition signals here, not only retention signals. An answer that files all of F10/F11 under 'post-sale' has the sequencing wrong for a PLG business.",
+    "Public docs are a first-party instrumented surface, not marketing collateral. supabase.com/docs is same-origin, has no login wall, and is where the real evaluation happens — so f04.information_depth_escalation and f02.website_browsing must be scoped to include the docs path. A tool that scopes web instrumentation to /pricing and the /solutions pages is measuring the least informative third of the property.",
+    "There is no CRM opportunity for the self-serve majority. Any row whose only source_class is `crm` — f14.stakeholder_role_coverage is the clearest — covers at most the Enterprise minority and must be reported with that coverage caveat rather than as a core signal. The PLG substitute that reaches the whole base is f14.buying_group_formation, computed from organisation membership.",
+    "Supabase is open source and self-hostable (/open-source, 'Read, contribute, self-host. You're never locked in'), so first-party telemetry cannot see self-hosted deployments at all. The tool should state that f10.product_usage coverage is capped to hosted projects and that a materially valuable population — often the most technical prospects — is structurally invisible.",
+    "Competitive and operational triggers here are cheap, not expensive. f15.competitor_disruption, f15.security_incident, f13.job_posting_signal and f13.technology_stack_change are all availability public_cost_free with permission_requirement 'none'. A tool that routes these to a paid intent-data vendor has conflated 'off-website' with 'must be bought' — one of the conflations this catalogue exists to prevent.",
+    "Community reading is a terms problem, not an effort problem. f03.community_recommendation is availability 'partial' with permission contractual_access even though the Discord and GitHub communities are Supabase's own; the constraint is the host platform's terms, so the honest recommendation is a bounded first-party read, not a scraper.",
+    "The enterprise motion is downstream, not parallel. Sales-touch signals (f07.demo, and any CRM-sourced row) should be scoped to accounts that ALREADY emit usage; proposing them as an independent acquisition channel inverts the actual funnel, in which the demo request follows the free project rather than preceding it."
+  ],
+
+  "notes": "CAPTURE CONDITION: supabase.com is server-rendered and captures cleanly — a plain GET returns ~1.3 MB of HTML with the full nav, hero copy, customer quotes, community wall and footer link graph present in source. /pricing, /careers, /partners, /contact/sales, /solutions/enterprise, /docs and /events all return 200 with readable text and no login or region wall. This is NOT a degraded-capture case; if a tool claims it could not read the site, that is a capture failure, not a site condition.\n\nSHAPE AMBIGUITY, STATED HONESTLY: Supabase is product-led with an enterprise tier bolted on top, not a pure self-serve company. There is a real sales team ('Talk to our Sales team'), a Custom-priced Enterprise plan, and 'Custom Security Questionnaires' listed as an Enterprise feature. The case is built so that every exclusion survives that fact: none of the eight excluded rows becomes correct at the Enterprise tier — rfp_or_tender_issued still has no bid surface, quote_request still fails its own qualifying condition against the actual form fields, budget_allocation still has no PO or requisition anywhere on the site, and the other five are physical-goods or regulated-identity rows that no tier reaches. A tool that says 'hybrid, dominated by self-serve' is more right than one that says 'pure PLG'.\n\nDELIBERATELY UNSCORED — f13.capacity_pressure. It is neither an include nor an exclude and scorers should not penalise either choice. The catalogue's own scope note routes metered utilisation on your own product to f10.product_usage and says capacity_pressure 'is not a second copy of it', additionally requiring a contract end date and a trailing growth rate that a monthly self-serve plan does not have. But its upper rungs explicitly reach accounts you do not meter, which Supabase's prospect base does contain. Both readings are defensible; the reasoning is what matters.\n\nALSO UNSCORED — f11.subscription_renewal_window. Pro and Team auto-renew monthly, which makes the 'window in which the renewal decision is made' thin to the point of vanishing for most accounts, while annual Team and Enterprise terms make it real for a minority. Left out of both lists on purpose.\n\nSECONDARY TRAPS NOT IN THE SCORED EXCLUSION LIST, noted so a scorer recognises them if they appear: f11.loyalty_programme_behaviour (the /supasquad community-champion programme is not an accrual-and-redemption ledger), f12.household_consumption_rate (collides with the word 'usage rate' but is keyed to a delivery address), f06.financing_calculation (the /pricing compute estimator models COST, not instalments or lease-versus-buy), and f13.permit_or_licence_filed (whose applicability carries industry_exclude ['software'] and should be knocked out by the profile alone). Any of these appearing in an answer is evidence of the same shape confusion the scored exclusions test.\n\nFIGURES QUOTED ARE AS AT 2026-08-01 and will drift: Free/Pro/Team prices ($0 / from $25 / from $599), free-tier limits (500 MB database, 5 GB egress, 1 GB file storage, 50,000 MAU, 2 active projects, paused after 1 week), overage rates, the 107.3K GitHub star count in the nav, and the careers-page claims ('350+ team members', '540,000+ community members', '1,500+ Contributors', '$1B raised'). The STRUCTURE these support — a $0 tier with hard published ceilings, a self-serve upgrade path, public docs, an owned community, a partner catalogue and a single custom-priced tier — is what the case actually rests on, and that structure is stable."
+}

@@ -1,0 +1,252 @@
+{
+  "case_id": "marketplace",
+  "company": "Taskrabbit",
+  "url": "https://www.taskrabbit.com/",
+  "business_shape": "marketplace",
+  "captured_at": "2026-08-01",
+  "why_this_case": "Taskrabbit has two populations with disjoint journeys, identity levels and lawful bases — Clients who book one dated task at a physical address, and Taskers who pay a $25 registration fee and clear a Persona/Checkr identity and background check before they can supply anything — so it fails any answer that returns one undifferentiated list of 'user' signals. It also punishes keyword matching on the word 'marketplace': the company IS the marketplace, so the catalogue's marketplace row (f04.marketplace_activity, which is for a seller listing on a marketplace it does not own) is exactly wrong here while f04.product_comparison, where the compared units are supply-side humans, is exactly right.",
+  "expected_profile": {
+    "business_model": {
+      "accept": [
+        "marketplace",
+        "two_sided_marketplace",
+        "platform"
+      ],
+      "why": "Taskrabbit matches Clients to independent Taskers and performs no work itself. The homepage booking promise is 'Choose a Tasker by price, skills, and reviews', 'Schedule a Tasker as early as today'; the service pages run 'Select your Tasker' -> 'Schedule a time' -> 'Pay when it's done'. 'Become a Tasker' is a separate registration funnel in the header and footer with its own requirements and its own fee."
+    },
+    "is_two_sided": {
+      "accept": [
+        true
+      ],
+      "why": "Two distinct funnels are visible from the marketing site alone: the Client booking funnel (categories -> service page -> Book Now) and the Tasker registration funnel ('Become a Tasker' -> support.taskrabbit.com requirements: 18+, US Social Security Number, checking account, valid credit card, smartphone, 'personal information for a background and ID check', 'a one time, non-refundable $25 registration fee'). The help centre is itself split into 'Client' and 'Tasker' sections."
+    },
+    "b2b_b2c": {
+      "accept": [
+        "b2c",
+        [
+          "b2c"
+        ],
+        [
+          "b2c",
+          "b2b"
+        ],
+        "b2c_and_b2b",
+        "mixed"
+      ],
+      "why": "Demand is households — Assembly, Mounting, Moving, Cleaning, Yardwork, Winter Tasks, Holidays, Baby Prep — priced consumer-style ('$49', '$65', '$69', '$139'). A minor commercial sliver exists as the 'Office Services' category, but /business returns HTTP 410 Gone, so there is no live enterprise motion. Supply is individual independent contractors, not firms, so both sides resolve to natural persons."
+    },
+    "sales_motion": {
+      "accept": [
+        "self_serve"
+      ],
+      "why": "Both sides are self-serve end to end. There is no 'contact sales' or quote form anywhere in the demand funnel, the price is fixed and shown before booking, and Tasker registration is app-based. /business (410 Gone) is affirmative evidence that the sales-led surface was retired, not merely absent."
+    },
+    "requires_plg_motion": {
+      "accept": [
+        false
+      ],
+      "why": "There is no software product sold to either side: no free tier, no plans, no entitlement, no seats, no usage allowance. The Tasker app is an operational tool for performing paid work, not a product whose metered usage drives expansion. This must be a positively determined false, not an unresolved null — the site affirmatively shows a transactional booking funnel and a paid registration."
+    },
+    "has_review_site_category": {
+      "accept": [
+        true
+      ],
+      "why": "The homepage footer links to Trustpilot, and reviews are a first-class in-funnel object: Taskers carry ratings and written reviews that the Client sorts and reads while choosing. Note the inversion this creates — the reviews are about supply-side individuals, not about the company's product."
+    },
+    "dev_audience": {
+      "accept": [
+        false
+      ],
+      "why": "No developer surface at all: no /docs, no API reference, no SDK, no status page linked from the marketing site. The navigation is 'Services', 'Sign up / Log in', 'Become a Tasker'."
+    },
+    "has_owned_community": {
+      "accept": [
+        false,
+        null
+      ],
+      "why": "No forum, user group or community link appears in the header or footer; the footer carries company links, discover links, app downloads and social profiles only. Accept null as well — absence of a link from the marketing site is weak evidence, and a Tasker community behind the login wall would not be visible to any crawl."
+    },
+    "service_area_model": {
+      "accept": [
+        "metro_limited",
+        "city_by_city",
+        "service_area_bounded",
+        "multi_city"
+      ],
+      "why": "/locations enumerates US metros state by state (Phoenix, Los Angeles, San Francisco, Chicago, New York, Houston, plus mid-size markets such as Bozeman, Bend, Fargo) and the footer's 'Other Countries' switcher lists Canada, Germany, Spain, France, United Kingdom, Italy and Portugal. The Tasker requirements page says 'Be able to work in one of our active cities'. Every signal therefore needs a location key, and the EU/UK footprint means ePrivacy and GDPR apply to a real slice of traffic, not a hypothetical one."
+    },
+    "recurring_revenue": {
+      "accept": [
+        false,
+        "none",
+        "transactional",
+        "per_transaction"
+      ],
+      "why": "No subscription, membership, retainer or loyalty programme is offered to either side. The Client pays per completed task ('Pay when it's done'); the Tasker's $25 registration fee is explicitly 'one time, non-refundable'. Any recurrence is repeat-booking behaviour, not a contract."
+    }
+  },
+  "must_include_signals": [
+    {
+      "id": "f02.search_query",
+      "why": "The demand funnel is search-shaped: 16 top-level categories with a deep named taxonomy ('Crib Assembly', 'Bookshelf Assembly', 'Pool Table Movers', 'In-Home Furniture Movers') and city pages under /locations. Query terms name the task, the object and often the deadline, and the landing click is attributable on Taskrabbit's own surface.",
+      "how_obvious": "obvious"
+    },
+    {
+      "id": "f01.explicit_need_statement",
+      "why": "Taskrabbit already stores the richest demand artefact it will ever have and it is not a pageview: the Client writes, in their own words, what they need done, to an identified counterparty, inside the platform. The homepage says 'Chat, pay, tip, and review all in one place'. This is availability available_now with permission notice — a first-party dated statement naming the category, the constraint and the urgency, requiring no new instrumentation at all. Answers that reach straight for tracking miss it.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f05.eligibility_check",
+      "why": "Address serviceability is the first gate in the Client funnel and Taskrabbit is explicitly metro-bounded ('Be able to work in one of our active cities'; /locations enumerates them). The Client declares a task address for the stated purpose of learning whether it can be served, and a pass/fail/refer result is returned. Its activation_direction is 'route', which is the whole point on a marketplace: an unserved postcode is a supply-expansion input, not a lost lead.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f04.product_comparison",
+      "why": "'Choose a Tasker by price, skills, and reviews' is a comparison surface Taskrabbit owns, and the units being compared are supply-side individuals rather than SKUs. Two or more Taskers viewed side by side inside one session window is the demand-side evaluation event, and it is exactly the reason f04.marketplace_activity is the wrong row for this company.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f03.review_reading",
+      "why": "Reviews sit inside the booking step, not before it: the Client opens, sorts and reads per-Tasker ratings and written reviews while selecting, and the footer additionally links Trustpilot. The signal is the interaction with the review module, not a pageview of a page that has stars on it — and here that interaction is a supply-selection act with a booking immediately downstream.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f07.reservation",
+      "why": "A Taskrabbit booking is literally a hold ahead of payment: 'Select your Tasker' -> 'Schedule a time' -> 'Pay when it's done', with the IKEA page confirming bookings 'up to 14 days in advance'. A named Tasker's dated slot enters a held state with a confirmation/expiry condition and no money has moved. The instrumentable object is the hold and its expiry state, which most answers collapse into 'checkout'.",
+      "how_obvious": "earned"
+    },
+    {
+      "id": "f08.identity_verification",
+      "why": "The single highest-value supply-side signal and one no demand-only answer can produce. Taskrabbit's support centre states 'To register as Taskers, all users are required to undergo identity verification', names Persona and Checkr as the providers, and requires an SSN, a checking account and a non-refundable $25 registration fee. The verification case state — started, referred, passed, failed, abandoned — against a blocked registration IS Taskrabbit's supply-acquisition funnel, and abandonment at the document-capture step is a supply shortfall with a dollar value. The entry's own scope line governs: the case state is the signal; the documents, images and report contents never are.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f09.installation_scheduling",
+      "why": "Every completed task is a dated site visit at a service location with a job type — the row's 'location' identity level is exactly right and Taskrabbit's entire demand book is an appointment book. Critically, the negative variant is the marketplace's characteristic failure: a booking rescheduled twice, or still unconfirmed inside the lead-time window, is an unfilled slot, which is a supply problem dressed as a demand event. Answers that read F09 as 'enterprise implementation kickoff' skip this family entirely.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f12.declared_relocation",
+      "why": "'Moving Services' is a top-level category with 19 offerings, and a move task requires the Client to declare origin and destination addresses and a date — a declared, dated, household-identity relocation supplied for a service purpose, not a guess from browsing. It is the strongest forward-looking trigger on the platform because a mover predictably needs assembly, mounting, hauling and cleaning within weeks, and it is off-website data Taskrabbit already holds.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f14.referral_source_named",
+      "why": "IKEA is a named organisational referrer, not a channel bucket: /ikea reads 'The trusted service provider for IKEA' and states 'All bookings must be made on the web at https://www.taskrabbit.com/ikea or through the Taskrabbit app'. Partner-attributed arrivals are a distinct cohort with a known antecedent purchase (flat-pack furniture) and a predictable first task, which makes them separable from organic demand at first touch.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.weather_trigger",
+      "why": "Three of the sixteen categories are threshold-bound: 'Winter Tasks' (snow removal, sidewalk salting, weatherization), 'Yardwork Services' (gutter cleaning, tree trimming) and 'Holidays' (Christmas decorating, tree delivery). With a bounded set of named metros, a location-keyed forecast threshold is directly actionable — and its highest value is supply-side, telling Taskrabbit which metros to call Taskers into before the demand lands rather than which consumers to advertise to.",
+      "how_obvious": "hard"
+    },
+    {
+      "id": "f15.supply_scarcity",
+      "why": "The defining marketplace row and the clearest two-sided one: remaining Tasker capacity for a dated period in a given category and metro falling below threshold is simultaneously a truthful demand-side scarcity fact the Client can be shown and the trigger to recruit supply. Its required replenishment_lead_time_days is not a shipping lead time here — it is the registration-to-first-task turnaround gated by f08.identity_verification, which is why these two rows have to be read together.",
+      "how_obvious": "hard"
+    }
+  ],
+  "must_exclude_signals": [
+    {
+      "id": "f04.marketplace_activity",
+      "why": "This row is defined as demand activity against the subject's listings on a marketplace the subject does NOT own; it requires listing_id, marketplace_id and seller API credentials, and its permission_requirement is contractual_access. Taskrabbit owns its marketplace. There are no listings of Taskrabbit's on anyone else's platform and no seller API to integrate. The equivalent behaviour here is first-party and is covered by f04.product_comparison and f03.review_reading at website_instrumentation.",
+      "failure_mode": "Keyword matching the business shape: seeing 'marketplace' in the brief and returning the row with 'marketplace' in its name, which inverts the direction of the relationship and sends the company to buy an integration that cannot exist."
+    },
+    {
+      "id": "f11.replenishment_due",
+      "why": "Applies to consumables only and requires item_id, pack quantity and a depletion projection from at least two purchases of the same item. Taskrabbit's unit of sale is a dated hour of a named person's labour. There is no consumable, no pack size, no dose and no depletion date, and 'you assembled a bookshelf 90 days ago, time to reorder' is not a proposition.",
+      "failure_mode": "Applying the D2C ecommerce template to any business with repeat customers — the exact category error the row's own definition warns against."
+    },
+    {
+      "id": "f11.subscription_renewal_window",
+      "why": "Requires term_end_date, subscription_status and an auto_renew flag. Neither side has a term. The Client pays per completed task ('Pay when it's done'); the Tasker's fee is 'a one time, non-refundable $25 registration fee'. There is no membership, retainer or plan anywhere on the site.",
+      "failure_mode": "Dutifully walking F11 because the family list says to, and manufacturing a contract the business model does not have. This is the specific way a 15-family checklist produces a confident wrong answer."
+    },
+    {
+      "id": "f10.product_usage",
+      "why": "Requires entitlement_value and metered utilisation against a purchased tier over consecutive periods, with permission_requirement contractual_access. Taskrabbit sells no entitlement to anyone. Tasker app sessions are not usage against an allowance, and Client app opens are not either — measuring them tells you nothing about a limit being reached because there is no limit.",
+      "failure_mode": "The PLG telemetry reflex, and specifically a side-collapse: treating the supply side as 'product users' whose engagement can be metered, when Taskers are counterparties supplying labour, not accounts consuming a tier."
+    },
+    {
+      "id": "f07.trial",
+      "why": "Requires a trial or pilot instance provisioned against a named account with a start timestamp and an end date or conversion condition, and its applicability is durable-only. Nothing is provisioned to anyone. The Client's first act is a paid booking; the Tasker's first act is paying $25 and submitting to a background check. There is no free tier, sandbox or pilot on either side.",
+      "failure_mode": "Reaching for the B2B SaaS commitment ladder because the company is a technology platform, and mistaking self-serve signup for a trial."
+    },
+    {
+      "id": "f13.job_posting_signal",
+      "why": "Requires organisation_domain_or_id and a public posting at a target organisation. Taskrabbit's supply is individual independent contractors identified by SSN, and its demand is households. There is no target organisation to monitor on either side, and a company hiring an office manager does not predict a Taskrabbit booking.",
+      "failure_mode": "Hearing 'the supply side is small businesses' and reaching for firmographics — treating solo gig workers as accounts with domains, org charts and hiring plans."
+    },
+    {
+      "id": "f12.household_consumption_rate",
+      "why": "The trap here is that the household identity level is genuinely right for Taskrabbit — service is delivered to an address and the Client is a household. But this row is consumables-only and requires item_id, quantity and pack_size to compute units per interval. Taskrabbit delivers labour hours, which have no pack size and no consumption rate, and the row's own scope note points straight at restricted.household_composition_inference, which this case does flag.",
+      "failure_mode": "Correctly inferring household identity and then wrongly inheriting the consumables machinery that usually rides with it — a right-premise, wrong-row error that a plausibility check will not catch."
+    },
+    {
+      "id": "f14.stakeholder_role_coverage",
+      "why": "Scores named people on an opportunity against organisational roles — technical approver, security, legal, procurement, finance. A household booking a $69 TV mount has no such roles, and neither does a Tasker registering alone on a phone. The applicable F14 rows here are f14.referral_source_named (included above) and, arguably, f14.household_coordination for two people in one home coordinating a move.",
+      "failure_mode": "Applying the enterprise buying-committee template because the shape was described as two-sided, mistaking 'two sides' for 'multiple stakeholders in one deal'."
+    }
+  ],
+  "families_expected": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F12",
+    "F13",
+    "F14",
+    "F15"
+  ],
+  "families_not_applicable": [
+    {
+      "family": "F10",
+      "why": "Product usage, ownership and replacement requires an owned product, asset, subscription or entitlement, and neither side has one. Taskrabbit holds no serial numbers, no install base, no meter, no rated duty cycle and no tier: it brokers a one-off labour transaction and the relationship ends when the task is paid for. All six rows fail on their required fields — f10.product_usage needs an entitlement_value, f10.maintenance_and_failure and f10.lifecycle_stage need an asset the subject owns, f10.migration_preparation needs an incumbent system to export from, f10.trade_in_activity needs an item to appraise. See notes for the one arguable row a scorer should not penalise."
+    }
+  ],
+  "must_flag_restricted": [
+    {
+      "id": "restricted.biometric_attribute_inference",
+      "why": "Directly triggered by what the site says it does. Taskrabbit routes every Tasker registration through Persona and Checkr and may request 'photographic proof of a valid, government-issued ID'. Those documents disclose date of birth, sex, nationality and often immigration status, and the face image is a biometric. Deriving any of that for supply-side segmentation, prioritisation, promotion or recruiting look-alikes is the prohibited class — and it is a live temptation precisely because f08.identity_verification is on the include list. The case state may be used; the attributes inside the documents may not."
+    },
+    {
+      "id": "restricted.pregnancy_and_early_parenthood_inference",
+      "why": "'Baby Prep' is one of the sixteen service categories, covering nursery setup and childproofing, and 'Crib Assembly' is a named subcategory. Browsing or booking these makes a pregnancy or new-parent inference trivially cheap and commercially obvious. A person who books crib assembly has told you a fact for a service purpose; deriving from browsing that they are pregnant, trying to conceive, or have an infant of a given age, and holding or activating that attribute, has no lawful route."
+    },
+    {
+      "id": "restricted.household_composition_inference",
+      "why": "Taskrabbit accumulates repeat dated visits to one service address with a known task mix. Inferring from crib assembly plus childproofing plus a second bedroom's furniture that a child of a given age lives there, or inferring occupant count and relationships from task volume, manufactures children's-data and family-circumstance knowledge from behaviour. The lawful alternative is on the same site: ask, on the booking form, for the facts the task actually requires."
+    },
+    {
+      "id": "restricted.financial_distress_inference",
+      "why": "The characteristic gig-marketplace abuse, and one no consumer-ecommerce template would surface. A Tasker who abruptly widens availability, cuts their hourly rate, accepts longer-travel or lower-value tasks, or whose payout instrument fails, presents an obvious distress proxy — and the platform is the counterparty setting what work and what terms they are shown. Deriving financial difficulty about a natural person supplying labour, and using it to time, price or target an approach to them, is prohibited."
+    },
+    {
+      "id": "restricted.ability_to_pay_pricing_inference",
+      "why": "The demand-side mirror. Taskrabbit knows the service address, the device and the neighbourhood before it shows a price, and prices are presented as starting points ('$49', '$69', '$139') with Tasker hourly rates layered on. Estimating what a Client can afford from address, device or browsing and using that estimate to decide which price band, which Taskers or which promotion they see is the prohibited act, whatever it is called internally."
+    }
+  ],
+  "expected_capability_notes": [
+    "Every recommended signal must be labelled with the side it detects — Client (demand) or Tasker (supply). An answer that returns one undifferentiated list of 'user' signals fails this case even if every id in it exists, because the two sides carry different identity levels (Client: individual, household and location; Tasker: an individual with a verification case), different journeys (one dated task versus registration -> ID and background check -> utilisation -> churn), and different lawful bases.",
+    "Supply is not a schedule Taskrabbit controls — it is third-party capacity that must be recruited. Any note that treats Tasker availability as an internal roster (the way a local services firm would treat its own crew) is wrong; f15.supply_scarcity and f09.installation_scheduling must resolve to recruiting and fill-rate actions, not to dispatch.",
+    "No product-usage telemetry exists on either side. Taskrabbit provisions no trial, sells no entitlement and meters no allowance, so F10 rows must be returned as not-applicable or unavailable rather than recommended — and the reason given must be 'no entitlement exists', not 'not instrumented yet'.",
+    "The Tasker verification funnel is instrumentable only as case state. The ID images, selfies and background-report contents submitted to Persona and Checkr are never signal fields; the row that may be built carries verification_case_id, case_state, timestamp and the blocked registration, and nothing from inside the documents.",
+    "Marketplace demand data here is first-party. Because Taskrabbit owns the booking, the comparison surface and the review surface, the equivalents of a third-party marketplace feed are available_now or website_instrumentation with permission 'notice' — not contractual_access via a seller API. Any answer that assigns contractual_access or partner dependence to Taskrabbit's own booking data has misread who owns the platform.",
+    "Supply-side capacity must be expressed at (category x metro x date), never at person level, and the actionable output is a Tasker call-out or recruiting trigger whose lead time is the registration-to-first-task turnaround.",
+    "Location must be a required key on nearly every row. Service is delivered at a physical address inside a bounded set of active cities across seven countries plus the US, so a signal with no location key is not actionable, and the EU/UK footprint means ePrivacy consent applies to the on-site tracking rows rather than being a hypothetical.",
+    "IKEA-sourced demand should be recognised as a named organisational referrer resolvable to a record (f14.referral_source_named), not bucketed as 'partner traffic' or 'referral channel' — the whole value is that the antecedent purchase and the likely first task are already known."
+  ],
+  "notes": "CAPTURE CONDITIONS (part of what this case tests). taskrabbit.com, /services, /locations, /ikea and /services/furniture-assembly all return server-rendered HTML readable by a plain text fetcher. Two surfaces do not: /become-a-tasker returned the generic services shell rather than its own content through the fetcher used, and the actual booking form (task location, date, size, free-text description) sits behind a JavaScript flow and was not observable in static HTML. Supply-side facts in this case were therefore taken from Taskrabbit's own public help centre at support.taskrabbit.com ('What's Required to Become a Tasker?', 'Identity Verification Process'), which is linked from the site and requires no login. A tool that crawls only the marketing domain will see the demand side in full and the supply side only as a 'Become a Tasker' nav link plus a help-centre section named 'Tasker'. An answer that says so explicitly and still infers the supply-side journey from those two affordances should be credited, not penalised; an answer that silently omits the supply side because it could not crawl it should not.\n\n/business returns HTTP 410 Gone. Treat that as affirmative evidence that there is no live enterprise motion, not as an unresolved null.\n\nAMBIGUITY, DELIBERATELY NOT SCORED. (1) F11 is thin but not empty: f11.reorder_cadence_pattern is arguable for repeat Clients, since 'Personal Assistant' is offered on an 'hourly/ongoing basis' and recurring cleaning is a real pattern. Naming it is acceptable; F11 is not in families_expected and the two F11 rows in must_exclude are excluded on their own required fields, not because the family is absent. (2) Within F10, f10.service_deterioration read as Client-experience decay (rising support contacts, repeat incidents, Taskprotect claims — /ikea advertises 'up to $1,000 in coverage for claims') is the one row with a colourable argument; do not fail an answer that names it, but the other five F10 rows are wrong. (3) f14.household_coordination is acceptable for two people in one home coordinating a move; only f14.stakeholder_role_coverage is scored as wrong. (4) F06 appears in families_expected with no corresponding must_include: it is a coverage-only expectation, grounded in f06.price_sensitivity ('Choose a Tasker by price', starting prices shown as '$49'/'$65'/'$69'/'$139', Taskers setting their own hourly rates). Any reasonable F06 row satisfies it; f06.roi_analysis, f06.financing_calculation and f06.negotiation are not expected and should not be credited as coverage.\n\nFEE MECHANICS. Only the Tasker-side fee was verifiable: 'a one time, non-refundable $25 registration fee'. The Taskrabbit service-fee help article did not render, so no claim about Client-side service or trust-and-support fees is required or should be penalised either way.\n\nNOT A LOCAL SERVICES BUSINESS. The likeliest structural failure on this case, beyond collapsing the two sides, is modelling Taskrabbit as a single local services provider with its own crew, calendar and service area. It performs no tasks and employs no Taskers. The tell is whether the answer treats supply as capacity to be recruited and verified, or as staff to be dispatched.\n\nBACKGROUND (off-site, for context only, not something the tool should be expected to know): Taskrabbit is owned by IKEA's parent Ingka Group, which is why the /ikea partner channel is structural rather than a marketing tie-up. Nothing in the scoring depends on knowing this — /ikea's own copy, 'The trusted service provider for IKEA', is sufficient grounding for the f14.referral_source_named inclusion.",
+  "acceptable_signals": [
+    {
+      "id": "f13.permit_or_licence_filed",
+      "why": "Demoted from required: it fails this case's own gold profile on two facets (business_model and sales_motion), so a tool honouring applicability would be marked wrong for correctly dropping it. Plausible for the demand side of a home-services marketplace, so it is accepted, not required."
+    }
+  ]
+}
