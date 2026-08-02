@@ -1,5 +1,12 @@
 # Translating seller language into buyer language
 
+> **Not loaded by the skill.** This was `references/translation.md` until an isolation
+> test measured it. Its two signature contributions — mechanics-derived phrasing and the
+> inverted gap — scored **identically** with and without it (100/100 and 60/60), so it was
+> not earning the tokens it cost on every run. The parts that measurably mattered are now
+> inline in `SKILL.md`; the rest is kept here because the four-failure-mode analysis is
+> good research and the next person to touch this should read it before re-adding anything.
+
 The seller writes *"automated multi-entity consolidation."* The buyer writes
 *"I paste the trial balance into a master workbook and the mapping tab broke again."*
 Nothing on the website contains the second sentence, and the second sentence is what you

@@ -112,12 +112,24 @@ references are unreachable, not to *worse than nothing*.
 
 Honest limits, and one of them matters more than the deltas:
 
-- **Baseline variance exceeds the reference delta.** The same baseline prompt scored 52%,
-  33% and 38% across three runs. So the ~3-point gap between the full skill and the body
-  alone says nothing — these assertions cannot tell whether the references earn their
-  place. That needs a test designed around what the references uniquely carry (specimens,
-  doppelgängers, the deleted-and-why), not the body-shaped assertions used here.
-- Two prompts, three runs, one grader, no variance control.
+- Two prompts, three runs, one grader, no variance control. Baseline scored 52%, 33% and
+  38% on the *same* prompt across runs, so single-arm deltas carry real noise.
+
+**Do the references earn their place?** A separate head-to-head — body alone vs body plus
+references, five prompts, both arms given their content inline and verified to have read
+nothing else — says **partly**:
+
+| | body | body + references |
+|---|---:|---:|
+| Assertions only the references can satisfy | **48%** | **85%** |
+| Controls (things the body already carries) | 80% | 87% |
+
+The 7-point control gap against a 37-point reference gap means this is specific content,
+not "longer answer wins". But the per-field split was sharper than the headline:
+`prohibitions.md` carried it almost alone — *publicly-joinable-is-not-public* and
+*never-pivot-to-an-exposed-third-party* both went **0% → 100%**. Meanwhile
+`translation.md`'s two signature ideas scored **identically in both arms** (100/100 and
+60/60), so it was moved out of the load path to `docs/`.
 - The word "permitted" leaked in 2 of 3 runs despite an explicit prohibition. The
   instruction has been rewritten to supply the replacement wording rather than only ban the
   word — **not yet re-measured.**
@@ -161,9 +173,10 @@ Then just ask: *"what buying signals should I watch for — yoursite.com?"*
 ```
 SKILL.md                  the derivation — canonical
 references/
-  translation.md          seller language → buyer language, and its four failure modes
   signal-library.md       the types that recurred across ten businesses
-  prohibitions.md         what must never be a signal
+  prohibitions.md         what must never be a signal — measured as the references' whole value
+docs/
+  translation-method.md   moved out of the load path after it failed to earn its tokens
 plugins/signal-lens/      generated mirror for the marketplaces (40KB, skill only)
 data/families/            PARKED — a 92-entry first-party intent catalogue (see below)
 evals/                    a scorer and gold cases; the cases are stale, see evals/README.md

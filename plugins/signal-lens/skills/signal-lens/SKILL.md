@@ -55,8 +55,20 @@ on the seller's own website, it is not buyer language. Rewrite it. Real posts ar
 messy and specific, name tools and prices and hours wasted, and do not contain
 category nouns the buyer has never heard.
 
-Then read `references/translation.md` and derive all five before writing a single
-signal. They are what everything downstream is built from:
+Two ways this goes wrong that the test above will not catch:
+
+- **The buyer's ask can be the opposite of the seller's promise.** An
+  observability vendor sells "keep all your data at full fidelity"; the buyer is
+  asking how to store *less*. Search the seller's language and you retrieve the
+  happy half of the market. Check for this explicitly — it is the failure that
+  looks like success.
+- **Sometimes there is no gap.** Where the buyer is fluent — *MER*, *blended
+  CAC*, *RFE on prong 2* — translate **posture** instead: the sound of someone
+  auditing a decision they have already made. *"Am I being farmed"*, *"is this
+  normal"*, *"talk me out of it"*.
+
+Derive all five before writing a single signal. They are what everything
+downstream is built from:
 
 | | |
 |---|---|
@@ -152,7 +164,8 @@ Getting this wrong wastes the signal even when detection is perfect.
   scale under someone else's rant has self-selected into a pain description they
   did not have to write. A thread is a container of leads, not one lead.
 - **The channel, not a buyer** — whoever keeps answering recommendation threads.
-  Pitching them is the fastest way to lose them.
+  Pitching them is the fastest way to lose them. Their doppelgänger is the paid
+  affiliate: a link, a coupon code, or suspiciously consistent loyalty.
 - **Nobody.** Some signals identify a company with no contactable person, and
   some identify a person you must not contact. **"No lead" is a valid outcome** —
   return it rather than manufacturing one.
@@ -170,10 +183,11 @@ which is exactly why a naive relevance model ranks them first.
 
 Anything matching goes into a **do not use** section with its reason.
 
-Never write that a signal is *permitted*, *allowed*, *fine* or *safe* — you are
-not in a position to clear anyone, and a seller who reads it that way will act on
-it. Say **"nothing in these checks matched"**, which is the absence of a finding.
-The words are not interchangeable and the difference is the whole point.
+Never tell the seller a signal is *permitted*, *allowed*, *fine* or *safe* — you
+are not in a position to clear anyone, and they will act on it as though you
+were. Where you found nothing to flag, say you found nothing and name who should
+confirm it. Write that in your own words to the seller; do not recite a formula
+about checks or findings, which reads as machinery and is not their language.
 
 ## Step 6 — Output
 
