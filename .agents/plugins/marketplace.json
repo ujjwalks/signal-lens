@@ -1,0 +1,21 @@
+{
+  "name": "signal-lens-marketplace",
+  "interface": {
+    "displayName": "Signal Lens Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "signal-lens",
+      "description": "Derive the public conversations that mean someone is about to buy from a specific seller.",
+      "source": {
+        "source": "local",
+        "path": "./plugins/signal-lens"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "signal-lens",
+  "version": "0.1.0",
+  "description": "Derive the public conversations that mean someone is about to buy from a specific seller, in the buyer's words rather than the seller's.",
+  "author": { "name": "ujjwalks", "url": "https://github.com/ujjwalks" },
+  "homepage": "https://github.com/ujjwalks/signal-lens",
+  "repository": "https://github.com/ujjwalks/signal-lens",
+  "license": "MIT",
+  "keywords": ["signals", "intent", "leads", "prospecting", "social-listening"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Signal Lens",
+    "shortDescription": "Find the public conversations that mean someone is about to buy",
+    "longDescription": "Given a seller's website, translates seller language into the words their buyer would actually type in a post, derives the signals worth monitoring, names who the lead really is, and excludes what must never be treated as a signal.",
+    "developerName": "ujjwalks",
+    "category": "Productivity",
+    "capabilities": ["Read", "Interactive"],
+    "defaultPrompt": [
+      "What buying signals should I watch for in public conversations? Our site is https://example.com",
+      "Our outbound is dead - where are our buyers actually talking, and what am I looking for?"
+    ],
+    "websiteURL": "https://github.com/ujjwalks/signal-lens"
+  }
+}
