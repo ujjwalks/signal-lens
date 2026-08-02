@@ -81,7 +81,49 @@ downstream is built from:
 Every inferred field carries what you inferred it from. An artifact you cannot
 evidence is a guess, and guesses at this step propagate into every signal.
 
-## Step 2 — Derive the signals
+## Step 2 — Validate the problem before looking for signals
+
+You now have the evidence to do this, because artifacts A and B *are* the
+evidence. It costs a paragraph and it decides whether the rest is possible.
+
+**A signal is someone already doing something about a problem.** So if nobody is
+doing anything about it yet, there is nothing to find, and any list you produce
+will be invented. That is the entire reason this step exists.
+
+Grade the problem on what you can actually evidence — best first:
+
+| | What it looks like |
+|---|---|
+| **Money already moving** | Someone is paid for this today: a tool, a firm, a freelancer, an internal hire |
+| **Effort already spent** | A workaround exists — the spreadsheet, the manual process, the thing someone built |
+| **A consequence with a number** | Hours lost, money leaked, incidents, a date missed |
+| **Complaint only** | People say it is annoying. Nobody pays, nobody works around it |
+| **The seller's word only** | The problem appears in their marketing and nowhere else |
+
+The top three are past behaviour — what someone already did, paid for, or built.
+The bottom two are opinion about a hypothetical, and **anything about the future
+is an over-optimistic lie**. That distinction is the whole test.
+
+Two traps in the seller's own copy:
+
+- **A number the seller invented is not evidence.** "Teams waste 10 hours a week"
+  with no source is a claim about a hypothetical average person. Ask where it
+  came from; if nowhere, it is marketing.
+- **Solution-shaped problems.** "Companies lack a unified view of X" describes the
+  absence of the product, not a problem anyone had before it existed. Nobody
+  wakes up lacking a unified view; they wake up to a number that is wrong.
+
+**Refuse at the bottom two.** Say the problem is not yet evidenced outside their
+own marketing, show which of the five rows you could and could not fill, and name
+what would change your mind — someone paying for a workaround, a named
+competitor, a complaint thread. Then stop.
+
+This will be unpopular and it is the most useful thing the skill can do. A
+plausible list of keywords for a problem nobody has yet costs a company months.
+If the evidence is thin but real — say, complaints exist but nobody pays —
+continue, and mark every signal derived from it as unvalidated.
+
+## Step 3 — Derive the signals
 
 These are the types that recurred across ten unrelated businesses. Walk them; for
 each, write the signal for this seller or record why it does not apply — a reason
@@ -136,7 +178,7 @@ not a signal:
    communities that are mostly practitioners, run this *before* scoring, not
    after.
 
-## Step 3 — Give every signal a doppelgänger
+## Step 4 — Give every signal a doppelgänger
 
 A signal without a named doppelgänger is not finished.
 
@@ -153,7 +195,7 @@ The discriminators that keep working:
 - asking *how* to verify vs asserting verification is impossible
 - a question mark at the end vs a screenshot at the end
 
-## Step 4 — Name the lead, which is often not the poster
+## Step 5 — Name the lead, which is often not the poster
 
 Getting this wrong wastes the signal even when detection is perfect.
 
@@ -170,7 +212,7 @@ Getting this wrong wastes the signal even when detection is perfect.
   some identify a person you must not contact. **"No lead" is a valid outcome** —
   return it rather than manufacturing one.
 
-## Step 5 — Run the prohibitions pass
+## Step 6 — Run the prohibitions pass
 
 Read `references/prohibitions.md` and check the finished list against it.
 
@@ -189,7 +231,7 @@ were. Where you found nothing to flag, say you found nothing and name who should
 confirm it. Write that in your own words to the seller; do not recite a formula
 about checks or findings, which reads as machinery and is not their language.
 
-## Step 6 — Output
+## Step 7 — Output
 
 Lead with the **three signals to start with** and why those three. A list of
 thirty is the artifact a busy person pays to escape.

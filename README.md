@@ -40,13 +40,17 @@ are dated, checkable, cohort-forming, and safe to act on.
 1. **Profile the seller**, then derive five artifacts before writing any signal: the
    workaround inventory (artifact-first), the competitor set in three tiers, the countable
    severity noun, the vocabulary split, and the prohibited bridge.
-2. **Derive the signals** against the library, extending it wherever this seller has one it
+2. **Validate the problem — and refuse if it isn't there.** A signal is someone *already
+   doing something* about a problem, so if nobody is doing anything yet there is nothing to
+   find and any list would be invented. The first three artifacts are the evidence, so this
+   costs a paragraph.
+3. **Derive the signals** against the library, extending it wherever this seller has one it
    does not contain.
-3. **Three gates** on every signal — a **count** of the right noun, a **clock** extracted
+4. **Three gates** on every signal — a **count** of the right noun, a **clock** extracted
    from the text rather than the crawl, and the poster's **side and role**.
-4. **A doppelgänger** for each: the post that looks identical and means the opposite.
-5. **Name the lead**, which is often not the poster — and "no lead" is a valid answer.
-6. **Prohibitions pass**, then output the three signals to start with.
+5. **A doppelgänger** for each: the post that looks identical and means the opposite.
+6. **Name the lead**, which is often not the poster — and "no lead" is a valid answer.
+7. **Prohibitions pass**, then output the three signals to start with.
 
 ## What it will not do
 
