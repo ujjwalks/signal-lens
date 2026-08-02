@@ -50,6 +50,11 @@ feelings. Those are dated, checkable, cohort-forming, and safe to act on.
 Fetch the site. If it will not render, say so and work from the user's
 description — do not infer pages that might plausibly exist.
 
+**The test that governs all of it:** if a phrase you write could plausibly appear
+on the seller's own website, it is not buyer language. Rewrite it. Real posts are
+messy and specific, name tools and prices and hours wasted, and do not contain
+category nouns the buyer has never heard.
+
 Then read `references/translation.md` and derive all five before writing a single
 signal. They are what everything downstream is built from:
 
@@ -66,9 +71,41 @@ evidence is a guess, and guesses at this step propagate into every signal.
 
 ## Step 2 — Derive the signals
 
-Read `references/signal-library.md`. Walk the core types; for each, write the
-signal for this seller or record why it does not apply — a reason about this
-business, never "I could not think of one".
+These are the types that recurred across ten unrelated businesses. Walk them; for
+each, write the signal for this seller or record why it does not apply — a reason
+about this business, never "I could not think of one".
+
+**Arrangement breaking** — the highest-yield group, and the one a pain-shaped
+search cannot see:
+
+- **Clock on the incumbent arrangement** — renewal, trial expiry, replenishment,
+  coverage cliff. The date is in their own words
+- **Continuity break** — the person who maintained the workaround is leaving. The
+  inheritor is the best lead shape there is: same problem, no attachment
+- **Vendor death** — an EOL date, a shutdown, a rebrand, a warranty refused
+- **Broadcast cohort shock** — a price change, recall, stockout or compliance date
+  strands a whole population at once. Detect once, enumerate the cohort
+- **Just churned off something** — decided to leave, not yet decided where to go
+- **Unhappy with a named incumbent** — from any of the three competitor tiers
+
+**Buyer in motion:**
+
+- **Second opinion / pre-commitment** — one quote in hand, asking strangers to
+  confirm or refute it. Latest-stage and cheapest to convert. **Discriminator is
+  tense:** "wants $11,400" is live, "I paid $11,400" is over
+- **Asking what it costs** · **Asking for a recommendation** (the asker is the
+  lead; the replies tell you who you are against)
+- **Counted failed attempt loop** — the workaround failing with an integer attached
+- **Outgrown their setup** · **Doing it the hard way** (strong on pain, weak on budget)
+- **Gatekeeper spec you cannot meet** — a third party names the exact capability
+  gap in their own words
+
+**Conditional:** unaware the category exists · new person in a buying role ·
+building it themselves (works on a lag) · hiring for the pain (B2B only) ·
+third-party-funded budget.
+
+Read `references/signal-library.md` for the specimens, the doppelgängers, the
+strengths, and what was deliberately cut and why.
 
 Then extend. The library is a floor. Every industry has signals it does not
 contain, and the ones you add are the most valuable part of the output.
@@ -131,8 +168,12 @@ pseudonymous handle to a real identity**, and **exclude distress before scoring,
 not after** — in several markets the highest-intent strings are crisis posts,
 which is exactly why a naive relevance model ranks them first.
 
-Anything matching goes into a **do not use** section with its reason. Do not
-write "permitted"; if nothing matched, say nothing matched.
+Anything matching goes into a **do not use** section with its reason.
+
+Never write that a signal is *permitted*, *allowed*, *fine* or *safe* — you are
+not in a position to clear anyone, and a seller who reads it that way will act on
+it. Say **"nothing in these checks matched"**, which is the absence of a finding.
+The words are not interchangeable and the difference is the whole point.
 
 ## Step 6 — Output
 

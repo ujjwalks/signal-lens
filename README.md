@@ -90,9 +90,11 @@ description missed entirely. Decoys included buyer-lens and seo-sxo, which carri
 "signal" and "intent"; it correctly declined `"review my pricing page and tell me if my
 customers would buy"`, the live buyer-lens seam.
 
-**Pass rate — +37 and +20 points over baseline** on two prompts (89% vs 52%, 100% vs 80%).
+**Pass rate — +54 and +7 points over baseline** with the full skill (92% vs 38%, 100% vs
+93%), and **+56 and +20 on the body alone** (89% vs 33%, 100% vs 80%).
 
-That pass number required fixing the harness twice, and the failures are worth recording:
+Getting that number required fixing the harness twice, and the failures are worth
+recording:
 
 1. skill-doctor's dry harness disallows `Read` — correctly, so the baseline cannot quietly
    load the installed skill — and injects only `SKILL.md`. A thin router pointing at three
@@ -100,16 +102,25 @@ That pass number required fixing the harness twice, and the failures are worth r
    measure a router.
 2. Re-running it with file access restored contaminated the other arm instead: **3 of 4
    baseline agents read the repo and one invoked the Skill tool.** That run is void.
-3. The number above comes from flattening the references into the injected body so both
-   arms stay blocked. The flattened layout is a *measurement artifact*, not what ships.
+3. The numbers above keep both arms blocked, and measure two variants: the body alone, and
+   the body with its references inlined into the injection.
 
-**The 53-point swing on the HVAC prompt — −33 with references unreachable, +20 with them
-inlined — is the most useful thing the eval produced.** It says the body alone is not
-self-sufficient, which for a router is by design, but it means the skill is fragile to any
-runtime that fails to load references.
+**That −33 is why the body now carries an inline floor** — the signal type names, the
+translation test, and the two hardest prohibitions. With the floor, the same prompt scores
+**+20 on the body alone**, a 53-point move. A router should degrade to *adequate* when its
+references are unreachable, not to *worse than nothing*.
 
-Small-n and dry by design: two prompts, three runs, one grader. One run used the word
-"permitted", which the skill explicitly forbids — a real one-in-three violation.
+Honest limits, and one of them matters more than the deltas:
+
+- **Baseline variance exceeds the reference delta.** The same baseline prompt scored 52%,
+  33% and 38% across three runs. So the ~3-point gap between the full skill and the body
+  alone says nothing — these assertions cannot tell whether the references earn their
+  place. That needs a test designed around what the references uniquely carry (specimens,
+  doppelgängers, the deleted-and-why), not the body-shaped assertions used here.
+- Two prompts, three runs, one grader, no variance control.
+- The word "permitted" leaked in 2 of 3 runs despite an explicit prohibition. The
+  instruction has been rewritten to supply the replacement wording rather than only ban the
+  word — **not yet re-measured.**
 
 ## Install
 
