@@ -7,18 +7,29 @@
   },
   "metadata": {
     "description": "Derive the public conversations that mean someone is about to buy, for a specific seller.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "signal-lens",
       "source": "./plugins/signal-lens",
       "description": "Given a seller's website, translate what they say about themselves into what their buyer would actually type in a post, then derive the signals to monitor and who the lead really is.",
-      "version": "0.1.0",
-      "author": { "name": "ujjwalks" },
+      "version": "0.2.0",
+      "author": {
+        "name": "ujjwalks"
+      },
       "homepage": "https://github.com/ujjwalks/signal-lens",
       "license": "MIT",
-      "keywords": ["signals", "intent", "leads", "prospecting", "social-listening", "reddit", "linkedin", "outbound"],
+      "keywords": [
+        "signals",
+        "intent",
+        "leads",
+        "prospecting",
+        "social-listening",
+        "reddit",
+        "linkedin",
+        "outbound"
+      ],
       "strict": true
     }
   ]
