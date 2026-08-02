@@ -114,6 +114,24 @@ translation test, and the two hardest prohibitions. With the floor, the same pro
 **+20 on the body alone**, a 53-point move. A router should degrade to *adequate* when its
 references are unreachable, not to *worse than nothing*.
 
+**Does the refusal fire correctly?** Eight sellers, well-evidenced through purely
+hypothetical, with each verdict classified blind to ground truth: **0 false refusals, 0
+false proceeds.** No real business was turned away, and no invented problem got a clean
+signal list.
+
+Scored against my labels it was 6/8 — and both misses were my rubric, not the skill. I had
+labelled two pitches "refuse" because their stated problem was solution-shaped. The skill
+instead **decomposed** them: it named the framing as solution-shaped, found an *adjacent*
+problem with real evidence (named incumbents, real spend, real workarounds), produced
+signals for that, and marked everything specific to the unevidenced mechanism as an
+unvalidated hypothesis rather than pipeline. That is a better answer than refusing, and a
+binary rubric had no way to score it.
+
+The one outright refusal was the only case with no adjacent evidenced market — and it
+stayed useful, naming four things that would change the verdict. It caught 3/3
+solution-shaped framings and 2/2 unsourced statistics where one was present. Usefulness
+ranged 8–9 across all eight, including the refusal.
+
 Honest limits, and one of them matters more than the deltas:
 
 - Two prompts, three runs, one grader, no variance control. Baseline scored 52%, 33% and
