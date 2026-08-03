@@ -1,0 +1,83 @@
+{
+  "domain": "finboard.ai",
+  "source": "https://finboard.ai",
+  "fetched_at": "2026-08-03",
+  "seller": {
+    "sells": "Consolidated financial reporting across several QuickBooks companies — maps each entity's chart of accounts to one group structure, eliminates intercompany, and produces a group P&L and balance sheet",
+    "category": "multi-entity consolidation for QuickBooks",
+    "motion": "B2B",
+    "industry": ["accounting", "finance operations", "multi-entity SMB"],
+    "price_band": "mid four figures per year",
+    "buyer": [
+      "Controller (feels the pain, owns the close)",
+      "CFO (owns the budget)",
+      "fractional or outsourced controller serving several clients"
+    ]
+  },
+  "artifacts": {
+    "workarounds": [
+      {
+        "what": "An Excel workbook that consolidates exported trial balances, one tab per entity",
+        "who_maintains": "the senior accountant who originally built it",
+        "fails_when": "an entity is added and the tab structure will not stretch, or the person who built it leaves and nobody else understands the links"
+      },
+      {
+        "what": "Re-keying each entity's P&L into a group template by hand every month",
+        "who_maintains": "Controller",
+        "fails_when": "the close deadline shortens, or an acquisition lands mid-period and the prior-year comparative no longer ties"
+      },
+      {
+        "what": "Paying an outsourced accounting firm to produce the group statements",
+        "who_maintains": "the external firm's engagement manager",
+        "fails_when": "the fee scales with entity count, or the board moves from quarterly to monthly reporting"
+      }
+    ],
+    "competitors": {
+      "direct": ["Fathom", "LiveFlow", "Cube", "Vena"],
+      "category_alternatives": [
+        "Excel",
+        "QuickBooks' own multi-company report",
+        "reporting per-entity only and never consolidating"
+      ],
+      "the_person_they_pay": [
+        "outsourced accounting firm that produces the consolidation as a deliverable",
+        "fractional controller billing monthly",
+        "a senior accountant whose main job has quietly become the consolidation workbook"
+      ]
+    },
+    "severity_noun": {
+      "noun": "legal entities",
+      "why": "consolidation effort scales with the number of entities and intercompany pairs, not with revenue — a $2m four-entity group is more work than a $40m single company",
+      "material_at": "4 or more"
+    },
+    "vocabulary": {
+      "seller_language": [
+        "multi-entity consolidation",
+        "financial close automation",
+        "governed reporting model",
+        "intercompany elimination",
+        "consolidated group reporting"
+      ],
+      "buyer_language": [
+        "consolidating 6 QuickBooks files every month",
+        "our close takes three weeks and most of it is copy-paste",
+        "how does everyone handle intercompany in QBO",
+        "the workbook breaks every time we add a company",
+        "re-keying trial balances by hand",
+        "board wants monthly numbers and we cannot produce them",
+        "is there actual software for this or does everyone just use Excel"
+      ]
+    },
+    "prohibited_bridge": [
+      "inferring financial distress from a public filing in order to time outreach",
+      "targeting an individual who disclosed a layoff at their employer"
+    ]
+  },
+  "unresolved": [
+    {
+      "field": "seller.price_band",
+      "question": "Roughly what does a typical account pay per year?",
+      "why_it_matters": "decides whether a signal is worth a human's time or only worth a list"
+    }
+  ]
+}

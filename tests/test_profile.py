@@ -1,0 +1,132 @@
+"""Tests for the step 1 profile contract.
+
+`profile-untranslated.json` is the case the validator exists for: every field present,
+nothing obviously wrong on a read-through, and the buyer vocabulary is the seller's own
+words rearranged. A profile like that produces searches that return the company's own
+marketing and no buyer at all, and it looks fine until you read the finished plan.
+"""
+
+import copy
+import io
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+VALIDATOR = os.path.join(ROOT, "scripts", "validate_profile.py")
+GOOD = os.path.join(HERE, "fixtures", "profile-good.json")
+BAD = os.path.join(HERE, "fixtures", "profile-untranslated.json")
+
+
+def run(path, *extra):
+    p = subprocess.run([sys.executable, VALIDATOR, path, *extra],
+                       capture_output=True, text=True)
+    return p.returncode, p.stdout + p.stderr
+
+
+def load(path):
+    with io.open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+class Fixtures(unittest.TestCase):
+    def test_a_real_profile_validates(self):
+        rc, out = run(GOOD)
+        self.assertEqual(rc, 0, out)
+
+    def test_the_untranslated_profile_is_rejected(self):
+        rc, out = run(BAD)
+        self.assertEqual(rc, 1, out)
+
+    def test_it_names_the_vocabulary_failure_specifically(self):
+        """The whole point. A generic 'invalid profile' would not tell anyone what to fix."""
+        _, out = run(BAD)
+        self.assertIn("buyer_language", out)
+        self.assertIn("seller_language", out)
+
+    def test_questions_mode_prints_the_unresolved_questions(self):
+        rc, out = run(GOOD, "--questions")
+        self.assertEqual(rc, 0)
+        self.assertIn("?", out)
+
+    def test_json_mode_is_machine_readable(self):
+        rc, out = run(GOOD, "--json")
+        self.assertEqual(rc, 0)
+        self.assertTrue(json.loads(out)["valid"])
+
+
+class Rules(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def write(self, profile):
+        p = os.path.join(self.tmp.name, "p.json")
+        with io.open(p, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(profile))
+        return p
+
+    def mutate(self, fn):
+        p = copy.deepcopy(self.base)
+        fn(p)
+        return run(self.write(p))
+
+    def test_buyer_language_echoing_the_seller_fails(self):
+        def break_it(p):
+            p["artifacts"]["vocabulary"]["buyer_language"] = \
+                p["artifacts"]["vocabulary"]["seller_language"] + ["multi-entity consolidation tool"]
+        rc, out = self.mutate(break_it)
+        self.assertEqual(rc, 1, out)
+        self.assertIn("rearranged", out)
+
+    def test_an_uncountable_severity_noun_fails(self):
+        rc, out = self.mutate(lambda p: p["artifacts"]["severity_noun"].update({"noun": "complexity"}))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("not countable", out)
+
+    def test_a_countable_noun_passes(self):
+        rc, out = self.mutate(lambda p: p["artifacts"]["severity_noun"].update({"noun": "locations"}))
+        self.assertEqual(rc, 0, out)
+
+    def test_a_workaround_without_a_failure_condition_fails(self):
+        rc, out = self.mutate(lambda p: p["artifacts"]["workarounds"][0].update({"fails_when": ""}))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("fails_when", out)
+
+    def test_an_empty_third_competitor_tier_fails(self):
+        rc, out = self.mutate(lambda p: p["artifacts"]["competitors"].update({"the_person_they_pay": []}))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("the_person_they_pay", out)
+
+    def test_an_empty_prohibited_bridge_is_valid_but_a_missing_one_is_not(self):
+        """Considered-and-empty is a real answer. Absent means nobody asked."""
+        rc, _ = self.mutate(lambda p: p["artifacts"].update({"prohibited_bridge": []}))
+        self.assertEqual(rc, 0)
+        rc, out = self.mutate(lambda p: p["artifacts"].pop("prohibited_bridge"))
+        self.assertEqual(rc, 1, out)
+
+    def test_each_defect_is_reported_once(self):
+        """Structural and semantic layers both fire on the same field; the reader should
+        see one problem, not three."""
+        rc, out = self.mutate(lambda p: p["artifacts"]["workarounds"][0].update({"fails_when": ""}))
+        self.assertEqual(out.count("artifacts.workarounds[0].fails_when"), 1, out)
+
+    def test_a_missing_file_is_an_error_not_an_invalid_profile(self):
+        rc, out = run(os.path.join(self.tmp.name, "nope.json"))
+        self.assertEqual(rc, 2, out)
+
+    def test_malformed_json_is_an_error_not_an_invalid_profile(self):
+        p = os.path.join(self.tmp.name, "bad.json")
+        with io.open(p, "w", encoding="utf-8") as fh:
+            fh.write("{not json")
+        rc, out = run(p)
+        self.assertEqual(rc, 2, out)
+
+
+if __name__ == "__main__":
+    unittest.main()

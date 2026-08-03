@@ -1,0 +1,53 @@
+{
+  "_comment": "Well-formed and useless. This is the failure the validator exists for: every field is present, nothing looks wrong on a read-through, and the buyer vocabulary is the seller's own words rearranged. Searching on it returns the company's own marketing and its competitors' marketing, and no buyer at all. The severity noun cannot appear as an integer in a post, so no signal can carry a count. Two workarounds have no failure condition, which is where the signals were supposed to come from.",
+  "domain": "finboard.ai",
+  "source": "https://finboard.ai",
+  "fetched_at": "2026-08-03",
+  "seller": {
+    "sells": "A governed multi-entity consolidation and financial close automation platform for modern finance teams",
+    "category": "financial close automation",
+    "motion": "B2B",
+    "industry": ["SaaS"],
+    "buyer": ["finance leaders"]
+  },
+  "artifacts": {
+    "workarounds": [
+      {
+        "what": "Manual consolidation processes",
+        "who_maintains": "",
+        "fails_when": ""
+      },
+      {
+        "what": "Legacy tooling",
+        "fails_when": "it is bad"
+      }
+    ],
+    "competitors": {
+      "direct": ["Fathom", "LiveFlow"],
+      "category_alternatives": ["Excel"],
+      "the_person_they_pay": []
+    },
+    "severity_noun": {
+      "noun": "complexity",
+      "why": "more complexity means more need for the product"
+    },
+    "vocabulary": {
+      "seller_language": [
+        "multi-entity consolidation",
+        "financial close automation",
+        "governed reporting model",
+        "intercompany elimination"
+      ],
+      "buyer_language": [
+        "multi-entity consolidation",
+        "financial close automation software",
+        "governed reporting",
+        "intercompany elimination tool",
+        "consolidation automation",
+        "close automation platform"
+      ]
+    },
+    "prohibited_bridge": []
+  },
+  "unresolved": []
+}

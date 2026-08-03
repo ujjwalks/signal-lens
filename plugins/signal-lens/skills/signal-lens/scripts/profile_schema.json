@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signal-lens seller profile",
+  "description": "The output of step 1. Written to ./signal-lens/<domain>.json and read on every later run so the site is fetched once. scripts/validate_profile.py is the authority: it reads this file for structure and adds the semantic checks a schema cannot express.",
+  "type": "object",
+  "required": ["domain", "source", "seller", "artifacts"],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Bare hostname, no scheme. Names the file."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 8,
+      "description": "The URL actually read. Not the homepage if the substance was elsewhere."
+    },
+    "fetched_at": {
+      "type": "string",
+      "description": "ISO date the site was read. A profile older than a couple of quarters describes a company that may have repositioned."
+    },
+    "seller": {
+      "type": "object",
+      "required": ["sells", "motion", "industry", "buyer"],
+      "properties": {
+        "sells": {
+          "type": "string",
+          "minLength": 20,
+          "description": "What is actually being sold, in plain words. Not the tagline."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category a buyer would name, which is often not the one the seller claims."
+        },
+        "motion": {
+          "type": "string",
+          "enum": ["B2B", "B2C", "dual"],
+          "description": "dual means an individual's complaint can be a lead for their employer. Changes who the lead is."
+        },
+        "industry": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "description": "Keys into references/industry-signals.md. Use the buyer's industry, not the seller's."
+        },
+        "price_band": {
+          "type": "string",
+          "description": "Order of magnitude. Decides whether a signal is worth a human's time."
+        },
+        "buyer": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "description": "B2B: the role that owns the budget AND the role that feels the pain, where these differ. B2C: the person."
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["workarounds", "competitors", "severity_noun", "vocabulary", "prohibited_bridge"],
+      "properties": {
+        "workarounds": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Artifact A. What buyers do today INSTEAD of buying this. Every entry needs the condition under which it breaks, because that condition is the signal.",
+          "items": {
+            "type": "object",
+            "required": ["what", "fails_when"],
+            "properties": {
+              "what": {"type": "string", "minLength": 5},
+              "who_maintains": {
+                "type": "string",
+                "description": "Named person or role. When they leave, the workaround dies — the continuity-break signal."
+              },
+              "fails_when": {"type": "string", "minLength": 10}
+            }
+          }
+        },
+        "competitors": {
+          "type": "object",
+          "required": ["direct", "category_alternatives", "the_person_they_pay"],
+          "description": "Artifact B, three tiers. The third is the one sellers forget and the one that yields most.",
+          "properties": {
+            "direct": {"type": "array", "items": {"type": "string"}},
+            "category_alternatives": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Spreadsheets, a manual process, doing nothing."
+            },
+            "the_person_they_pay": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string"},
+              "description": "The human currently paid to do this — bookkeeper, agency, VA, contractor. Their rate is the price ceiling and their departure is a signal."
+            }
+          }
+        },
+        "severity_noun": {
+          "type": "object",
+          "required": ["noun", "why"],
+          "description": "Artifact C. The countable thing that separates a two-person nuisance from a five-figure problem. Every signal must carry a count of THIS noun.",
+          "properties": {
+            "noun": {"type": "string", "minLength": 3},
+            "why": {"type": "string", "minLength": 15},
+            "material_at": {
+              "type": "string",
+              "description": "The count above which this is worth money."
+            }
+          }
+        },
+        "vocabulary": {
+          "type": "object",
+          "required": ["seller_language", "buyer_language"],
+          "description": "Artifact D, and the crux of the whole skill. Buyers do not type the seller's words. A buyer_language list that paraphrases seller_language means the translation never happened.",
+          "properties": {
+            "seller_language": {
+              "type": "array",
+              "minItems": 3,
+              "items": {"type": "string"},
+              "description": "Terms from the site. What NOT to search for."
+            },
+            "buyer_language": {
+              "type": "array",
+              "minItems": 5,
+              "items": {"type": "string"},
+              "description": "What someone with this problem types before they know the category exists. Symptoms, workaround names, complaints about the manual process."
+            }
+          }
+        },
+        "prohibited_bridge": {
+          "type": "array",
+          "description": "Artifact E. Inferences that would reach this buyer through a protected characteristic, a distress disclosure, or a third party the poster exposed. Named so they can be excluded. Empty array is a valid answer only if you considered it.",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "description": "What the site did not answer. Each entry is a question to put to the user. A profile with unresolved entries is usable but flagged.",
+      "items": {
+        "type": "object",
+        "required": ["field", "question"],
+        "properties": {
+          "field": {"type": "string"},
+          "question": {"type": "string", "minLength": 10},
+          "why_it_matters": {"type": "string"}
+        }
+      }
+    }
+  }
+}

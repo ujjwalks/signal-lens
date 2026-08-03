@@ -7,7 +7,7 @@ signal-lens is an [Agent Skill](https://agentskills.io): instructions plus refer
 material that an agent loads on demand. It is the derivation engine behind
 [findonline.ai](https://findonline.ai).
 
-> **v1.0.1.** Installable on Claude Code and Codex — see [Install](#install). Measured; see [Measured](#measured) for what those numbers do and do not support.
+> **v1.2.0.** Installable on Claude Code and Codex — see [Install](#install). Measured; see [Measured](#measured) for what those numbers do and do not support.
 
 ## The problem it solves
 
@@ -27,25 +27,38 @@ everyone in r/accounting hates closing the books. Ranking on it surfaces student
 venters first, because they write the most vivid posts, and it orders the market backwards:
 the most emotionally intense posts come from the smallest accounts.
 
-What discriminates is **the structural failure of the workaround**. The person who
-maintained the spreadsheet leaves. The vendor announces an EOL date. The renewal arrives
-with an uplift. The bottle runs out.
+But pain is necessary, not optional. What promotes it to a signal is **evidence that the
+workaround is failing**, and that evidence comes in two shapes:
 
-So the highest-yield signals are about **the arrangement as an object** — running out, out
-of stock, price rose, licence changed, brand died, warranty ended, maintainer left. Those
-are dated, checkable, cohort-forming, and safe to act on.
+- **A break event.** The person who maintained the spreadsheet leaves. The vendor announces
+  an EOL date. The renewal arrives with an uplift. The bottle runs out. Highest-yield,
+  because it is dated, checkable, cohort-forming and safe to act on.
+- **Continuous degradation**, where there is no event and the only trace is the pain itself
+  carrying a number. *"Three days on reconciliation and we still can't close."*
+
+So the discriminator is not pain versus structure — it is **unqualified versus evidenced**.
+A complaint with a count, an artifact, a date, or category awareness is a signal. The same
+complaint without one is ambient. A plan built only from break events silently drops every
+buyer whose arrangement is failing slowly, which is usually the larger group.
 
 ## How it works
 
-1. **Profile the seller**, then derive five artifacts before writing any signal: the
-   workaround inventory (artifact-first), the competitor set in three tiers, the countable
-   severity noun, the vocabulary split, and the prohibited bridge.
+`SKILL.md` is a router. Each step is a reference file it loads when it reaches that step,
+so a step can be reviewed and changed on its own.
+
+1. **Profile the seller** into `./signal-lens/<domain>.json` — the workaround inventory,
+   the competitor set in three tiers, the countable severity noun, the vocabulary split and
+   the prohibited bridge. `scripts/validate_profile.py` checks it before anything is built
+   on it, and every later step reads the JSON rather than the website. Re-running on the
+   same seller reuses the profile instead of re-fetching. Unanswered fields become questions
+   put to the user.
 2. **Validate the problem — and refuse if it isn't there.** A signal is someone *already
    doing something* about a problem, so if nobody is doing anything yet there is nothing to
    find and any list would be invented. The first three artifacts are the evidence, so this
    costs a paragraph.
-3. **Derive the signals** against the library, extending it wherever this seller has one it
-   does not contain.
+3. **Derive the signals** against the library and `references/industry-signals.md`, which
+   says what actually fires in this seller's industry rather than on average — extending
+   both wherever this seller has a signal neither contains.
 4. **Three gates** on every signal — a **count** of the right noun, a **clock** extracted
    from the text rather than the crawl, and the poster's **side and role**.
 5. **A doppelgänger** for each: the post that looks identical and means the opposite.
@@ -269,7 +282,7 @@ Its 16 prohibition classes fed directly into `references/prohibitions.md`.
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests -v          # 50 tests, stdlib only, no deps
+python3 -m unittest discover -s tests -v          # 65 tests, stdlib only, no deps
 python3 scripts/check_output.py <a-plan-the-skill-produced>
 ```
 

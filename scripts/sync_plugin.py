@@ -10,8 +10,9 @@ What it deliberately does NOT copy: `data/` (a parked 92-entry catalogue this sk
 not use, ~862KB), `evals/`, `tests/`, `docs/`. An installed plugin should carry the skill
 and nothing else.
 
-`scripts/` is copied by explicit allowlist, not wholesale. Only `check_output.py` is part
-of the skill — the agent runs it in step 7. The rest (`bump_version.py`, this file,
+`scripts/` is copied by explicit allowlist, not wholesale. Only the files the agent runs are part
+of the skill: `check_output.py` (step 7), `validate_profile.py` and the
+`profile_schema.json` it reads (step 1). The rest (`bump_version.py`, this file,
 `validate_catalogue.py`) are repo machinery and would be noise in an install. A new script
 does not ship until someone adds it to SCRIPTS below, which is the intended friction.
 
@@ -37,7 +38,7 @@ MIRROR = os.path.join(ROOT, "plugins", NAME, "skills", NAME)
 COPY = [("SKILL.md", "SKILL.md")]
 COPY_DIRS = [("references", "references")]
 # Scripts the agent runs. Allowlist — see the module docstring.
-SCRIPTS = ["check_output.py"]
+SCRIPTS = ["check_output.py", "validate_profile.py", "profile_schema.json"]
 
 
 def sources():
