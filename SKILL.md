@@ -18,7 +18,7 @@ compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
   packages. Not usable where the runtime has no network.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
   author: ujjwalks
   homepage: https://github.com/ujjwalks/signal-lens
 ---
@@ -44,6 +44,26 @@ So the highest-yield signals are about **the product or arrangement as an
 object** — running out, out of stock, price rose, licence changed, brand died,
 warranty ended, contract renews, maintainer left — rather than about the buyer's
 feelings. Those are dated, checkable, cohort-forming, and safe to act on.
+
+## Read the request sideways
+
+People rarely ask for this in the words it produces. They ask **"where can I find
+buyers"**, **"who should we target"**, **"what's our ICP"**, **"how do I do
+outbound"**, **"we need more leads, where do I look"**. Those are all this — they
+are just phrased as targeting questions, and the honest answer to a targeting
+question is what those people *say in public when they are about to buy*.
+
+So answer the question they asked, with what this produces. Say so in one line —
+*"the useful version of 'where do I find them' is 'what do they say right before
+they buy', so here is that"* — and then run the steps.
+
+**Two failure modes, and the first is the common one.** If you answer the
+targeting question directly you will produce a list of filters, directories and
+job boards: competent, generic, and available without this skill. That is the
+default the model reaches for and it is what this exists to replace. And if the
+user genuinely wants something else — a list of named companies, a positioning
+doc, a cold-email sequence — say plainly that this does not produce that, rather
+than producing a worse version of it.
 
 ## Step 1 — Profile the seller, then derive five artifacts
 

@@ -1,0 +1,78 @@
+{
+  "_comment": "Sideways-phrasing eval. The earlier spec asked 'what buying signals should we watch for in public conversations' -- which names the task and flatters the skill. A real user asked 'where can I find buyers' and got a list-building answer. These prompts are phrased the way people actually ask.",
+  "skill_path": "/Users/ujjwal/self/signal",
+  "model": "claude-sonnet-4-6",
+  "runs": 3,
+  "trigger": {
+    "positive": [],
+    "negative": []
+  },
+  "pass": [
+    {
+      "prompt": "My company is finboard.ai - multi-entity consolidation and reporting on top of QuickBooks for 10-200 person companies. Where can I find buyers?",
+      "assert": [
+        {
+          "desc": "reframes the targeting question into what buyers say, rather than answering it as list-building",
+          "pattern": "what they say|before they buy|conversations|posts|say in public|phrase"
+        },
+        {
+          "desc": "produces actual buyer-language phrasing, not category nouns",
+          "pattern": "workbook|trial balance|spreadsheet|paste|tie out|close takes|entities"
+        },
+        {
+          "desc": "names the competitor set including the person they pay today",
+          "pattern": "CPA|outsourced|firm|fractional|bookkeeper|freelanc"
+        },
+        {
+          "desc": "does NOT default to list-building tooling as the answer",
+          "pattern": "^(?!.*(Sales Navigator|ZoomInfo|Apollo\\.io|lead list|directory of)).*$"
+        },
+        {
+          "desc": "gives signals with a false positive or lookalike attached",
+          "pattern": "false positive|looks like|lookalike|doppelg|not in market|mistake"
+        },
+        {
+          "desc": "names a lead who is not the poster, or says no lead",
+          "pattern": "not the poster|no lead|employer|channel|recommender|third part"
+        },
+        {
+          "desc": "produces a do-not-use or exclusion section",
+          "pattern": "do not use|must not|exclude|never"
+        },
+        {
+          "desc": "states what detecting each signal would require",
+          "pattern": "detect|watch|monitor|surface|keyword|profile change|register"
+        }
+      ]
+    },
+    {
+      "prompt": "We sell a premium standing desk direct to consumers, around $1,600. Who should we be targeting and where do they hang out?",
+      "assert": [
+        {
+          "desc": "reframes to what those people say rather than where they are listed",
+          "pattern": "what they say|say in public|posts|conversations|phrase|write"
+        },
+        {
+          "desc": "buyer-language derived from how the thing fails",
+          "pattern": "wobble|dip|sag|tips|creak|shakes|monitor|keyboard"
+        },
+        {
+          "desc": "names incumbents by name",
+          "pattern": "Uplift|Autonomous|Fully|Vari|Flexispot|Ikea|Herman Miller|Steelcase"
+        },
+        {
+          "desc": "does NOT answer as demographic targeting or ad-audience building",
+          "pattern": "^(?!.*(lookalike audience|Meta Ads|demographic targeting|age range|interest targeting)).*$"
+        },
+        {
+          "desc": "signals carry a lookalike that means the opposite",
+          "pattern": "false positive|looks like|opposite|category exit|not in market"
+        },
+        {
+          "desc": "produces an exclusion section",
+          "pattern": "do not use|must not|exclude|never"
+        }
+      ]
+    }
+  ]
+}

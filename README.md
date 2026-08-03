@@ -114,6 +114,26 @@ translation test, and the two hardest prohibitions. With the floor, the same pro
 **+20 on the body alone**, a 53-point move. A router should degrade to *adequate* when its
 references are unreachable, not to *worse than nothing*.
 
+**Does it survive a question asked sideways?** This is the test that matters, and the
+earlier ones were too kind. They asked *"what buying signals should we watch for in public
+conversations"* — which names the task. A real user asked *"where can I find buyers"* and
+got a competent list-building answer: Sales Navigator filters, PE portfolio pages, job
+boards. No conversations, no buyer language, no competitor names. The skill had loaded and
+was not followed.
+
+Re-measured on prompts phrased the way people actually ask — *"where can I find buyers"*,
+*"who should we target and where do they hang out"*:
+
+| | with skill | baseline |
+|---|---:|---:|
+| finboard.ai (multi-entity consolidation) | **96%** | 46% |
+| Premium standing desk, DTC | **94%** | 44% |
+
+**+50 points on both**, after adding an intake instruction that reframes targeting
+questions into what those buyers say in public. Note the baseline is also *steadier* here
+(46%/44%) than on the friendly prompts (33–93%), so the sideways phrasing is the better
+instrument as well as the harder one.
+
 **Does the refusal fire correctly?** Eight sellers, well-evidenced through purely
 hypothetical, with each verdict classified blind to ground truth: **0 false refusals, 0
 false proceeds.** No real business was turned away, and no invented problem got a clean
