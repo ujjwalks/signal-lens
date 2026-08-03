@@ -38,7 +38,8 @@ MIRROR = os.path.join(ROOT, "plugins", NAME, "skills", NAME)
 COPY = [("SKILL.md", "SKILL.md")]
 COPY_DIRS = [("references", "references")]
 # Scripts the agent runs. Allowlist — see the module docstring.
-SCRIPTS = ["check_output.py", "validate_profile.py", "profile_schema.json"]
+SCRIPTS = ["check_output.py", "validate_profile.py", "profile_schema.json",
+           "validate_signals.py", "signals_schema.json"]
 
 
 def sources():

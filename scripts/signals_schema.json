@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signal-lens detection specs (phase 2)",
+  "description": "Output of step 8. Takes the enumerated signals from phase 1 and states, for each, exactly what must be detected. Nothing is dropped: a signal nobody can currently detect keeps its entry with method 'none_known', because a high-ranked undetectable signal is the argument for building a new tool in phase 3. Written to ./signal-lens/<domain>.signals.json and validated by scripts/validate_signals.py.",
+  "type": "object",
+  "required": ["domain", "signals"],
+  "properties": {
+    "domain": {"type": "string", "minLength": 3},
+    "profile": {
+      "type": "string",
+      "description": "Path to the seller profile these were derived from. The specs are only as good as it."
+    },
+    "signals": {
+      "type": "array",
+      "minItems": 20,
+      "description": "One entry per row of the phase 1 CSV. The floor matches the CSV's: fewer than twenty means the set was summarised upstream.",
+      "items": {
+        "type": "object",
+        "required": ["signal", "surface", "observable", "method", "rank"],
+        "properties": {
+          "signal": {"type": "string", "minLength": 3},
+          "library_type": {
+            "type": "string",
+            "description": "Which library type this is an instance of, or 'new'. Makes it visible when a whole type has been dropped between phases."
+          },
+          "surface": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"},
+            "description": "Resolvable locations, not platforms. 'r/Accounting' or 'g2.com/products/{competitor}/reviews', never 'Reddit'. A surface nobody can navigate to is not a surface."
+          },
+          "observable": {
+            "type": "string",
+            "enum": ["post_body", "comment", "review_text", "rating_field",
+                     "listing_field", "profile_field", "job_posting", "public_record",
+                     "changelog_entry", "content_cadence", "none"],
+            "description": "The thing you actually read. 'none' only where method is none_known."
+          },
+          "method": {
+            "type": "string",
+            "enum": ["keyword", "regex", "state_diff", "date_arrival",
+                     "cohort_enumeration", "none_known"],
+            "description": "none_known is a legitimate answer and must not be used to hide a signal that was simply not thought about. Pair it with why in `unspecifiable_because`."
+          },
+          "query": {
+            "type": "object",
+            "description": "The pattern. Terms come from artifacts.vocabulary.buyer_language and competitor names from artifacts.competitors — not from the seller's own website.",
+            "properties": {
+              "any_of": {"type": "array", "items": {"type": "string"}},
+              "all_of": {"type": "array", "items": {"type": "string"}},
+              "near": {"type": "array", "items": {"type": "string"}},
+              "window_tokens": {"type": "integer"},
+              "field": {"type": "string"},
+              "compare_to": {"type": "string"},
+              "threshold": {"type": "string"}
+            }
+          },
+          "must_also_have": {
+            "type": "object",
+            "description": "The three gates from step 3, made machine-checkable.",
+            "properties": {
+              "count_of": {
+                "type": "string",
+                "description": "The severity noun from the profile. Its presence is what separates venting from intent."
+              },
+              "date_from_text": {"type": "boolean"},
+              "demand_side": {"type": "boolean"}
+            }
+          },
+          "disqualifiers": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "The step 4 doppelgangers, expressed as exclusions. An empty list means nobody stress-tested this signal."
+          },
+          "baseline": {
+            "type": "object",
+            "required": ["required"],
+            "properties": {
+              "required": {"type": "boolean"},
+              "snapshot": {"type": "string"},
+              "cadence": {"type": "string"}
+            },
+            "description": "Presence signals need a stored earlier observation. Without one you can read current state but not movement, which is the actual signal."
+          },
+          "freshness_days": {
+            "type": "integer",
+            "description": "How long the signal stays live after the observable appears. A 60-day grace-period post is strong on day two and dead on day fifty-five."
+          },
+          "yields": {
+            "type": "object",
+            "required": ["entity"],
+            "properties": {
+              "entity": {"type": "string"},
+              "contactable": {"type": "string", "enum": ["yes", "sometimes", "no"]}
+            },
+            "description": "What you end up holding. 'no' is a valid and useful answer - see step 5."
+          },
+          "unspecifiable_because": {
+            "type": "string",
+            "description": "Required when method is none_known. A reason about this signal, never 'could not think of a query'."
+          },
+          "rank": {
+            "type": "object",
+            "required": ["stage", "evidence_density", "separability", "reach"],
+            "description": "Components, not a verdict. scripts/rank_signals.py computes the score from these, so a rank cannot be asserted without stating what produced it. Every component is a prior until backtested against closed-won data.",
+            "properties": {
+              "stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4,
+                "description": "0 problem-unaware · 1 problem-aware · 2 solution-aware · 3 vendor-aware · 4 in-negotiation. How close the observable sits to a decision."
+              },
+              "evidence_density": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3,
+                "description": "How many of {count of the severity noun, extractable date, named incumbent} the query REQUIRES. Not how many it might contain."
+              },
+              "separability": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2,
+                "description": "0 the doppelganger needs a human · 1 partly expressible as rules · 2 fully expressible. Low separability caps precision no matter how good the query is."
+              },
+              "reach": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2,
+                "description": "0 one entity · 1 a small recurring stream · 2 a cohort stranded at once, where one detection enumerates many."
+              },
+              "note": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

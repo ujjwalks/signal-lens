@@ -72,7 +72,8 @@ than producing a worse version of it.
 
 ## The steps
 
-Read each step's file when you reach it. Each one is a page; none is optional.
+Read each step's file when you reach it. Each one is a page. Steps 1-7 are never
+optional; step 8 runs when the seller wants detection specified, not on every run.
 
 | | Read | When |
 |---|---|---|
@@ -83,6 +84,7 @@ Read each step's file when you reach it. Each one is a page; none is optional.
 | 5 | `references/step-5-lead.md` | To decide who the lead is for each signal, which is often not the poster. |
 | 6 | `references/step-6-prohibitions.md` | On the finished list, before writing anything for the seller. Sends you to `references/prohibitions.md`, which is the actual rule set. |
 | 7 | `references/step-7-output.md` | To produce the CSV and run the check that gates it. |
+| 8 | `references/step-8-specify.md` | **Phase 2.** Only when the CSV has passed its check. Turns each enumerated signal into a detection spec and ranks them, into `<domain>.signals.json`, validated by `scripts/validate_signals.py`. Nothing is dropped — a signal with no known detection method keeps its entry, because a high-ranked undetectable signal is the argument for what to build next. |
 
 ## If you cannot read the step files
 

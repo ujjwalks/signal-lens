@@ -143,8 +143,20 @@ routing and reasoning, not artifacts.
 
 **What the artifact looks like, measured deterministically.** Three real runs on the same
 prompt, checked by `scripts/check_output.py` with no model in the loop: **43, 39, 40 rows**,
-CSV header 3/3, contract passed 3/3. That is the claim worth making, because it is the one
-that reproduces.
+CSV header 3/3. The row counts reproduce, and that is the claim worth making.
+
+**A correction to what that check covered.** It originally reported "contract passed 3/3",
+and that was true of the checks as written — but they did not include a per-row field
+count. Adding one showed that **29 of the 43 rows in the kept run were structurally
+wrong**: cells containing commas were quoted inconsistently, so every column right of the
+first bare comma shifted, and `detection` was carrying `strength` and `false_positive`
+text. The content checks all passed; only the structure was broken, and nothing looked
+wrong to a reader.
+
+The fixture is kept unrepaired at `tests/fixtures/plan-good.md` as evidence, the checker
+now counts fields per row, and step 7 carries an explicit quoting rule. The lesson is the
+one this file keeps re-learning: a check that passes tells you about the checks, not about
+the artifact.
 
 **A caution on the pass-rate numbers below.** The dry harness swings hard at n=3 — an
 *unchanged* baseline arm moved 44% → 17% between runs, and the skill arm read 96% → 75% →
