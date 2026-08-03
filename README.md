@@ -50,7 +50,7 @@ are dated, checkable, cohort-forming, and safe to act on.
    from the text rather than the crawl, and the poster's **side and role**.
 5. **A doppelgänger** for each: the post that looks identical and means the opposite.
 6. **Name the lead**, which is often not the poster — and "no lead" is a valid answer.
-7. **Prohibitions pass**, then output the three signals to start with.
+7. **Prohibitions pass**, then output **every** signal found — grouped and ordered by how detectable each is, never shortlisted. Filtering is a later phase, and it can only choose from what was listed.
 
 ## What it will not do
 

@@ -164,6 +164,28 @@ strengths, and what was deliberately cut and why.
 Then extend. The library is a floor. Every industry has signals it does not
 contain, and the ones you add are the most valuable part of the output.
 
+**Enumerate exhaustively. Do not shortlist.** Something downstream will filter
+these by what can actually be built; filtering can recover precision, but it can
+never recover a signal you failed to list. A signal you leave out because it felt
+marginal is gone for good.
+
+Each signal is a row:
+
+| | |
+|---|---|
+| **Signal** | what the person is doing or saying |
+| **What it sounds like** | a realistic post in their own voice, not a paraphrase |
+| **Who the lead is** | often not the poster — see step 5 |
+| **Why it is intent** | the reasoning, so a human can disagree with it |
+| **Strength** | strong / medium / weak, and say what makes it weak |
+| **False positive** | what looks exactly like this and is not |
+| **What detecting it takes** | the surface it appears on, and what catching it would require: a keyword match, a profile compared against its earlier state, a public register, a date arriving, a thread watched over time |
+
+That last column is not for the reader. It is what lets someone decide later
+which of these can be built. Fill it even when the honest answer is "no practical
+way to catch this today" — a signal that is real and uncatchable is worth
+knowing, and it is the one most likely to become catchable.
+
 **Every candidate signal must pass three gates.** A signal failing any of them is
 not a signal:
 
@@ -233,10 +255,15 @@ about checks or findings, which reads as machinery and is not their language.
 
 ## Step 7 — Output
 
-Lead with the **three signals to start with** and why those three. A list of
-thirty is the artifact a busy person pays to escape.
+**Give every signal you found.** Not a shortlist, not a top three. Completeness is
+the job at this stage — something downstream decides what is buildable, and it
+can only choose from what you listed.
 
-Then the full table, then **do not use**, then — only if asked — the phrases.
+Order them so the list is usable at length: group by the family they came from,
+and within each group put the ones that are easiest to detect first. Say which
+you would start with if asked, but never in place of the full list.
+
+Then **do not use**, then the phrases.
 
 - Every figure carries "(assumed)" and the check that would replace it. You have
   no data on this seller's conversion rate.
