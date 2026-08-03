@@ -129,7 +129,7 @@ count cannot exist in it. Output-shape properties need a wet run; the dry harnes
 routing and reasoning, not artifacts.
 
 **What the artifact looks like, measured deterministically.** Three real runs on the same
-prompt, checked by `evals/check_output.py` with no model in the loop: **43, 39, 40 rows**,
+prompt, checked by `scripts/check_output.py` with no model in the loop: **43, 39, 40 rows**,
 CSV header 3/3, contract passed 3/3. That is the claim worth making, because it is the one
 that reproduces.
 
@@ -269,11 +269,17 @@ Its 16 prohibition classes fed directly into `references/prohibitions.md`.
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests -v          # 46 tests, stdlib only, no deps
-python3 evals/check_output.py <a-plan-the-skill-produced>
+python3 -m unittest discover -s tests -v          # 50 tests, stdlib only, no deps
+python3 scripts/check_output.py <a-plan-the-skill-produced>
 ```
 
-`check_output.py` is the one to reach for. Run the skill, save what it produced, check it.
+`check_output.py` ships with the skill and **step 7 of SKILL.md runs it** before a plan is
+presented. That is deliberate: the twenty-row floor used to be a sentence asking the model
+to count its own output, and the answer that reached a real user had six signals. A model
+can talk itself out of a sentence; it cannot talk itself out of an exit code. Everything
+the skill can check by code rather than by judgement is checked by code.
+
+You can also run it by hand. Run the skill, save what it produced, check it.
 It verifies the CSV contract, the twenty-row enumeration floor, that every row carries a
 false positive and a detection method, that exclusions are present, that no clearance
 language crept in, and that the working method did not leak into an answer written for a

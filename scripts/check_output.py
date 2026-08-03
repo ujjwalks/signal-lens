@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Check a produced signal plan against the skill's own output contract.
 
-Every defect this checks for shipped, and every one was found by a user running the skill
-rather than by an eval. That is the argument for it existing: the paid harness measures
-routing and reasoning well and cannot see an artifact at all, because it asks the agent to
-describe what it *would* run. A row count cannot exist in a plan.
+SKILL.md step 7 runs this before the plan is shown to anyone. That placement is the whole
+point. The contract's floor — twenty rows — used to be a sentence in the body asking the
+model to count its own output, and a model can talk itself out of a sentence. It cannot
+talk itself out of an exit code. Every rule below was an English instruction first and
+shipped broken anyway; each one is here because a real run violated it.
 
-So this reads the thing the skill actually produced and asks whether it satisfies what the
-skill says it produces. It costs nothing, needs no model, and gives the same answer twice.
+Stdlib only, no model, same answer every time.
 
-    python3 evals/check_output.py <plan-file> [--json]
+    python3 scripts/check_output.py <plan-file> [--json]
+    python3 scripts/check_output.py -            # read the plan from stdin
 
 Exit codes: 0 pass, 1 contract violated, 2 unreadable.
 """
@@ -142,26 +143,29 @@ def check(text):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("plan")
+    ap.add_argument("plan", help="path to the drafted plan, or - to read stdin")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    if not os.path.isfile(args.plan):
+    if args.plan == "-":
+        name, text = "(stdin)", sys.stdin.read()
+    elif os.path.isfile(args.plan):
+        name = os.path.basename(args.plan)
+        with open(args.plan, encoding="utf-8", errors="replace") as fh:
+            text = fh.read()
+    else:
         print(f"CANNOT READ: {args.plan}", file=sys.stderr)
         return 2
-    with open(args.plan, encoding="utf-8", errors="replace") as fh:
-        text = fh.read()
 
     findings, stats = check(text)
     errors = [f for f in findings if f["severity"] == "error"]
     warns = [f for f in findings if f["severity"] == "warn"]
 
     if args.json:
-        print(json.dumps({"plan": os.path.basename(args.plan), **stats,
-                          "findings": findings}, indent=2))
+        print(json.dumps({"plan": name, **stats, "findings": findings}, indent=2))
         return 1 if errors else 0
 
-    print(f"PLAN  {os.path.basename(args.plan)}  —  {stats['rows']} rows")
+    print(f"PLAN  {name}  —  {stats['rows']} rows")
     print()
     for group, label in ((errors, "ERRORS"), (warns, "WARNINGS")):
         if group:
@@ -171,7 +175,11 @@ def main():
                 if f["detail"]:
                     print(f"      {f['detail']}")
             print()
-    print("PASS" if not errors else f"FAIL — {len(errors)} contract violations")
+    if errors:
+        print(f"FAIL — {len(errors)} contract violations. Fix the plan and run again; "
+              "do not present it in this state.")
+    else:
+        print(f"PASS — {stats['rows']} rows, all required columns present.")
     return 1 if errors else 0
 
 

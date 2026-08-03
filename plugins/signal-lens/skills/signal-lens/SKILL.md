@@ -10,7 +10,9 @@ description: >-
   ask what to watch for. Works out which public conversations mean someone is
   about to buy from that specific seller, and who the lead actually is, which is
   often not the person who posted.
-compatibility: Requires network access to fetch the seller's website.
+compatibility: >-
+  Requires network access to fetch the seller's website, and python3 (stdlib only)
+  to run the output check in step 7.
 ---
 
 # signal-lens
@@ -298,11 +300,33 @@ from one you forgot, and the person filtering later cannot tell which.
 
 A row per *variant*, not per family: "job change" and "promotion into a new
 budget" are two rows, because they are detected differently and mean different
-things. Expect several dozen rows for most sellers. **If you have produced fewer
-than twenty, you have summarised rather than enumerated — go back.**
+things. Expect several dozen rows for most sellers.
 
 Put the CSV first. Then **do not use**, then the phrases. Prose commentary goes
 after the CSV, never instead of rows.
+
+### Check it before anyone sees it
+
+Write the drafted plan to a file and run, from the skill directory:
+
+```
+python3 scripts/check_output.py <that-file>
+```
+
+Do this every time, before presenting anything. Then act on what it says: exit 0
+means present the plan, non-zero means fix what it names and run it again.
+
+This step exists because the alternative did not work. The row floor used to be a
+sentence here asking you to count your own output, and the answer that shipped to
+a real user had six signals where this file lists about fifteen types — compression
+that felt like editing at the time. You cannot reliably audit your own enumeration
+from inside the same pass that produced it; a row count either is or is not twenty.
+The script also catches the failures that recur: a column left empty, a channel
+naming a platform rather than a surface, an `n/a` with no reason, wording that
+reads as legal clearance. It needs no network and no model.
+
+If the file cannot be run in this environment, say so in the reply and state that
+the plan is unverified — do not silently skip it.
 
 - Every figure carries "(assumed)" and the check that would replace it. You have
   no data on this seller's conversion rate.

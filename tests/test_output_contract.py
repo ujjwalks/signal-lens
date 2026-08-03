@@ -21,7 +21,7 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-CHECKER = os.path.join(ROOT, "evals", "check_output.py")
+CHECKER = os.path.join(ROOT, "scripts", "check_output.py")
 FIXTURES = os.path.join(HERE, "fixtures")
 
 HEADER = ("signal,what_you_see,where,channel,why_it_matters,who_the_lead_is,"

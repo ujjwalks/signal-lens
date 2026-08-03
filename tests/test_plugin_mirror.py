@@ -12,6 +12,7 @@ repo and were copied from there.
 
 import json
 import os
+import re
 import subprocess
 import sys
 import unittest
@@ -35,18 +36,49 @@ class Mirror(unittest.TestCase):
         self.assertEqual(proc.returncode, 0,
                          f"run `python3 scripts/sync_plugin.py`\n{proc.stdout}{proc.stderr}")
 
-    def test_mirror_carries_the_skill_and_nothing_else(self):
-        """An installed plugin should not drag the parked catalogue, evals or tests."""
+    def _mirror_files(self):
         found = set()
         for base, _, files in os.walk(MIRROR):
             for fn in files:
                 found.add(os.path.relpath(os.path.join(base, fn), MIRROR))
+        return found
+
+    def test_mirror_carries_the_skill_and_nothing_else(self):
+        """An installed plugin should not drag the parked catalogue, evals or tests."""
+        found = self._mirror_files()
         self.assertIn("SKILL.md", found)
         self.assertTrue(any(f.startswith("references") for f in found))
-        for unwanted in ("data", "evals", "tests", "docs", "scripts"):
+        for unwanted in ("data", "evals", "tests", "docs"):
             self.assertFalse(
                 any(f.startswith(unwanted) for f in found),
                 f"{unwanted}/ leaked into the plugin mirror")
+
+    def test_the_output_check_ships_to_the_agent(self):
+        """SKILL.md step 7 runs this. A body that points at a script the install does
+        not carry fails at the only moment it matters, and fails silently."""
+        found = self._mirror_files()
+        self.assertIn(os.path.join("scripts", "check_output.py"), found,
+                      "step 7 invokes scripts/check_output.py but it is not in the mirror")
+
+    def test_only_allowlisted_scripts_ship(self):
+        """Repo machinery — version bumping, this mirror, the parked catalogue
+        validator — is noise in an install and must not leak in wholesale."""
+        shipped = {f for f in self._mirror_files() if f.startswith("scripts" + os.sep)}
+        allowed = {os.path.join("scripts", n) for n in ("check_output.py",)}
+        self.assertEqual(shipped, allowed,
+                         "scripts/ in the mirror drifted from the sync_plugin allowlist")
+
+    def test_every_script_the_body_invokes_is_shipped(self):
+        """Catches a future step that adds `python3 scripts/foo.py` to SKILL.md
+        without adding foo.py to the sync allowlist."""
+        with open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8") as fh:
+            body = fh.read()
+        invoked = set(re.findall(r"scripts/([A-Za-z0-9_]+\.py)", body))
+        self.assertTrue(invoked, "expected SKILL.md to invoke at least one script")
+        shipped = self._mirror_files()
+        for name in sorted(invoked):
+            self.assertIn(os.path.join("scripts", name), shipped,
+                          f"SKILL.md invokes scripts/{name}, which the mirror lacks")
 
     def test_mirror_is_small(self):
         """A guard on the 862KB parked catalogue reappearing by accident."""
