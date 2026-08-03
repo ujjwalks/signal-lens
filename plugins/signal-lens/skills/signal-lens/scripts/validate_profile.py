@@ -43,6 +43,21 @@ UNCOUNTABLE = {
     "accuracy", "visibility", "insight", "data", "information", "quality",
 }
 
+# Search filler. These attach to any query in any market and are not evidence that
+# anyone translated anything. Without this set the whole check is defeated by adding one
+# word: "reverse ETL" is caught, "looking for a reverse ETL tool" is not, and the second
+# is what a model actually writes when it skips the translation.
+FILLER = {
+    "best", "top", "good", "great", "cheap", "cheapest", "free", "looking", "look",
+    "tool", "tools", "software", "platform", "platforms", "solution", "solutions",
+    "vendor", "vendors", "alternative", "alternatives", "option", "options",
+    "pricing", "price", "cost", "costs", "review", "reviews", "compare", "comparison",
+    "versus", "recommend", "recommendation", "recommendations", "help", "need",
+    "want", "use", "using", "used", "anyone", "anybody", "someone", "people",
+    "advice", "suggestions", "thoughts", "experience", "experiences", "worth",
+    "system", "systems", "service", "services", "app", "apps", "stack",
+}
+
 # Words too generic to count as evidence that buyer language was actually derived.
 STOPWORDS = {
     "the", "a", "an", "and", "or", "for", "to", "of", "in", "on", "with", "my", "our",
@@ -108,7 +123,10 @@ def semantic_checks(p):
     buyer = vocab.get("buyer_language") or []
     if seller and buyer:
         s_tok = set().union(*(tokens(x) for x in seller)) if seller else set()
-        derived = [b for b in buyer if tokens(b) and not (tokens(b) - s_tok)]
+        # A phrase counts as translated only if something specific survives removing the
+        # seller's vocabulary AND generic search filler. "best <seller category> tool"
+        # must not pass merely because "best" and "tool" are not on the seller's website.
+        derived = [b for b in buyer if tokens(b) and not (tokens(b) - s_tok - FILLER)]
         if derived:
             ratio = len(derived) / len(buyer)
             msg = (f"{len(derived)} of {len(buyer)} buyer_language entries use only words "

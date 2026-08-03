@@ -128,5 +128,69 @@ class Rules(unittest.TestCase):
         self.assertEqual(rc, 2, out)
 
 
+
+class VocabularyCheckCalibration(unittest.TestCase):
+    """The check that matters most, and the two ways it can be wrong.
+
+    It shipped defeated by a single filler word: `reverse ETL` was caught but
+    `looking for a reverse ETL tool` was not, and the second is what actually gets
+    written when the translation is skipped. Overcorrecting is the opposite risk —
+    step 1 says explicitly that some markets have fluent buyers whose vocabulary
+    legitimately overlaps the seller's, and rejecting those would contradict it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def run_with_vocab(self, seller, buyer):
+        p = copy.deepcopy(self.base)
+        p["artifacts"]["vocabulary"]["seller_language"] = seller
+        p["artifacts"]["vocabulary"]["buyer_language"] = buyer
+        f = os.path.join(self.tmp.name, "v.json")
+        with io.open(f, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(p))
+        return run(f)
+
+    SELLER = ["composable CDP", "data activation", "reverse ETL",
+              "audience orchestration", "agentic marketing platform"]
+
+    def test_seller_vocabulary_with_filler_is_rejected(self):
+        rc, out = self.run_with_vocab(self.SELLER, [
+            "looking for a reverse ETL tool",
+            "best data activation platform",
+            "composable CDP vs traditional CDP",
+            "audience orchestration tools",
+            "how to do data activation",
+            "reverse ETL pricing",
+        ])
+        self.assertEqual(rc, 1, f"filler words defeated the check again\n{out}")
+
+    def test_genuine_buyer_language_is_accepted(self):
+        rc, out = self.run_with_vocab(self.SELLER, [
+            "getting our warehouse data into facebook ads",
+            "the python script that pushes to braze keeps breaking",
+            "exporting a csv every week just to upload it again",
+            "how do people sync snowflake to hubspot",
+            "our segment bill got insane after we grew",
+            "audiences are always stale by the time the campaign goes out",
+        ])
+        self.assertEqual(rc, 0, out)
+
+    def test_a_fluent_buyer_market_is_not_rejected(self):
+        """Immigration: applicants use the same procedural vocabulary as the firm.
+        Step 1 says to translate posture instead, and calls this legitimate."""
+        rc, out = self.run_with_vocab(
+            ["EB-2 NIW petition", "RFE response", "priority date retrogression",
+             "I-140 filing", "premium processing"],
+            ["got an RFE on prong 2, is this normal",
+             "my priority date retrogressed again",
+             "is premium processing worth it for I-140",
+             "am I being farmed by my attorney",
+             "talk me out of refiling the NIW petition",
+             "attorney wants $8k for the RFE response"])
+        self.assertEqual(rc, 0, f"overcorrected — fluent-buyer markets are legitimate\n{out}")
+
 if __name__ == "__main__":
     unittest.main()

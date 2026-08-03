@@ -6,7 +6,11 @@
     "sells": "Consolidated financial reporting across several QuickBooks companies — maps each entity's chart of accounts to one group structure, eliminates intercompany, and produces a group P&L and balance sheet",
     "category": "multi-entity consolidation for QuickBooks",
     "motion": "B2B",
-    "industry": ["accounting", "finance operations", "multi-entity SMB"],
+    "industry": [
+      "accounting",
+      "finance operations",
+      "multi-entity SMB"
+    ],
     "price_band": "mid four figures per year",
     "buyer": [
       "Controller (feels the pain, owns the close)",
@@ -19,21 +23,32 @@
       {
         "what": "An Excel workbook that consolidates exported trial balances, one tab per entity",
         "who_maintains": "the senior accountant who originally built it",
-        "fails_when": "an entity is added and the tab structure will not stretch, or the person who built it leaves and nobody else understands the links"
+        "fails_when": "an entity is added and the tab structure will not stretch, or the person who built it leaves and nobody else understands the links",
+        "verb": "re-key and reconcile",
+        "time_to_failure": "about eighteen months, or one acquisition"
       },
       {
         "what": "Re-keying each entity's P&L into a group template by hand every month",
         "who_maintains": "Controller",
-        "fails_when": "the close deadline shortens, or an acquisition lands mid-period and the prior-year comparative no longer ties"
+        "fails_when": "the close deadline shortens, or an acquisition lands mid-period and the prior-year comparative no longer ties",
+        "verb": "re-key",
+        "time_to_failure": "until the close window shortens"
       },
       {
         "what": "Paying an outsourced accounting firm to produce the group statements",
         "who_maintains": "the external firm's engagement manager",
-        "fails_when": "the fee scales with entity count, or the board moves from quarterly to monthly reporting"
+        "fails_when": "the fee scales with entity count, or the board moves from quarterly to monthly reporting",
+        "verb": "chase and review",
+        "time_to_failure": "until the board asks for monthly"
       }
     ],
     "competitors": {
-      "direct": ["Fathom", "LiveFlow", "Cube", "Vena"],
+      "direct": [
+        "Fathom",
+        "LiveFlow",
+        "Cube",
+        "Vena"
+      ],
       "category_alternatives": [
         "Excel",
         "QuickBooks' own multi-company report",
