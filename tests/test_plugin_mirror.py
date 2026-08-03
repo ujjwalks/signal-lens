@@ -23,6 +23,16 @@ NAME = "signal-lens"
 MIRROR = os.path.join(ROOT, "plugins", NAME, "skills", NAME)
 
 
+def _sync_plugin():
+    """Import sync_plugin.py so the allowlist has exactly one definition."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "sync_plugin", os.path.join(ROOT, "scripts", "sync_plugin.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def load(*parts):
     with open(os.path.join(ROOT, *parts), encoding="utf-8") as fh:
         return json.load(fh)
@@ -60,25 +70,46 @@ class Mirror(unittest.TestCase):
         self.assertIn(os.path.join("scripts", "check_output.py"), found,
                       "step 7 invokes scripts/check_output.py but it is not in the mirror")
 
-    def test_only_allowlisted_scripts_ship(self):
-        """Repo machinery — version bumping, this mirror, the parked catalogue
-        validator — is noise in an install and must not leak in wholesale."""
+    def test_mirror_scripts_match_the_allowlist_exactly(self):
+        """Nothing reaches an install except via SCRIPTS in sync_plugin.py."""
+        allowed = {os.path.join("scripts", n) for n in _sync_plugin().SCRIPTS}
         shipped = {f for f in self._mirror_files() if f.startswith("scripts" + os.sep)}
-        allowed = {os.path.join("scripts", n) for n in ("check_output.py",)}
         self.assertEqual(shipped, allowed,
                          "scripts/ in the mirror drifted from the sync_plugin allowlist")
 
-    def test_every_script_the_body_invokes_is_shipped(self):
-        """Catches a future step that adds `python3 scripts/foo.py` to SKILL.md
-        without adding foo.py to the sync allowlist."""
-        with open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8") as fh:
-            body = fh.read()
-        invoked = set(re.findall(r"scripts/([A-Za-z0-9_]+\.py)", body))
-        self.assertTrue(invoked, "expected SKILL.md to invoke at least one script")
+    def test_repo_machinery_is_not_on_the_allowlist(self):
+        """The allowlist is only a guard if someone cannot quietly widen it. Version
+        bumping, the mirror sync and the parked catalogue validator are build tooling;
+        an install has no use for any of them."""
+        for name in ("bump_version.py", "sync_plugin.py", "validate_catalogue.py"):
+            self.assertNotIn(name, _sync_plugin().SCRIPTS,
+                             f"{name} is repo machinery and must not ship to users")
+
+    def test_every_script_the_skill_invokes_is_shipped(self):
+        """Scans SKILL.md *and* every reference, because the steps moved into
+        references/ and that is where invocations now live. A body — or a step file —
+        pointing at a script the install lacks fails at the only moment it matters,
+        and fails silently."""
+        sources = {"SKILL.md": os.path.join(ROOT, "SKILL.md")}
+        ref_dir = os.path.join(ROOT, "references")
+        for fn in sorted(os.listdir(ref_dir)):
+            if fn.endswith(".md"):
+                sources[f"references/{fn}"] = os.path.join(ref_dir, fn)
+
         shipped = self._mirror_files()
-        for name in sorted(invoked):
-            self.assertIn(os.path.join("scripts", name), shipped,
-                          f"SKILL.md invokes scripts/{name}, which the mirror lacks")
+        invoked_anywhere = set()
+        for label, path in sources.items():
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+            # The trailing guard matters: without it `.js` matches inside `.json`, and
+            # the test demands a `profile_schema.js` that was never meant to exist.
+            pattern = r"scripts/([A-Za-z0-9_]+\.(?:py|sh|js))(?![A-Za-z0-9])"
+            for name in sorted(set(re.findall(pattern, text))):
+                invoked_anywhere.add(name)
+                self.assertIn(os.path.join("scripts", name), shipped,
+                              f"{label} invokes scripts/{name}, which the mirror lacks")
+        self.assertTrue(invoked_anywhere,
+                        "no script is invoked anywhere — the deterministic checks are unreachable")
 
     def test_mirror_is_small(self):
         """A guard on the 862KB parked catalogue reappearing by accident."""
