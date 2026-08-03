@@ -44,20 +44,53 @@ Most of this is a **join, not new thinking**. `query.near` is the competitor set
 you already wrote. If a field has nothing to draw on, that is a gap in the profile
 rather than a gap here — go back rather than inventing one.
 
-## The rank components
+## The two scores
 
-Four numbers, each with a stated meaning. The script applies fixed weights.
+Not one score. Detectability and value answer different questions, and a single
+number mixing them answers neither — measured: a combined score correlated with the
+library's own hand-assigned /10 judgements at Spearman **0.41**, and the
+disagreements were structural rather than noisy. Every signal it under-rated
+converts well and is hard to specify; the one it over-rated is easy to specify and
+converts less.
+
+**DETECTABILITY — can you catch it, with what exists today.**
 
 | Component | Meaning | Weight |
 |---|---|---|
-| `stage` 0–4 | How close the observable sits to a decision: problem-unaware · problem-aware · solution-aware · vendor-aware · in-negotiation | ×3 |
-| `evidence_density` 0–3 | How many of {a count of the severity noun, an extractable date, a named incumbent} the query **requires**. Not how many it might happen to contain | ×3 |
-| `separability` 0–2 | Whether the doppelgänger can be expressed as a rule (2), partly (1), or needs a human (0). Low separability caps precision however good the query is | ×2 |
-| `reach` 0–2 | One entity · a recurring stream · a cohort stranded at once, where one detection enumerates many | ×1 |
+| `evidence_density` 0–3 | how many of {`numeric_pattern`, `date_pattern`, `query.near`} the spec **enforces**. A pattern only counts if it can match a digit — naming a noun in `count_of` is free, a working regex is not | ×3 |
+| `separability` 0–2 | whether the doppelgänger can be expressed as a rule (2), partly (1), or needs a human (0). Low separability caps precision however good the query is | ×2 |
 
-`evidence_density` is checked against the spec: claim 3 and the validator will look for
-three of them in `must_also_have` and `query.near`. **You cannot inflate a component
-without the spec showing it**, which is the point.
+Out of 13. A required baseline costs 2, because on day one you can read current state
+but not movement, and movement is the signal — that penalty disappears once snapshots
+exist, which is worth telling the seller rather than hiding. **`none_known` scores
+zero, not a low number**: "cannot be detected" and "detected badly" are different
+states, and the first is what phase 3 exists to change.
+
+**VALUE — what a catch is worth, whether or not you can catch it.**
+
+| Component | Meaning | Weight |
+|---|---|---|
+| `stage` 0–4 | how close the observable sits to a decision: problem-unaware · problem-aware · solution-aware · vendor-aware · in-negotiation | ×2 |
+| `contestedness` 0–2 | how little competition is already fishing it. **Score it as if the signal were detectable** — "nobody watches this" because nobody *can* is not an opportunity, and scoring it 2 hands the highest value to the rows nobody can act on | ×2 |
+| `reach` 0–2 | one entity · a recurring stream · a cohort stranded at once | ×1 |
+
+Out of 14.
+
+`evidence_density` is checked against the spec: claim 3 and the validator looks for
+three enforced things and rejects the entry if they are not there. **You cannot
+inflate a component without the spec showing it**, which is the point.
+
+### What the two scores are worth knowing about
+
+Measured against the 13 signals whose library type carries an explicit /10:
+**detectability rho +0.60, value rho −0.05.**
+
+Detectability has independent corroboration. **Value has none.** That is stated
+rather than tuned away, because the library's /10 is not a clean ground truth for
+value — it bundles "converts well" with "reliably spottable", which is why it tracks
+the detectability axis. The only thing that can validate the value axis is the
+seller's own closed-won data, and until that exists the value column is a structured
+opinion rather than a measurement.
 
 ## What to say to the seller
 

@@ -230,7 +230,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 2,
-                "description": "How much competition is already fishing this signal. 0 every vendor watches it (renewal threads, review sites) - 1 some do - 2 essentially nobody (public registers, category-unaware posts). Without this the stage weighting buries the only uncontested volume in the market, which is where there is no competition at all."
+                "description": "How little competition is already fishing this signal. 0 every vendor watches it (renewal threads, review sites) - 1 some do - 2 essentially nobody (public registers, category-unaware posts). Score it AS IF THE SIGNAL WERE DETECTABLE: 'nobody is watching this' because nobody can see it is not an uncontested opportunity, and scoring it 2 hands the highest value to the signals nobody can act on."
               }
             }
           }

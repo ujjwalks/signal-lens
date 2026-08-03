@@ -1278,7 +1278,7 @@
         "evidence_density": 0,
         "separability": 0,
         "reach": 0,
-        "contestedness": 2
+        "contestedness": 1
       }
     },
     {
@@ -1308,7 +1308,7 @@
         "evidence_density": 0,
         "separability": 0,
         "reach": 0,
-        "contestedness": 2
+        "contestedness": 1
       }
     }
   ]

@@ -56,9 +56,21 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_PATH = os.path.join(HERE, "signals_schema.json")
 
-WEIGHTS = {"stage": 2, "evidence_density": 3, "separability": 2, "reach": 1,
-           "contestedness": 2}
-MAX_SCORE = 4 * 2 + 3 * 3 + 2 * 2 + 2 * 1 + 2 * 2  # 27
+# TWO SCORES, NOT ONE. The components answer two different questions and mixing them
+# answers neither. Correlating a single combined score against the library's own /10
+# judgements gave Spearman 0.41 — and the disagreements were structural, not noise:
+# every signal the combined score under-rated converts well and is hard to specify
+# precisely, and the one it over-rated is easy to specify and converts less.
+#
+#   DETECTABILITY — how precisely can this be caught, with what exists today.
+#   VALUE         — how much is a catch worth, if you catch it.
+#
+# A signal can be high on one and zero on the other, and those are the interesting
+# ones: high value with no detection method is the phase 3 build list.
+DETECT_WEIGHTS = {"evidence_density": 3, "separability": 2}
+VALUE_WEIGHTS = {"stage": 2, "contestedness": 2, "reach": 1}
+DETECT_MAX = 3 * 3 + 2 * 2   # 13
+VALUE_MAX = 4 * 2 + 2 * 2 + 2 * 1  # 14
 
 # A pattern only counts as enforcing something if it can actually match a digit. A
 # field being non-empty costs nothing to write; a working regex does not.
@@ -80,9 +92,35 @@ def _walk():
     return mod.walk
 
 
+def detectability(s):
+    """How precisely this can be caught with what exists today.
+
+    Zero when there is no known method — not a low number, zero, because "we cannot
+    detect this at all" and "we can detect this badly" are different states and the
+    first one is what phase 3 exists to change.
+
+    A required baseline costs 2: you can read current state on day one but not
+    movement, and movement is the signal. That penalty decays to nothing once
+    snapshots exist, which is worth saying to the seller rather than hiding.
+    """
+    if s.get("method") == "none_known":
+        return 0
+    r = s.get("rank") or {}
+    v = sum(DETECT_WEIGHTS[k] * int(r.get(k, 0) or 0) for k in DETECT_WEIGHTS)
+    if (s.get("baseline") or {}).get("required"):
+        v -= 2
+    return max(0, v)
+
+
+def value(s):
+    """How much a catch is worth, independent of whether you can catch it."""
+    r = s.get("rank") or {}
+    return sum(VALUE_WEIGHTS[k] * int(r.get(k, 0) or 0) for k in VALUE_WEIGHTS)
+
+
 def score(rank):
-    """Deterministic. Same components in, same number out, on every run and every model."""
-    return sum(WEIGHTS[k] * int(rank.get(k, 0) or 0) for k in WEIGHTS)
+    """Kept for the inflated-component cross-check, which only reads evidence_density."""
+    return sum(DETECT_WEIGHTS.get(k, 0) * int(rank.get(k, 0) or 0) for k in DETECT_WEIGHTS)
 
 
 def enforced(s):
@@ -219,11 +257,15 @@ def ranked(doc):
         r = s.get("rank") or {}
         out.append({
             "signal": s.get("signal", "(unnamed)"),
-            "score": score(r),
-            "components": {k: r.get(k) for k in WEIGHTS},
+            "value": value(s),
+            "detectability": detectability(s),
+            "components": {k: r.get(k) for k in
+                           ("stage", "contestedness", "reach",
+                            "evidence_density", "separability")},
             "detectable": s.get("method") != "none_known",
+            "needs_baseline": bool((s.get("baseline") or {}).get("required")),
         })
-    return sorted(out, key=lambda x: (-x["score"], x["signal"]))
+    return sorted(out, key=lambda x: (-x["value"], -x["detectability"], x["signal"]))
 
 
 def main():
@@ -260,20 +302,36 @@ def main():
 
     if args.ranked:
         rows = ranked(doc)
-        print(f"{'score':>5}  {'':1} {'stg/evd/sep/rch':>15}  signal")
+        print(f"{'value':>5} {'detect':>7}   {'stg/con/rch | evd/sep':>21}  signal")
+        print(f"{'/'+str(VALUE_MAX):>5} {'/'+str(DETECT_MAX):>7}")
         for r in rows:
             c = r["components"]
-            comp = f"{c['stage']}/{c['evidence_density']}/{c['separability']}/{c['reach']}"
-            flag = " " if r["detectable"] else "*"
-            print(f"{r['score']:>5}  {flag} {comp:>15}  {r['signal'][:60]}")
-        undet = [r for r in rows if not r["detectable"]]
-        if undet:
-            print(f"\n* {len(undet)} not detectable by any known method. Highest is "
-                  f"{undet[0]['signal'][:50]!r} at {undet[0]['score']} — that is the "
-                  "argument for what to build next, not a row to delete.")
-        print(f"\nScores are out of {MAX_SCORE}, computed from stated components with "
-              "fixed weights. Every component is a prior until backtested against "
-              "closed-won data.")
+            comp = (f"{c['stage']}/{c['contestedness']}/{c['reach']} | "
+                    f"{c['evidence_density']}/{c['separability']}")
+            mark = "" if r["detectable"] else " *"
+            base = " b" if r["needs_baseline"] else ""
+            print(f"{r['value']:>5} {r['detectability']:>7}   {comp:>21}  "
+                  f"{r['signal'][:52]}{mark}{base}")
+
+        build = [r for r in rows if r["detectability"] == 0]
+        weak = [r for r in rows
+                if 0 < r["detectability"] <= DETECT_MAX // 3 and r["value"] >= VALUE_MAX // 2]
+        if build:
+            print(f"\n* {len(build)} worth having and not detectable at all. Highest is "
+                  f"{build[0]['signal'][:46]!r} at value {build[0]['value']}/{VALUE_MAX}. "
+                  "That is the build list, not a set of rows to delete.")
+        if weak:
+            print(f"\n  {len(weak)} more are worth having and only weakly specifiable — "
+                  "high value, low detectability. Sharpening those queries is cheaper "
+                  "than building anything new.")
+        if any(r["needs_baseline"] for r in rows):
+            n = sum(1 for r in rows if r["needs_baseline"])
+            print(f"\n  b = {n} need a stored earlier observation, so they are scored 2 "
+                  "lower today than they will be once snapshots exist. You can read "
+                  "current state on day one; movement takes a second look.")
+        print(f"\nTwo scores because they answer different questions: whether a catch is "
+              f"worth having, and whether you can catch it. Both are priors until "
+              "backtested against closed-won data.")
         return 0
 
     errors, warnings = validate(doc, profile)

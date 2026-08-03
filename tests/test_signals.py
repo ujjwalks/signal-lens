@@ -181,7 +181,7 @@ class Ranking(unittest.TestCase):
         s.pop("query")
         rc, out = run(self.write(doc([s])), "--ranked")
         self.assertEqual(rc, 0, out)
-        self.assertIn("argument for what to build next", out)
+        self.assertIn("build list", out)
 
     def test_the_ranking_output_states_it_is_not_backtested(self):
         rc, out = run(self.write(doc()), "--ranked")
@@ -268,7 +268,7 @@ class WeightCalibration(unittest.TestCase):
                                                    "separability": 1, "reach": 0,
                                                    "contestedness": 0})
         rc, out = run(self.write(doc([buried, contested])), "--json")
-        r = {x["signal"]: x["score"] for x in json.loads(out)["ranked"]}
+        r = {x["signal"]: x["value"] for x in json.loads(out)["ranked"]}
         self.assertGreaterEqual(r["category unaware"], r["crowded mid-stage"],
                                 "contestedness must be able to offset two stages")
 
@@ -304,6 +304,69 @@ class RealRun(unittest.TestCase):
         If it ranked last it would be noise instead."""
         rc, out = run(self.REAL, "--json")
         rows = json.loads(out)["ranked"]
-        top_undet = max(r["score"] for r in rows if not r["detectable"])
-        below = [r for r in rows if r["detectable"] and r["score"] < top_undet]
-        self.assertTrue(below, "no detectable signal ranks below the best undetectable one")
+        top_undet = max(r["value"] for r in rows if not r["detectable"])
+        below = [r for r in rows if r["detectable"] and r["value"] < top_undet]
+        self.assertTrue(below, "no detectable signal is worth less than the best "
+                               "undetectable one — the build list would be empty")
+
+
+class TwoScores(unittest.TestCase):
+    """Detectability and value are reported separately because they answer different
+    questions, and mixing them answered neither: a single combined score correlated
+    with the library's own /10 judgements at Spearman 0.41, and the disagreements were
+    structural rather than noisy.
+
+    After splitting, measured against the same 13 signals: detectability rho +0.60,
+    value rho -0.05. That is worth stating plainly rather than tuning away. The
+    library's /10 is not a clean value ground truth — it bundles "converts well" with
+    "reliably spottable" — so only closed-won data can validate the value axis.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def write(self, d):
+        p = os.path.join(self.tmp.name, "t.json")
+        with io.open(p, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(d))
+        return p
+
+    def test_both_scores_are_reported(self):
+        rc, out = run(self.write(doc()), "--json")
+        row = json.loads(out)["ranked"][0]
+        self.assertIn("value", row)
+        self.assertIn("detectability", row)
+
+    def test_an_undetectable_signal_scores_zero_detectability_not_low(self):
+        """Zero, not a small number: 'cannot be detected' and 'detected badly' are
+        different states, and the first is what phase 3 exists to change."""
+        s = one("no method", method="none_known", observable="none",
+                unspecifiable_because="no public trace exists", disqualifiers=[],
+                rank={"stage": 4, "evidence_density": 0, "separability": 0,
+                      "reach": 0, "contestedness": 1})
+        s.pop("query")
+        rc, out = run(self.write(doc([s])), "--json")
+        row = next(r for r in json.loads(out)["ranked"] if r["signal"] == "no method")
+        self.assertEqual(row["detectability"], 0)
+        self.assertGreater(row["value"], 0, "an undetectable signal can still be worth having")
+
+    def test_a_required_baseline_lowers_detectability_today(self):
+        """You can read current state on day one; movement takes a second look."""
+        now = one("no baseline needed")
+        later = one("needs a baseline", method="state_diff",
+                    baseline={"required": True, "snapshot": "rating", "cadence": "weekly"})
+        rc, out = run(self.write(doc([now, later])), "--json")
+        r = {x["signal"]: x["detectability"] for x in json.loads(out)["ranked"]}
+        self.assertLess(r["needs a baseline"], r["no baseline needed"])
+
+    def test_contestedness_is_not_credit_for_being_invisible(self):
+        """Scoring an undetectable signal 'uncontested' because nobody watches it hands
+        the highest value to the rows nobody can act on. The schema says to score it as
+        if the signal were detectable."""
+        with io.open(os.path.join(ROOT, "scripts", "signals_schema.json"),
+                     encoding="utf-8") as fh:
+            schema = json.load(fh)
+        desc = (schema["properties"]["signals"]["items"]["properties"]["rank"]
+                ["properties"]["contestedness"]["description"])
+        self.assertIn("AS IF THE SIGNAL WERE DETECTABLE", desc)
