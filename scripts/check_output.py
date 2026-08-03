@@ -27,6 +27,30 @@ REQUIRED_COLUMNS = ["signal", "what_you_see", "where", "channel", "why_it_matter
                     "who_the_lead_is", "strength", "false_positive", "detection"]
 MIN_ROWS = 20
 
+# `where` and `strength` are controlled vocabularies, and a real 35-row plan used 25
+# distinct `where` values of which one was canonical — "company announcement plus
+# finance artifact", "tools page, job listing, or public post". Free text there means
+# the next phase cannot group or filter by form, which is the only reason the column
+# exists. Compounds are fine as long as every part is a real value: "post or comment"
+# says something, "public firm post" is just a post with adjectives.
+WHERE_TERMS = {"post", "comment", "profile change", "job listing", "public record",
+               "review", "thread over time"}
+STRENGTH_TERMS = {"strong", "medium", "weak", "n/a"}
+SPLIT_TERMS = re.compile(r"\s*(?:,|/|·|\bor\b|\band\b|\bplus\b)\s*", re.I)
+
+
+def outside_vocab(cell, terms):
+    """Parts of `cell` that are not in `terms`, or [] if it conforms.
+
+    Whole-cell match first, then split. Splitting unconditionally turns "n/a" into
+    "n" and "a" on the slash, and rejects a value that is perfectly legitimate.
+    """
+    whole = (cell or "").strip().lower()
+    if not whole or whole in terms:
+        return []
+    parts = [p.strip().lower() for p in SPLIT_TERMS.split(whole) if p.strip()]
+    return [p for p in parts if p not in terms]
+
 # Phrases that mean the working method leaked into an answer written for a seller. Each
 # was observed in a real run.
 LEAKAGE = re.compile(
@@ -108,7 +132,14 @@ def check(text):
     empty = {c: 0 for c in REQUIRED_COLUMNS if c in idx}
     na_without_reason = 0
     generic_channel = 0
+    bad_where, bad_strength = [], []
     for row in body:
+        w = cell(row, "where")
+        if outside_vocab(w, WHERE_TERMS):
+            bad_where.append(w)
+        st = cell(row, "strength")
+        if outside_vocab(st, STRENGTH_TERMS):
+            bad_strength.append(st)
         for c in empty:
             if not cell(row, c):
                 empty[c] += 1
@@ -130,6 +161,20 @@ def check(text):
                    if c == "false_positive" else
                    "Without this a later phase cannot decide what is buildable"
                    if c == "detection" else "Required by the contract"))
+    if bad_where:
+        uniq = sorted(set(bad_where))
+        bad("error", "where-vocabulary",
+            f"{len(bad_where)} of {n} rows use a `where` outside the vocabulary, "
+            f"{len(uniq)} distinct: {', '.join(map(repr, uniq[:4]))}. Allowed: "
+            f"{' · '.join(sorted(WHERE_TERMS))}. Compounds are fine when every part is "
+            "one of those. Free text here means nothing downstream can group by form, "
+            "which is the only thing this column is for")
+    if bad_strength:
+        uniq = sorted(set(bad_strength))
+        bad("error", "strength-vocabulary",
+            f"{len(bad_strength)} of {n} rows use a `strength` outside "
+            f"{' · '.join(sorted(STRENGTH_TERMS))}: {', '.join(map(repr, uniq[:4]))}")
+
     if na_without_reason:
         bad("warn", "na-rows",
             f"{na_without_reason} n/a rows give no business reason. An unexplained n/a is "

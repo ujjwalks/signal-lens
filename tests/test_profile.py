@@ -239,3 +239,63 @@ class UnansweredPrice(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NamedCompetitors(unittest.TestCase):
+    """A real finboard.ai profile filled competitors.direct with category nouns —
+    "Generic BI tools", "generic FP&A tools", "multi-entity consolidation software;
+    exact named products were not established from the website" — and the 35-row plan
+    built on it lost SIX signals. Every competitor-watching row came back n/a, because
+    there is no changelog to poll, no pricing page to diff and no reviews to read for
+    a category.
+
+    The field looked filled in, so nothing flagged it, and the loss only showed up as
+    six weak rows a reader would skim past.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def build(self, direct, unresolved=None):
+        p = copy.deepcopy(self.base)
+        p["artifacts"]["competitors"]["direct"] = direct
+        if unresolved is not None:
+            p["unresolved"] = unresolved
+        f = os.path.join(self.tmp.name, "c.json")
+        with io.open(f, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(p))
+        return run(f)
+
+    ASKED = [{"field": "artifacts.competitors.direct",
+              "question": "Which named products do you actually lose deals to?",
+              "why_it_matters": "an unnamed competitor set kills a whole signal group"}]
+
+    def test_named_products_pass(self):
+        rc, out = self.build(["Fathom", "LiveFlow", "Cube", "Vena"])
+        self.assertEqual(rc, 0, out)
+
+    def test_the_real_category_nouns_are_rejected(self):
+        rc, out = self.build([
+            "Generic BI tools", "generic FP&A tools",
+            "multi-entity consolidation software; exact named products were not "
+            "established from the website."])
+        self.assertEqual(rc, 1, out)
+        self.assertIn("competitors.direct", out)
+
+    def test_one_real_name_among_categories_is_enough(self):
+        """The check is 'did you find any', not 'is every entry perfect'."""
+        rc, out = self.build(["Generic BI tools", "Fathom"])
+        self.assertEqual(rc, 0, out)
+
+    def test_recording_the_question_downgrades_it_to_a_warning(self):
+        """Same rule as price_band: an honest gap you asked about is not a defect."""
+        rc, out = self.build(["Generic BI tools"], unresolved=self.ASKED)
+        self.assertEqual(rc, 0, out)
+        self.assertIn("competitors.direct", out)
+
+    def test_the_message_says_where_to_look(self):
+        _, out = self.build(["various tools"])
+        for hint in ("/compare", "alternatives", "switched from"):
+            self.assertIn(hint, out)

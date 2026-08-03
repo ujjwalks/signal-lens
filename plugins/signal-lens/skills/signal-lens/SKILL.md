@@ -112,6 +112,10 @@ content role changing hands · public stack disclosure · competitor footprint
 movement · comment-section residue · directory presence. Each needs a **baseline**
 in `detection` — what you compare against, and how often you would look.
 
+**The platform the seller sits on is an incumbent arrangement** — its tier changes,
+limits and deprecations strand every customer at once, and it is the signal most often
+missed because "incumbent" reads as "competitor".
+
 **Three gates:** a count of the seller's severity noun · a date from the text, never the
 crawl · the poster is demand-side and their relation to the money is known.
 

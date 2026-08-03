@@ -46,7 +46,14 @@ cannot see:
   straight off `workarounds[].who_maintains`
 - **Vendor death** — an EOL date, a shutdown, a rebrand, a warranty refused
 - **Broadcast cohort shock** — a price change, recall, stockout or compliance date
-  strands a whole population at once. Detect once, enumerate the cohort
+  strands a whole population at once. Detect once, enumerate the cohort.
+  **The platform the seller sits on is an incumbent arrangement.** This is the one
+  most often missed, because "incumbent" reads as "competitor". If the product
+  attaches to QuickBooks, Shopify, Salesforce, HubSpot, an app store or a payment
+  processor, then that platform's tier changes, limit changes, deprecations and
+  fee rises strand every customer of the shape you sell to, on a dated day, at once
+  — usually the highest-reach signal available to the business. A real finboard.ai
+  run named QuickBooks six times in its own rows and never once watched Intuit
 - **Just churned off something** — decided to leave, not yet decided where to go
 - **Unhappy with a named incumbent** — from any of the three competitor tiers
 
