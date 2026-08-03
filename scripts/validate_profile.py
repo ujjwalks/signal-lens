@@ -157,6 +157,32 @@ def semantic_checks(p):
                              "no threshold. Without one, a count in a post cannot be sorted "
                              "into worth-a-human and not."))
 
+    # --- an unanswered price has to become a question ---
+    # Most businesses keep price off the HTML: a PDF menu, a Toast or Square ordering
+    # page, an image, quote-only. Recording "not stated" and moving on skips the field
+    # rather than answering it, and price is what calibrates the severity noun and sets
+    # the ceiling the buyer already pays. So a non-answer is allowed only if somebody
+    # wrote down the question.
+    band = str((p.get("seller") or {}).get("price_band", "")).strip().lower()
+    NON_ANSWER = re.compile(
+        r"^$|unknown|not stated|not disclosed|not published|not available|not listed|"
+        r"^n/?a$|^tbd$|unclear|no pricing|none found")
+    if NON_ANSWER.search(band):
+        asked = any("price" in str(u.get("field", "")).lower()
+                    or "price" in str(u.get("question", "")).lower()
+                    or "cost" in str(u.get("question", "")).lower()
+                    or "pay" in str(u.get("question", "")).lower()
+                    for u in (p.get("unresolved") or []) if isinstance(u, dict))
+        if not asked:
+            errors.append(("seller.price_band",
+                           f"{band or 'empty'!r}, and nothing in `unresolved` asks about it. "
+                           "Price is rarely in the HTML — check for a PDF rate card or menu, a "
+                           "third-party ordering or booking platform (Toast, Square, ChowNow, "
+                           "Resy, Mindbody), an image, or a marketplace listing. If it is behind "
+                           "a platform, that platform is a vendor they pay and belongs in "
+                           "competitors, not just here. If it is genuinely unavailable, add the "
+                           "question naming where you looked."))
+
     # --- workarounds need a failure condition, because that is the signal ---
     for i, w in enumerate(arts.get("workarounds") or []):
         if isinstance(w, dict):

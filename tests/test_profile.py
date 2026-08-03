@@ -192,5 +192,50 @@ class VocabularyCheckCalibration(unittest.TestCase):
              "attorney wants $8k for the RFE response"])
         self.assertEqual(rc, 0, f"overcorrected — fluent-buyer markets are legitimate\n{out}")
 
+class UnansweredPrice(unittest.TestCase):
+    """Mister O1: the menus are per-location PDFs and the ordering sits behind a
+    platform, so nothing on the site is a price. The skill recorded "not stated" and
+    carried on, which is a skipped field wearing the costume of an answer. Price
+    calibrates the severity noun and sets the ceiling the buyer already pays, so a
+    non-answer is only acceptable when somebody wrote down the question."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def build(self, band, unresolved):
+        p = copy.deepcopy(self.base)
+        p["seller"]["price_band"] = band
+        p["unresolved"] = unresolved
+        f = os.path.join(self.tmp.name, "pb.json")
+        with io.open(f, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(p))
+        return run(f)
+
+    ASKED = [{"field": "seller.price_band",
+              "question": "What does a typical account pay? The menus are per-location PDFs.",
+              "why_it_matters": "decides whether a signal is worth a human's time"}]
+
+    def test_a_shrug_with_no_question_is_rejected(self):
+        for band in ("not stated", "unknown", "n/a", "", "TBD", "not disclosed"):
+            rc, out = self.build(band, [])
+            self.assertEqual(rc, 1, f"{band!r} passed unchallenged\n{out}")
+
+    def test_the_same_gap_with_the_question_recorded_passes(self):
+        rc, out = self.build("not stated", self.ASKED)
+        self.assertEqual(rc, 0, out)
+
+    def test_the_message_names_where_price_actually_hides(self):
+        """A bare 'missing price' would not tell anyone what to go and do."""
+        _, out = self.build("not stated", [])
+        for hint in ("PDF", "Toast", "competitors"):
+            self.assertIn(hint, out)
+
+    def test_a_real_price_band_needs_no_question(self):
+        rc, out = self.build("mid four figures per year", [])
+        self.assertEqual(rc, 0, out)
+
+
 if __name__ == "__main__":
     unittest.main()
