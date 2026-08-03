@@ -78,6 +78,20 @@ def check(text):
     if extra:
         bad("warn", "columns", f"unexpected columns: {', '.join(extra)}")
 
+    # Field count per row. This was missing, and it mattered: in a real 43-row plan
+    # that this checker passed, 29 rows had 10-12 fields instead of 9, because cells
+    # containing commas were not consistently quoted. Everything right of the first
+    # bare comma shifts, so `detection` was carrying `strength` and `false_positive`
+    # content. The header was correct and the row count was fine, so nothing caught it.
+    ragged = [(i, len(r)) for i, r in enumerate(body, start=2) if len(r) != len(header)]
+    if ragged:
+        sample = ", ".join(f"line {i} has {k}" for i, k in ragged[:4])
+        bad("error", "ragged-rows",
+            f"{len(ragged)} of {len(body)} rows do not have {len(header)} fields "
+            f"({sample}). A cell containing a comma must be quoted — otherwise every "
+            "column after it shifts, and the columns a later phase reads end up "
+            "holding some other column's text")
+
     n = len(body)
     if n < MIN_ROWS:
         bad("error", "row-count",

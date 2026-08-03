@@ -30,6 +30,24 @@ Expect several dozen rows for most sellers.
 Put the CSV first. Then **do not use**, then the phrases. Prose commentary goes
 after the CSV, never instead of rows.
 
+## Quote every cell that contains a comma
+
+Not most of them. Every one.
+
+This is the rule that actually broke. A real 43-row plan passed every check it was
+given and **29 of its rows were structurally wrong**: `what_you_see` and `channel`
+were quoted, `why_it_matters` and `false_positive` were not, and those two are the
+most comma-heavy cells there are. *"budget approved, pain proven, and no appetite for
+another big system"* became three fields, and every column after it shifted by two —
+so `detection` ended up holding the `strength` value and `false_positive` held the
+lead. Nothing in the output looked wrong to a reader.
+
+So: wrap any cell containing a comma, a quote, or a newline in `"`, and double any
+internal quote. When in doubt, quote it — quoting a cell that did not need it costs
+nothing, and not quoting one that did corrupts every column to its right.
+
+`scripts/check_output.py` counts fields per row now and will refuse the plan. Run it.
+
 ## Check it before anyone sees it
 
 Write the drafted plan to a file and run, from the skill directory:

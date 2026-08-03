@@ -54,13 +54,39 @@ class RealFixtures(unittest.TestCase):
         self.assertEqual(rc, 1, out)
         self.assertIn("csv-present", out)
 
-    def test_the_output_after_the_fix_passes(self):
-        rc, out = run(os.path.join(FIXTURES, "plan-good.md"))
-        self.assertEqual(rc, 0, out)
-
     def test_the_good_fixture_actually_enumerates(self):
+        """What it was kept for, and this part still holds: 43 rows, not 6."""
         rc, out = run(os.path.join(FIXTURES, "plan-good.md"), "--json")
         self.assertGreaterEqual(json.loads(out)["rows"], 20)
+
+    def test_the_good_fixture_is_structurally_broken(self):
+        """`plan-good.md` was named for passing the checks that existed when it was
+        committed. It does not pass this one, and the file is unmodified so that the
+        defect stays visible.
+
+        29 of its 43 rows carry 10-12 fields instead of 9, because cells containing
+        commas were not consistently quoted. Everything right of the first bare comma
+        shifts, so `detection` — which the next phase reads — ends up holding
+        `strength` and `false_positive` text.
+
+        It is not repaired here on purpose. The overflow can be located (the
+        strong/medium/weak column anchors the alignment in 40 of 43 rows) but not
+        attributed: knowing a row has two extra fields does not tell you which cell
+        they came from. Reconstructing them would be inventing content and calling it
+        a real run.
+        """
+        rc, out = run(os.path.join(FIXTURES, "plan-good.md"))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("ragged-rows", out)
+
+    def test_the_good_fixture_still_passes_every_content_check(self):
+        """The point of the finding: content was fine, structure was not, and only
+        the content was ever checked."""
+        rc, out = run(os.path.join(FIXTURES, "plan-good.md"), "--json")
+        errors = [f["check"] for f in json.loads(out)["findings"]
+                  if f["severity"] == "error"]
+        self.assertEqual(errors, ["ragged-rows"],
+                         f"expected raggedness to be the only error, got {errors}")
 
 
 class ContractRules(unittest.TestCase):

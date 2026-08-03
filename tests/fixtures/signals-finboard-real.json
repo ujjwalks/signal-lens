@@ -1,0 +1,1315 @@
+{
+  "domain": "finboard.ai",
+  "profile": "tests/fixtures/profile-good.json",
+  "signals": [
+    {
+      "signal": "has a quote in hand and is asking strangers to sanity-check it",
+      "library_type": "second opinion / pre-commitment",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "quoted us",
+          "wants $",
+          "is this a fair price",
+          "talk me out of",
+          "am I being overcharged"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting"
+        ],
+        "window_tokens": 30
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "[\\$£€]\\s?[\\d,]{3,}",
+        "date_pattern": "\\d+\\s*(day|week|month)"
+      },
+      "disqualifiers": [
+        "past tense — 'I paid' rather than 'they want', which means the decision is over",
+        "a vendor farming the thread with a counter-quote"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 21,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 4,
+        "evidence_density": 3,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "just cancelled a reporting tool and has not chosen a replacement",
+      "library_type": "just churned off something",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "g2.com/products/{rival}/reviews"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "cancelled our",
+          "ripped out",
+          "moved off",
+          "we are leaving"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting"
+        ],
+        "window_tokens": 15
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)",
+        "date_pattern": "\\d+\\s*(day|week|month)"
+      },
+      "disqualifiers": [
+        "a past-tense war story about a migration finished years ago",
+        "a competitor's employee describing a lost account"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 45,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 3,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "renewal or price uplift on the incumbent reporting tool",
+      "library_type": "clock on the incumbent arrangement",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "g2.com/products/{rival}/reviews"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "renewal came in at",
+          "price went up",
+          "quoted us",
+          "renewal quote"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting"
+        ],
+        "window_tokens": 20
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "[\\$£€]\\s?[\\d,]{3,}",
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a vendor quoting their own price in a sales thread",
+        "someone discussing renewal in the abstract with no figure"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 3,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "an auditor or lender demands consolidated statements they cannot produce",
+      "library_type": "gatekeeper spec you cannot meet",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "auditor wants",
+          "our lender requires",
+          "bank is asking for",
+          "covenant requires"
+        ],
+        "all_of": [
+          "consolidated"
+        ],
+        "window_tokens": 25
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)",
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "an auditor describing what they generally require"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 45,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "hiring for the pain — a req naming multi-entity consolidation",
+      "library_type": "hiring for the pain",
+      "surface": [
+        "boards.greenhouse.io",
+        "jobs.lever.co",
+        "linkedin.com/jobs",
+        "the company's own /careers page"
+      ],
+      "observable": "job_posting",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "multi-entity",
+          "multi entity",
+          "intercompany elimination",
+          "consolidat"
+        ],
+        "all_of": [
+          "QuickBooks"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)",
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "an agency reposting a req they do not own",
+        "a req at an accounting firm hiring to serve clients — supply side"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "the hiring manager now, and the new hire on their start date",
+        "contactable": "yes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "CPA licence or ProAdvisor certification approaching renewal",
+      "library_type": "certification, licence or registry state",
+      "surface": [
+        "state CPA board licence registers",
+        "Intuit ProAdvisor directory"
+      ],
+      "observable": "public_record",
+      "method": "date_arrival",
+      "query": {
+        "field": "expiry_date",
+        "threshold": "within 90 days"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a lapse that means they left the profession rather than needing tooling"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the licence holder, or the firm that paid for it",
+        "contactable": "yes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 2,
+        "reach": 2,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "does not know consolidation software exists",
+      "library_type": "unaware the category exists",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "r/excel",
+        "r/smallbusiness"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "is there software for this",
+          "does everyone just use excel",
+          "how do people do this",
+          "am I doing this the hard way"
+        ],
+        "all_of": [
+          "entities"
+        ],
+        "window_tokens": 30
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "someone who names a tool later in the thread, so is solution-aware"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 0,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "appears on, or vanishes from, the QuickBooks App Store category",
+      "library_type": "marketplace listing state",
+      "surface": [
+        "quickbooks.intuit.com/app/apps/home (QuickBooks App Store)"
+      ],
+      "observable": "listing_field",
+      "method": "state_diff",
+      "query": {
+        "field": "category_listing",
+        "compare_to": "previous snapshot"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a temporary delisting during a platform review"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "apps listed under reporting/consolidation",
+        "cadence": "monthly"
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "the vendor listed or delisted, and by implication their installed base",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 2,
+        "reach": 1,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "unhappy with a named incumbent, in a review rather than a thread",
+      "library_type": "unhappy with a named incumbent",
+      "surface": [
+        "g2.com/products/{rival}/reviews",
+        "capterra.com/p/{rival}/reviews"
+      ],
+      "observable": "review_text",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "still export to excel",
+          "cannot handle intercompany",
+          "does not support multiple entities",
+          "had to build a workaround"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "a competitor writing a review of a rival",
+        "an incentivised review from a vendor campaign"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 180,
+      "yields": {
+        "entity": "the reviewer's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "close takes longer than the board will accept, with a number attached",
+      "library_type": "counted failed attempt loop",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "linkedin.com posts by controllers and CFOs"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "close takes",
+          "still closing",
+          "days to close",
+          "weeks to close"
+        ],
+        "all_of": [
+          "entities"
+        ],
+        "window_tokens": 25
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(day|week|month)",
+        "date_pattern": "\\d+\\s*(day|week|month)"
+      },
+      "disqualifiers": [
+        "a student or junior asking how close works",
+        "a consultant using the statistic as marketing"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 2,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "re-keying trial balances by hand every month",
+      "library_type": "doing it the hard way",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "re-key",
+          "rekeying",
+          "copy paste the trial balance",
+          "paste each entity",
+          "manual consolidation"
+        ],
+        "window_tokens": 25
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "a bookkeeper describing their service offering",
+        "someone who has already bought a tool and is describing the before"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "the consolidation workbook broke when an entity was added",
+      "library_type": "outgrown their setup",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "r/excel"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "workbook breaks",
+          "mapping tab",
+          "tabs are a mess",
+          "added another entity",
+          "links keep breaking"
+        ],
+        "window_tokens": 25
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "an Excel enthusiast asking a modelling question they intend to solve in Excel",
+        "a template vendor advertising a fix"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "someone totals what the outsourced consolidation actually costs",
+      "library_type": "cost of the workaround surfacing",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA",
+        "r/smallbusiness"
+      ],
+      "observable": "comment",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "we pay",
+          "a month for",
+          "charges us",
+          "quoted us"
+        ],
+        "near": [
+          "outsourced",
+          "accounting firm",
+          "fractional CFO",
+          "bookkeeper"
+        ],
+        "window_tokens": 20
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "[\\$£€]\\s?[\\d,]{3,}"
+      },
+      "disqualifiers": [
+        "the firm quoting its own rate card",
+        "a rate discussion in a market with different labour costs"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 120,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "a competitor sunsets or deprecates multi-entity support",
+      "library_type": "vendor death",
+      "surface": [
+        "{rival}.com/changelog",
+        "{rival}.com/status",
+        "{rival} release notes"
+      ],
+      "observable": "changelog_entry",
+      "method": "state_diff",
+      "query": {
+        "field": "changelog",
+        "compare_to": "previous snapshot",
+        "any_of": [
+          "deprecat",
+          "sunset",
+          "end of life",
+          "no longer supported"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a routine deprecation of an unrelated feature",
+        "a wording change with no behavioural effect"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "changelog and status page",
+        "cadence": "weekly"
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "that competitor's multi-entity customers — enumerable only via reviews or job ads",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 1,
+        "separability": 2,
+        "reach": 2,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "a competitor's pricing page changes its entity limits",
+      "library_type": "competitor footprint movement",
+      "surface": [
+        "{rival}.com/pricing"
+      ],
+      "observable": "public_record",
+      "method": "state_diff",
+      "query": {
+        "field": "pricing_page",
+        "compare_to": "previous snapshot"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)",
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a cosmetic page redesign with no limit change"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "plan tiers and entity limits",
+        "cadence": "weekly"
+      },
+      "freshness_days": 60,
+      "yields": {
+        "entity": "customers of that competitor sitting just above the new limit",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 2,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "Intuit tier change or feature removal strands a cohort",
+      "library_type": "broadcast cohort shock",
+      "surface": [
+        "quickbooks.intuit.com/pricing",
+        "quickbooks.intuit.com/learn-support"
+      ],
+      "observable": "public_record",
+      "method": "date_arrival",
+      "query": {
+        "field": "pricing_page",
+        "compare_to": "previous snapshot"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)",
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a regional price change that does not touch entity limits"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "pricing and plan limits",
+        "cadence": "monthly"
+      },
+      "freshness_days": 45,
+      "yields": {
+        "entity": "every multi-entity QuickBooks customer on the affected tier — a cohort you must enumerate separately",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 2,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "review text naming the manual workaround",
+      "library_type": "review content naming the workaround",
+      "surface": [
+        "quickbooks.intuit.com/app/apps/home (QuickBooks App Store)",
+        "g2.com/products/{rival}/reviews",
+        "capterra.com/p/{rival}/reviews"
+      ],
+      "observable": "review_text",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "still export",
+          "manual",
+          "spreadsheet",
+          "workaround",
+          "by hand"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting",
+          "consolidation"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "a review about onboarding rather than the product",
+        "an incentivised review"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 180,
+      "yields": {
+        "entity": "the reviewer's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "asking what multi-entity consolidation costs",
+      "library_type": "asking what it costs",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "how much does",
+          "what do you pay for",
+          "ballpark cost",
+          "pricing for consolidation"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting",
+          "consolidation"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "[\\$£€]\\s?[\\d,]{3,}"
+      },
+      "disqualifiers": [
+        "a vendor answering with their own pricing",
+        "a student researching the market"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 30,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "asking for a recommendation for consolidating several QuickBooks files",
+      "library_type": "asking for a recommendation",
+      "surface": [
+        "r/Accounting",
+        "r/QuickBooks",
+        "r/bookkeeping",
+        "r/CPA",
+        "r/FPandA"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "any recommendations",
+          "what do you all use",
+          "looking for something that",
+          "how does everyone handle intercompany"
+        ],
+        "all_of": [
+          "QuickBooks"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "a ProAdvisor answering on a client's behalf — identical vocabulary, no budget",
+        "a vendor seeding the question"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 30,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "a job ad or conference talk names the incumbent stack",
+      "library_type": "public stack disclosure",
+      "surface": [
+        "boards.greenhouse.io",
+        "linkedin.com/jobs",
+        "conference agendas and speaker pages"
+      ],
+      "observable": "job_posting",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "experience with"
+        ],
+        "near": [
+          "Fathom",
+          "LiveFlow",
+          "Cube",
+          "Vena",
+          "Spotlight Reporting",
+          "NetSuite",
+          "Sage Intacct"
+        ],
+        "window_tokens": 12
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a nice-to-have listed among twenty tools",
+        "an agency req listing every tool in the market"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the employer",
+        "contactable": "yes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 2,
+        "separability": 2,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "the person who built the consolidation workbook is leaving",
+      "library_type": "continuity break",
+      "surface": [
+        "linkedin.com/in/{person} (title field)"
+      ],
+      "observable": "profile_field",
+      "method": "state_diff",
+      "query": {
+        "field": "job_title",
+        "compare_to": "previous snapshot",
+        "any_of": [
+          "Controller",
+          "Senior Accountant",
+          "Financial Analyst"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a promotion inside the same company, where the workbook goes with them",
+        "a recruiter's post about the role rather than the person"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "current title and employer",
+        "cadence": "weekly"
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the employer, and specifically whoever inherits the workbook",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "a new controller arrives with a mandate to change something",
+      "library_type": "new person in a buying role",
+      "surface": [
+        "linkedin.com/in/{person} (title + employer)"
+      ],
+      "observable": "profile_field",
+      "method": "state_diff",
+      "query": {
+        "field": "title_and_employer",
+        "compare_to": "previous snapshot",
+        "any_of": [
+          "Controller",
+          "VP Finance",
+          "Head of Finance"
+        ]
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "an internal promotion, where the budget conversation already went the wrong way"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "title and employer",
+        "cadence": "weekly"
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "the new hire, and the CFO who signs",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 0
+      }
+    },
+    {
+      "signal": "competitor's app-store rating falls over a quarter",
+      "library_type": "rating trajectory break",
+      "surface": [
+        "quickbooks.intuit.com/app/apps/home (QuickBooks App Store)",
+        "g2.com/products/{rival}/reviews"
+      ],
+      "observable": "rating_field",
+      "method": "state_diff",
+      "query": {
+        "field": "average_rating",
+        "compare_to": "snapshot 90 days prior",
+        "threshold": "drop of 0.3 or more"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a platform-wide scoring change that moved every vendor on the same date",
+        "one viral review distorting a small denominator"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "rating and review count",
+        "cadence": "weekly"
+      },
+      "freshness_days": 90,
+      "yields": {
+        "entity": "that competitor's customers — reachable only through the reviews themselves",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 2,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 2,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "building the consolidation themselves in SQL or a script",
+      "library_type": "building it themselves",
+      "surface": [
+        "github.com search",
+        "r/dataengineering",
+        "r/Accounting"
+      ],
+      "observable": "post_body",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "built our own",
+          "wrote a script",
+          "python script to consolidate",
+          "dbt model for"
+        ],
+        "all_of": [
+          "consolidat"
+        ],
+        "window_tokens": 25
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "the build announcement itself — approaching here reliably produces 'why would I pay'; key a timer to the SECOND breakage post instead"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 270,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "questions underneath a competitor's tutorial content",
+      "library_type": "comment-section residue",
+      "surface": [
+        "youtube.com comments on {rival} tutorials",
+        "{rival}.com/blog comments"
+      ],
+      "observable": "comment",
+      "method": "keyword",
+      "query": {
+        "any_of": [
+          "what if you have",
+          "does this work with",
+          "how would you handle"
+        ],
+        "all_of": [
+          "entities"
+        ],
+        "window_tokens": 20
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": false,
+        "numeric_pattern": "\\d+\\s*(entit|compan|subsidiar|LLC|files)"
+      },
+      "disqualifiers": [
+        "the vendor answering in their own comment section"
+      ],
+      "baseline": {
+        "required": false
+      },
+      "freshness_days": 120,
+      "yields": {
+        "entity": "the poster's employer",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 1,
+        "evidence_density": 1,
+        "separability": 1,
+        "reach": 0,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "a firm's client-facing content stops after years of cadence",
+      "library_type": "content cadence break",
+      "surface": [
+        "the firm's /blog",
+        "their newsletter archive"
+      ],
+      "observable": "content_cadence",
+      "method": "state_diff",
+      "query": {
+        "field": "publication_dates",
+        "compare_to": "prior 12-month cadence",
+        "threshold": "gap exceeding 3x the median interval"
+      },
+      "must_also_have": {
+        "count_of": "legal entities",
+        "demand_side": true,
+        "date_from_text": true,
+        "date_pattern": "(19|20)\\d{2}|\\d{1,2}[/-]\\d{1,2}|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+      },
+      "disqualifiers": [
+        "a deliberate strategy change",
+        "a site migration that moved the feed"
+      ],
+      "baseline": {
+        "required": true,
+        "snapshot": "post dates",
+        "cadence": "monthly"
+      },
+      "freshness_days": 180,
+      "yields": {
+        "entity": "the firm — this signals capacity loss, not consolidation need specifically",
+        "contactable": "sometimes"
+      },
+      "rank": {
+        "stage": 0,
+        "evidence_density": 1,
+        "separability": 0,
+        "reach": 0,
+        "contestedness": 2
+      }
+    },
+    {
+      "signal": "the outsourced accounting firm resigns the engagement",
+      "library_type": "continuity break",
+      "surface": [
+        "no public surface"
+      ],
+      "observable": "none",
+      "method": "none_known",
+      "unspecifiable_because": "the resignation is private between firm and client and leaves no public trace until the next filing slips, by which point the client has already appointed a replacement. Would become detectable if filing-delay data were polled per entity",
+      "must_also_have": {
+        "count_of": "",
+        "date_from_text": false,
+        "demand_side": true
+      },
+      "disqualifiers": [],
+      "baseline": {
+        "required": false
+      },
+      "yields": {
+        "entity": "the client company, if it could be identified at all",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 4,
+        "evidence_density": 0,
+        "separability": 0,
+        "reach": 0,
+        "contestedness": 1
+      }
+    },
+    {
+      "signal": "the controller quietly decides the workbook is no longer safe",
+      "library_type": "outgrown their setup",
+      "surface": [
+        "no public surface"
+      ],
+      "observable": "none",
+      "method": "none_known",
+      "unspecifiable_because": "the decision precedes any public utterance by weeks and is usually only voiced internally. Nothing is posted, listed or filed. Highest-value moment in the cycle and there is currently no observable at all",
+      "must_also_have": {
+        "count_of": "",
+        "date_from_text": false,
+        "demand_side": true
+      },
+      "disqualifiers": [],
+      "baseline": {
+        "required": false
+      },
+      "yields": {
+        "entity": "the controller",
+        "contactable": "no"
+      },
+      "rank": {
+        "stage": 3,
+        "evidence_density": 0,
+        "separability": 0,
+        "reach": 0,
+        "contestedness": 1
+      }
+    }
+  ]
+}
