@@ -68,11 +68,19 @@
             "required": ["what", "fails_when"],
             "properties": {
               "what": {"type": "string", "minLength": 5},
+              "verb": {
+                "type": "string",
+                "description": "What they physically do to it, weekly. Re-key, paste, reconcile, chase, re-upload. This is the word that appears in their post — 'the artifact' is what you search for, the verb is how you recognise them."
+              },
               "who_maintains": {
                 "type": "string",
                 "description": "Named person or role. When they leave, the workaround dies — the continuity-break signal."
               },
-              "fails_when": {"type": "string", "minLength": 10}
+              "fails_when": {"type": "string", "minLength": 10},
+              "time_to_failure": {
+                "type": "string",
+                "description": "Roughly how long it holds before it breaks — 'about eighteen months', 'one acquisition'. This is what makes the clock signal derivable: without a horizon you know the workaround fails but not when to expect anyone to say so."
+              }
             }
           }
         },

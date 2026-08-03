@@ -43,6 +43,21 @@ UNCOUNTABLE = {
     "accuracy", "visibility", "insight", "data", "information", "quality",
 }
 
+# Search filler. These attach to any query in any market and are not evidence that
+# anyone translated anything. Without this set the whole check is defeated by adding one
+# word: "reverse ETL" is caught, "looking for a reverse ETL tool" is not, and the second
+# is what a model actually writes when it skips the translation.
+FILLER = {
+    "best", "top", "good", "great", "cheap", "cheapest", "free", "looking", "look",
+    "tool", "tools", "software", "platform", "platforms", "solution", "solutions",
+    "vendor", "vendors", "alternative", "alternatives", "option", "options",
+    "pricing", "price", "cost", "costs", "review", "reviews", "compare", "comparison",
+    "versus", "recommend", "recommendation", "recommendations", "help", "need",
+    "want", "use", "using", "used", "anyone", "anybody", "someone", "people",
+    "advice", "suggestions", "thoughts", "experience", "experiences", "worth",
+    "system", "systems", "service", "services", "app", "apps", "stack",
+}
+
 # Words too generic to count as evidence that buyer language was actually derived.
 STOPWORDS = {
     "the", "a", "an", "and", "or", "for", "to", "of", "in", "on", "with", "my", "our",
@@ -108,7 +123,10 @@ def semantic_checks(p):
     buyer = vocab.get("buyer_language") or []
     if seller and buyer:
         s_tok = set().union(*(tokens(x) for x in seller)) if seller else set()
-        derived = [b for b in buyer if tokens(b) and not (tokens(b) - s_tok)]
+        # A phrase counts as translated only if something specific survives removing the
+        # seller's vocabulary AND generic search filler. "best <seller category> tool"
+        # must not pass merely because "best" and "tool" are not on the seller's website.
+        derived = [b for b in buyer if tokens(b) and not (tokens(b) - s_tok - FILLER)]
         if derived:
             ratio = len(derived) / len(buyer)
             msg = (f"{len(derived)} of {len(buyer)} buyer_language entries use only words "
@@ -138,6 +156,32 @@ def semantic_checks(p):
             warnings.append(("artifacts.severity_noun.material_at",
                              "no threshold. Without one, a count in a post cannot be sorted "
                              "into worth-a-human and not."))
+
+    # --- an unanswered price has to become a question ---
+    # Most businesses keep price off the HTML: a PDF menu, a Toast or Square ordering
+    # page, an image, quote-only. Recording "not stated" and moving on skips the field
+    # rather than answering it, and price is what calibrates the severity noun and sets
+    # the ceiling the buyer already pays. So a non-answer is allowed only if somebody
+    # wrote down the question.
+    band = str((p.get("seller") or {}).get("price_band", "")).strip().lower()
+    NON_ANSWER = re.compile(
+        r"^$|unknown|not stated|not disclosed|not published|not available|not listed|"
+        r"^n/?a$|^tbd$|unclear|no pricing|none found")
+    if NON_ANSWER.search(band):
+        asked = any("price" in str(u.get("field", "")).lower()
+                    or "price" in str(u.get("question", "")).lower()
+                    or "cost" in str(u.get("question", "")).lower()
+                    or "pay" in str(u.get("question", "")).lower()
+                    for u in (p.get("unresolved") or []) if isinstance(u, dict))
+        if not asked:
+            errors.append(("seller.price_band",
+                           f"{band or 'empty'!r}, and nothing in `unresolved` asks about it. "
+                           "Price is rarely in the HTML — check for a PDF rate card or menu, a "
+                           "third-party ordering or booking platform (Toast, Square, ChowNow, "
+                           "Resy, Mindbody), an image, or a marketplace listing. If it is behind "
+                           "a platform, that platform is a vendor they pay and belongs in "
+                           "competitors, not just here. If it is genuinely unavailable, add the "
+                           "question naming where you looked."))
 
     # --- workarounds need a failure condition, because that is the signal ---
     for i, w in enumerate(arts.get("workarounds") or []):

@@ -41,21 +41,122 @@ resolve.
 
 ## Reading the site
 
-Read for what buyers *do*, not for what the company *says*. The useful pages are
-usually not the homepage: pricing tells you the severity noun, customer stories
-name the workaround, careers pages name the person currently doing it by hand, and
-docs or changelogs tell you what breaks.
+Read for what buyers *do*, not for what the company *says*.
+
+**A homepage is a positioning document. Almost nothing you need is on it.** It is
+written to be liked, so it carries the seller's vocabulary and hides the price, the
+workaround and the competitor. Fetching it and stopping is the single most common
+way this step produces a profile that validates and is useless.
+
+### Go and find the pages
+
+Do not wait for the homepage to link them. Navigation is often JavaScript, or the
+link is in a footer that did not render, or the page exists and is simply not
+linked. **Try the conventional path directly.**
+
+| Looking for | Try |
+|---|---|
+| Price, and the severity noun | `/pricing` `/plans` `/rates` `/menu` `/order` `/order-online` `/book` |
+| The workaround, in a customer's own words | `/customers` `/case-studies` `/stories` `/testimonials` |
+| **Who does it by hand today** — the best page on most sites | `/careers` `/jobs` `/about/careers` and any ATS link (Greenhouse, Lever, Ashby) |
+| What breaks, and how often | `/docs` `/changelog` `/status` `/releases` `/integrations` |
+| Scale, and whether *locations* is the severity noun | `/locations` `/stores` `/find-us` |
+| Named competitors | `/compare` `/vs` `/alternatives` `/migrate` |
+| Everything, enumerated | `/sitemap.xml` — the reliable way to see what exists. Also `/robots.txt`, which usually names the sitemap |
+
+Reach for `/sitemap.xml` early when the homepage is thin. It is a list of every page
+the site admits to having, and it costs one fetch.
+
+A job posting is worth more than any marketing page. *"Senior Accountant —
+multi-entity consolidation experience required"* names the pain, the count and the
+budget in a document the company wrote about itself, with no intention of
+persuading you.
 
 Every inferred field carries **the value, how sure you are, and where you saw it**.
 An artifact you cannot point at is a guess. Where the site does not say, write that
 it does not say and put it in `unresolved` — that is a finding about the site, not
 a gap to fill with a plausible sentence.
 
+### When the price is not on the page
+
+Most businesses do not put prices in HTML text, and the profile is wrong without
+them: price calibrates the severity noun, and the tier-three competitor's rate is
+the ceiling the buyer is already paying. `price_band: "not stated"` with nothing
+else is a skipped field, not an answer.
+
+Look in this order before giving up:
+
+| Where it hides | What to do |
+|---|---|
+| **A PDF** — menu, rate card, price list, prospectus, often one per location or region | Fetch and read it. Look under `/uploads/`, `/wp-content/`, `/files/`, or linked from a *menu* / *pricing* / *rates* page |
+| **A third-party ordering or booking platform** — Toast, Square, ChowNow, Olo, DoorDash, Resy, OpenTable, Mindbody, Calendly | Follow the link. The prices live on that platform, not on the site |
+| **An image** — a photographed menu, a price table exported as PNG | Read it if the tooling allows; if not, say which image |
+| **Quote-only** — "contact us", "request a demo", "get a quote" | Never invent a band. Quote-only is itself a finding about how they sell |
+| **A marketplace or directory** — Amazon, G2, Capterra, Yelp, Angi, a franchise disclosure | Third parties routinely publish the number the vendor will not |
+
+### The platform is not an obstacle. It is the finding.
+
+This is the part worth getting right, because it inverts a dead end into the most
+valuable thing on the page.
+
+If a restaurant's ordering runs through Toast, Toast is not in your way. Toast is:
+
+- a **vendor they pay**, which belongs in `competitors.direct` — a tier-one entry
+  you would never have found in the copy
+- a **workaround** in artifact A wherever the menu is a document someone maintains
+  and re-uploads by hand
+- a **broadcast cohort shock** waiting to happen: when a platform changes its fee
+  structure, every business on it is stranded on the same day, which is among the
+  highest-yield signals in the library
+
+So write it into `artifacts`, not only into `unresolved`. *"I could not read the
+price because it is on Toast"* is a sentence containing a vendor relationship, a
+whole cohort, and a renewal date.
+
+**Per-location price documents are a severity reading.** Fifteen location-specific
+menu PDFs says the severity noun is probably *locations*, and that somebody
+maintains fifteen documents by hand — artifact A, already written down for you.
+Compare their upload paths: a menu under `/uploads/2019/` sitting beside a wine
+list under `/uploads/2026/03/` suggests two things maintained on very different
+cadences, and the stale one is the workaround that is failing. Treat that as a lead
+to check with the user, not a proven fact — a file can be replaced in place without
+its path ever changing.
+
+**When you genuinely cannot read it**, put it in `unresolved` naming *the specific
+place you looked and what you would need* — "the menu is a per-location PDF I could
+not fetch; the Miami one is at `<url>`" — never a bare "pricing unknown". A specific
+question gets an answer; a vague one gets a shrug.
+
+### If a critical field is still empty, ask
+
+Searching has a floor. When you have tried the paths above and a field the output
+depends on is still empty, **stop and ask the user.** Do not infer it, do not write
+a plausible sentence, and do not proceed quietly with a gap.
+
+These are the fields worth interrupting for, because each one changes the answer:
+
+| Field | What goes wrong without it |
+|---|---|
+| `seller.price_band` | No way to say whether a signal is worth a human's time or only worth a list |
+| `artifacts.severity_noun` | Every signal fails the COUNT gate in step 3, because there is no right noun to count |
+| `artifacts.workarounds[].fails_when` | The arrangement-breaking group — the highest-yield signals — cannot be derived at all |
+| `competitors.the_person_they_pay` | No price ceiling, and you miss the tier that yields most |
+| `seller.industry` | Step 3 cannot look up what actually fires in this market and falls back to averages |
+| `seller.motion` | Step 5 names the wrong lead wherever employer and individual differ |
+
+Ask them together, in one short block, in your own words, and say why each matters.
+Cap it at about four — pick the ones that change the output most. Then write the
+answers into the profile and re-run the validator.
+
+If the user does not know either, keep the entry in `unresolved` rather than
+deleting it, and mark every signal that depended on it as resting on an assumption.
+**An assumption you named is a finding. An assumption you buried is a defect.**
+
 ## The five artifacts
 
 | | |
 |---|---|
-| **A. Workaround inventory** → `artifacts.workarounds` | For each way buyers cope: the **artifact** (a concrete noun they can see, open or photograph), **who maintains it**, and the condition under which it **fails**. The failure condition is the signal — a workaround recorded without one contributes nothing to step 3 |
+| **A. Workaround inventory** → `artifacts.workarounds` | For each way buyers cope: the **artifact** (a concrete noun they can see, open or photograph), the **verb** they perform on it weekly (*re-key, paste, reconcile, chase*) — that verb is how you recognise them in a post — **who maintains it**, the condition under which it **fails**, and roughly **how long it holds first**. The failure condition is the signal and the horizon is what makes the clock derivable; a workaround recorded without either contributes nothing to step 3 |
 | **B. Competitor set, three tiers** → `artifacts.competitors` | Paid products · the free or manual substitute (usually the real incumbent) · **the person they pay to do it** — the CPA firm, the freelancer, the agency, the VA. Tier three never appears on a website, is a paid competitor in half of all cases, sets the price ceiling, and their departure is a signal |
 | **C. The countable severity noun** → `artifacts.severity_noun` | The one noun whose count decides whether a post is worth nothing or five figures — entities, GB/month, ad spend, doors, tonnage, priority date. It must be countable: "complexity" and "time" cannot appear as an integer in somebody's post, so no signal could carry the count step 3 requires |
 | **D. Vocabulary split** → `artifacts.vocabulary` | The same complaint in the seller's register and the buyer's. This is the crux of the whole skill, and the validator checks it mechanically because it fails silently |

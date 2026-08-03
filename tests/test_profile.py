@@ -128,5 +128,114 @@ class Rules(unittest.TestCase):
         self.assertEqual(rc, 2, out)
 
 
+
+class VocabularyCheckCalibration(unittest.TestCase):
+    """The check that matters most, and the two ways it can be wrong.
+
+    It shipped defeated by a single filler word: `reverse ETL` was caught but
+    `looking for a reverse ETL tool` was not, and the second is what actually gets
+    written when the translation is skipped. Overcorrecting is the opposite risk —
+    step 1 says explicitly that some markets have fluent buyers whose vocabulary
+    legitimately overlaps the seller's, and rejecting those would contradict it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def run_with_vocab(self, seller, buyer):
+        p = copy.deepcopy(self.base)
+        p["artifacts"]["vocabulary"]["seller_language"] = seller
+        p["artifacts"]["vocabulary"]["buyer_language"] = buyer
+        f = os.path.join(self.tmp.name, "v.json")
+        with io.open(f, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(p))
+        return run(f)
+
+    SELLER = ["composable CDP", "data activation", "reverse ETL",
+              "audience orchestration", "agentic marketing platform"]
+
+    def test_seller_vocabulary_with_filler_is_rejected(self):
+        rc, out = self.run_with_vocab(self.SELLER, [
+            "looking for a reverse ETL tool",
+            "best data activation platform",
+            "composable CDP vs traditional CDP",
+            "audience orchestration tools",
+            "how to do data activation",
+            "reverse ETL pricing",
+        ])
+        self.assertEqual(rc, 1, f"filler words defeated the check again\n{out}")
+
+    def test_genuine_buyer_language_is_accepted(self):
+        rc, out = self.run_with_vocab(self.SELLER, [
+            "getting our warehouse data into facebook ads",
+            "the python script that pushes to braze keeps breaking",
+            "exporting a csv every week just to upload it again",
+            "how do people sync snowflake to hubspot",
+            "our segment bill got insane after we grew",
+            "audiences are always stale by the time the campaign goes out",
+        ])
+        self.assertEqual(rc, 0, out)
+
+    def test_a_fluent_buyer_market_is_not_rejected(self):
+        """Immigration: applicants use the same procedural vocabulary as the firm.
+        Step 1 says to translate posture instead, and calls this legitimate."""
+        rc, out = self.run_with_vocab(
+            ["EB-2 NIW petition", "RFE response", "priority date retrogression",
+             "I-140 filing", "premium processing"],
+            ["got an RFE on prong 2, is this normal",
+             "my priority date retrogressed again",
+             "is premium processing worth it for I-140",
+             "am I being farmed by my attorney",
+             "talk me out of refiling the NIW petition",
+             "attorney wants $8k for the RFE response"])
+        self.assertEqual(rc, 0, f"overcorrected — fluent-buyer markets are legitimate\n{out}")
+
+class UnansweredPrice(unittest.TestCase):
+    """Mister O1: the menus are per-location PDFs and the ordering sits behind a
+    platform, so nothing on the site is a price. The skill recorded "not stated" and
+    carried on, which is a skipped field wearing the costume of an answer. Price
+    calibrates the severity noun and sets the ceiling the buyer already pays, so a
+    non-answer is only acceptable when somebody wrote down the question."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = load(GOOD)
+
+    def build(self, band, unresolved):
+        p = copy.deepcopy(self.base)
+        p["seller"]["price_band"] = band
+        p["unresolved"] = unresolved
+        f = os.path.join(self.tmp.name, "pb.json")
+        with io.open(f, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(p))
+        return run(f)
+
+    ASKED = [{"field": "seller.price_band",
+              "question": "What does a typical account pay? The menus are per-location PDFs.",
+              "why_it_matters": "decides whether a signal is worth a human's time"}]
+
+    def test_a_shrug_with_no_question_is_rejected(self):
+        for band in ("not stated", "unknown", "n/a", "", "TBD", "not disclosed"):
+            rc, out = self.build(band, [])
+            self.assertEqual(rc, 1, f"{band!r} passed unchallenged\n{out}")
+
+    def test_the_same_gap_with_the_question_recorded_passes(self):
+        rc, out = self.build("not stated", self.ASKED)
+        self.assertEqual(rc, 0, out)
+
+    def test_the_message_names_where_price_actually_hides(self):
+        """A bare 'missing price' would not tell anyone what to go and do."""
+        _, out = self.build("not stated", [])
+        for hint in ("PDF", "Toast", "competitors"):
+            self.assertIn(hint, out)
+
+    def test_a_real_price_band_needs_no_question(self):
+        rc, out = self.build("mid four figures per year", [])
+        self.assertEqual(rc, 0, out)
+
+
 if __name__ == "__main__":
     unittest.main()
