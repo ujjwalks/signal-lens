@@ -1,5 +1,20 @@
 # signal-lens — implementation plan
 
+> ## ⚠️ Historical. This describes a direction that was tried and abandoned.
+>
+> Sections 1–10 below plan a **first-party purchase-intent catalogue** — 92 acquisition
+> rows filtered by a relevance router. That was built, measured, and parked. **88 of its
+> 92 rows require a first-party data source** (CRM, orders, billing) that a tool reading
+> public conversations does not have.
+>
+> What shipped instead is in [`SKILL.md`](SKILL.md): a derivation engine for **public
+> conversations**, which emits a CSV of signals with a detection method per row.
+>
+> Sections **11b and 11c** record the pivot and the measurements that forced it, and are
+> the only parts still current. The rest is kept because the evidence in it is real and
+> the next person to propose re-adopting this direction should read what happened.
+
+
 **Status:** draft 3 — evidence-based, adversarially reviewed.
 **Date:** 2026-08-01
 **Repo target:** `github.com/ujjwalks/signal-lens`
