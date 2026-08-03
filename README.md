@@ -254,6 +254,31 @@ which a tool reading public conversations does not have.
 It is kept rather than deleted because those signals become relevant as channels are added.
 Its 16 prohibition classes fed directly into `references/prohibitions.md`.
 
+## Development
+
+```bash
+python3 -m unittest discover -s tests -v          # 46 tests, stdlib only, no deps
+python3 evals/check_output.py <a-plan-the-skill-produced>
+```
+
+`check_output.py` is the one to reach for. Run the skill, save what it produced, check it.
+It verifies the CSV contract, the twenty-row enumeration floor, that every row carries a
+false positive and a detection method, that exclusions are present, that no clearance
+language crept in, and that the working method did not leak into an answer written for a
+seller. Deterministic, no model, no cost.
+
+Every rule in it corresponds to a defect that shipped — and **none was caught by an eval.**
+All were found by someone running the skill and reading the output. `tests/fixtures/` keeps
+both sides of the worst one: the six-signal prose answer a real user got for topmate.io,
+and the 38-row CSV from after the fix.
+
+Of the 46 tests, **20 cover the shipped skill** (output contract, plugin packaging). The
+other 26 cover the parked catalogue and its scorer, which are not part of this skill.
+
+To release: `python3 scripts/bump_version.py <semver> && python3 scripts/sync_plugin.py`.
+The version has to move or installs will not see the change — the Codex plugin cache is
+keyed by it.
+
 ## Licence
 
 Code and skill text: **MIT** ([LICENSE](LICENSE)).
