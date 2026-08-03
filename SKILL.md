@@ -78,7 +78,7 @@ Read each step's file when you reach it. Each one is a page; none is optional.
 |---|---|---|
 | 1 | `references/step-1-profile.md` | First, always. Produces a validated seller profile JSON that every later step reads. **If `./signal-lens/<domain>.json` already exists, this step is a re-check, not a re-derivation.** Writes against `scripts/profile_schema.json`, validated by `scripts/validate_profile.py`. |
 | 2 | `references/step-2-validate.md` | Before deriving any signal, to decide whether the problem is evidenced at all. This step can end the run. |
-| 3 | `references/step-3-signals.md` | To enumerate. Also sends you to `references/signal-library.md` for specimens and to `references/industry-signals.md` for what actually fires in this seller's industry. |
+| 3 | `references/step-3-signals.md` | To enumerate. Sends you to `references/signal-library.md` for specimens, `references/industry-signals.md` for what actually fires in this seller's industry, and `references/presence-signals.md` for what is visible with nobody having said anything. |
 | 4 | `references/step-4-doppelgangers.md` | Once signals exist, before scoring any of them. |
 | 5 | `references/step-5-lead.md` | To decide who the lead is for each signal, which is often not the poster. |
 | 6 | `references/step-6-prohibitions.md` | On the finished list, before writing anything for the seller. Sends you to `references/prohibitions.md`, which is the actual rule set. |
@@ -102,6 +102,13 @@ workaround surfacing · second opinion with a quote in hand · asking what it co
 asking for a recommendation · gatekeeper spec you cannot meet · unaware the category
 exists · new person in a buying role · building it themselves · hiring for the pain ·
 third-party-funded budget.
+
+**And the artifact forms, where nobody said anything:** rating trajectory break ·
+review content naming the workaround · marketplace listing state · certification or
+licence expiring · profile and link-stack fragmentation · content cadence break ·
+content role changing hands · public stack disclosure · competitor footprint
+movement · comment-section residue · directory presence. Each needs a **baseline**
+in `detection` — what you compare against, and how often you would look.
 
 **Three gates:** a count of the seller's severity noun · a date from the text, never the
 crawl · the poster is demand-side and their relation to the money is known.
