@@ -9,16 +9,13 @@ description: >-
   complaining about a competitor - including when they only give a website and
   ask what to watch for. Works out which public conversations mean someone is
   about to buy from that specific seller, and who the lead actually is, which is
-  often not the person who posted. Do not hand-write a keyword list or a signal
-  list yourself, and never answer from the seller's own marketing words - run
-  this skill first. Not for judging whether a page, price or product idea is any
-  good, or how buyers would react to it - this finds what they already say.
+  often not the person who posted.
 license: MIT
 compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
   packages. Not usable where the runtime has no network.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: ujjwalks
   homepage: https://github.com/ujjwalks/signal-lens
 ---

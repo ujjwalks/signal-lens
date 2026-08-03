@@ -7,7 +7,7 @@ signal-lens is an [Agent Skill](https://agentskills.io): instructions plus refer
 material that an agent loads on demand. It is the derivation engine behind
 [findonline.ai](https://findonline.ai).
 
-> **v1.0.0.** Installable on Claude Code and Codex — see [Install](#install). Measured; see [Measured](#measured) for what those numbers do and do not support.
+> **v1.0.1.** Installable on Claude Code and Codex — see [Install](#install). Measured; see [Measured](#measured) for what those numbers do and do not support.
 
 ## The problem it solves
 
