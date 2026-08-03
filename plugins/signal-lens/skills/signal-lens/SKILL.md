@@ -11,14 +11,14 @@ description: >-
   about to buy from that specific seller, and who the lead actually is, which is
   often not the person who posted. Do not hand-write a keyword list or a signal
   list yourself, and never answer from the seller's own marketing words - run
-  this skill first. For how buyers would react to a page or a price, use
-  buyer-lens instead.
+  this skill first. Not for judging whether a page, price or product idea is any
+  good, or how buyers would react to it - this finds what they already say.
 license: MIT
 compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
   packages. Not usable where the runtime has no network.
 metadata:
-  version: "0.5.0"
+  version: "1.0.0"
   author: ujjwalks
   homepage: https://github.com/ujjwalks/signal-lens
 ---
@@ -98,8 +98,10 @@ downstream is built from:
 | **D. Vocabulary split** | The same complaint in the credentialed register and the lay register. If they share tokens, you have not found the lay one |
 | **E. Prohibited bridge** | The most persuasive true sentence the seller could say — and whether they are allowed to say it |
 
-Every inferred field carries what you inferred it from. An artifact you cannot
-evidence is a guess, and guesses at this step propagate into every signal.
+Every inferred field carries **the value, how sure you are, and where you saw it**.
+An artifact you cannot point at is a guess, and a guess here propagates into every
+signal built on it. Where the site does not say, write that it does not say —
+that is a finding about the site, not a gap to fill.
 
 ## Step 2 — Validate the problem before looking for signals
 
@@ -132,6 +134,12 @@ Two traps in the seller's own copy:
 - **Solution-shaped problems.** "Companies lack a unified view of X" describes the
   absence of the product, not a problem anyone had before it existed. Nobody
   wakes up lacking a unified view; they wake up to a number that is wrong.
+
+**Say which row you reached, in one line, even when the answer is obviously yes.**
+"People already pay CPA firms two to three thousand a month to do this by hand"
+is the sentence that makes everything after it credible. Skipping it because the
+answer is easy is how a plan for a real problem reads the same as a plan for an
+imaginary one.
 
 **Refuse at the bottom two.** Say the problem is not yet evidenced outside their
 own marketing, show which of the five rows you could and could not fill, and name
@@ -286,7 +294,7 @@ signal,what_you_see,where,channel,why_it_matters,who_the_lead_is,strength,false_
 | `signal` | short name — *accounting job change*, *renewal quote received* |
 | `what_you_see` | the observable, in the buyer's own words where it is a post |
 | `where` | the form: post · comment · profile change · job listing · public record · review · thread over time |
-| `channel` | the specific surface: `r/accounting`, LinkedIn, a permit register, a status page |
+| `channel` | the **surface**, not the platform. `r/accounting`, a named LinkedIn newsletter, a specific issue tracker, a county permit register, a vendor status page. "LinkedIn" alone is not a channel — it does not tell anyone where to look |
 | `why_it_matters` | the reasoning, so a human can disagree — *a new controller inherits a process they did not build and has ninety days to change it* |
 | `who_the_lead_is` | often not the poster. `none` is a valid answer |
 | `strength` | strong · medium · weak |

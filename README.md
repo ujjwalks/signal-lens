@@ -7,7 +7,7 @@ signal-lens is an [Agent Skill](https://agentskills.io): instructions plus refer
 material that an agent loads on demand. It is the derivation engine behind
 [findonline.ai](https://findonline.ai).
 
-> **Status: v0.1.** Measured once — see [Measured](#measured). Not yet packaged for install.
+> **v1.0.0.** Installable on Claude Code and Codex — see [Install](#install). Measured; see [Measured](#measured) for what those numbers do and do not support.
 
 ## The problem it solves
 
@@ -127,6 +127,18 @@ Worth noting how that was measured. skill-doctor's dry harness scored the same c
 commands or steps you would run — DO NOT execute anything."* It describes a plan, so a row
 count cannot exist in it. Output-shape properties need a wet run; the dry harness measures
 routing and reasoning, not artifacts.
+
+**What the artifact looks like, measured deterministically.** Three real runs on the same
+prompt, checked by `evals/check_output.py` with no model in the loop: **43, 39, 40 rows**,
+CSV header 3/3, contract passed 3/3. That is the claim worth making, because it is the one
+that reproduces.
+
+**A caution on the pass-rate numbers below.** The dry harness swings hard at n=3 — an
+*unchanged* baseline arm moved 44% → 17% between runs, and the skill arm read 96% → 75% →
+67% across three runs of a change that a deterministic before/after showed did not regress
+the output at all (37.7 rows before, 40.7 after). Treat the deltas as directional. The
+trigger numbers are solid and reproduced four times; the pass percentages are not something
+to defend to a decimal.
 
 **Does it survive a question asked sideways?** This is the test that matters, and the
 earlier ones were too kind. They asked *"what buying signals should we watch for in public
