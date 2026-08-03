@@ -114,6 +114,20 @@ translation test, and the two hardest prohibitions. With the floor, the same pro
 **+20 on the body alone**, a 53-point move. A router should degrade to *adequate* when its
 references are unreachable, not to *worse than nothing*.
 
+**Does it enumerate, or summarise?** A real run against topmate.io produced 6 signals
+against ~15 types in the body — prose lets a model compress silently. The output is now a
+CSV with a required header, a row for every type walked (including `n/a` rows with the
+business reason), and a stated floor: *fewer than twenty means you summarised.*
+
+Measured by running it and counting rows, three times: **39, 42, 36.** Header, `n/a` rows,
+false-positive column and do-not-use section present in 3/3.
+
+Worth noting how that was measured. skill-doctor's dry harness scored the same change
+**62%**, missing the row floor 3/3 — because it instructs the agent to *"produce the exact
+commands or steps you would run — DO NOT execute anything."* It describes a plan, so a row
+count cannot exist in it. Output-shape properties need a wet run; the dry harness measures
+routing and reasoning, not artifacts.
+
 **Does it survive a question asked sideways?** This is the test that matters, and the
 earlier ones were too kind. They asked *"what buying signals should we watch for in public
 conversations"* — which names the task. A real user asked *"where can I find buyers"* and

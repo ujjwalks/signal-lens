@@ -18,7 +18,7 @@ compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
   packages. Not usable where the runtime has no network.
 metadata:
-  version: "0.4.0"
+  version: "0.5.0"
   author: ujjwalks
   homepage: https://github.com/ujjwalks/signal-lens
 ---
@@ -275,15 +275,36 @@ about checks or findings, which reads as machinery and is not their language.
 
 ## Step 7 — Output
 
-**Give every signal you found.** Not a shortlist, not a top three. Completeness is
-the job at this stage — something downstream decides what is buildable, and it
-can only choose from what you listed.
+Output a **CSV**, one row per signal, with exactly these columns:
 
-Order them so the list is usable at length: group by the family they came from,
-and within each group put the ones that are easiest to detect first. Say which
-you would start with if asked, but never in place of the full list.
+```
+signal,what_you_see,where,channel,why_it_matters,who_the_lead_is,strength,false_positive,detection
+```
 
-Then **do not use**, then the phrases.
+| Column | |
+|---|---|
+| `signal` | short name — *accounting job change*, *renewal quote received* |
+| `what_you_see` | the observable, in the buyer's own words where it is a post |
+| `where` | the form: post · comment · profile change · job listing · public record · review · thread over time |
+| `channel` | the specific surface: `r/accounting`, LinkedIn, a permit register, a status page |
+| `why_it_matters` | the reasoning, so a human can disagree — *a new controller inherits a process they did not build and has ninety days to change it* |
+| `who_the_lead_is` | often not the poster. `none` is a valid answer |
+| `strength` | strong · medium · weak |
+| `false_positive` | the thing that looks identical and means the opposite |
+| `detection` | what catching it would take — keyword match, profile compared to earlier state, register poll, date arriving, thread watched |
+
+**Every signal type you walked in step 3 gets a row.** If one does not apply to
+this seller, it still gets a row with `n/a` in `what_you_see` and the business
+reason in `why_it_matters`. A type that silently vanishes is indistinguishable
+from one you forgot, and the person filtering later cannot tell which.
+
+A row per *variant*, not per family: "job change" and "promotion into a new
+budget" are two rows, because they are detected differently and mean different
+things. Expect several dozen rows for most sellers. **If you have produced fewer
+than twenty, you have summarised rather than enumerated — go back.**
+
+Put the CSV first. Then **do not use**, then the phrases. Prose commentary goes
+after the CSV, never instead of rows.
 
 - Every figure carries "(assumed)" and the check that would replace it. You have
   no data on this seller's conversion rate.
