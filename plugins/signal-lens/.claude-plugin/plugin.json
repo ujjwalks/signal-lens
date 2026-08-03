@@ -1,7 +1,7 @@
 {
   "name": "signal-lens",
   "description": "Derive the public conversations that mean someone is about to buy from a specific seller, in the buyer's words rather than the seller's.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": {
     "name": "ujjwalks",
     "url": "https://github.com/ujjwalks"

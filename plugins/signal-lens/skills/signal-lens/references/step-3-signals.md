@@ -4,7 +4,7 @@ Enumerate. Do not shortlist. Something downstream filters these by what can
 actually be built; filtering recovers precision, but it can never recover a signal
 you failed to list. A signal left out because it felt marginal is gone for good.
 
-## Read these two first
+## Read these three first
 
 1. `references/industry-signals.md` — look up every value in `seller.industry`.
    It tells you which types actually fire in that market, which are dead there, and
@@ -12,6 +12,24 @@ you failed to list. A signal left out because it felt marginal is gone for good.
    averages and are the wrong number for any specific seller.
 2. `references/signal-library.md` — the specimens, the doppelgängers, the
    strengths, and what was deliberately cut and why.
+3. `references/presence-signals.md` — signals visible with nobody having said
+   anything: ratings, reviews, listings, certifications, profiles, content cadence,
+   the competitor's own footprint.
+
+## Two ways to observe, not two kinds of signal
+
+Most of the library is built on **utterances** — somebody wrote something and you
+match against it. That finds only people who write, ranks by vividness, and gives
+you a crawl timestamp instead of the date the thing happened.
+
+A **state** has none of those problems. A certificate expiring on 14 March is dated,
+verifiable, identical for every observer, and forms a cohort for free.
+
+Many signals have both forms. *Outgrown their setup* is a post; a bio-link page
+carrying four disconnected tools is the same intent as an artifact, and the artifact
+is the better evidence. **Where a signal has an artifact form, write the artifact
+row too** — it is a different `where`, a different `detection`, and often a different
+false positive, so it is a separate row, not a footnote on the utterance one.
 
 ## Walk every type
 
@@ -52,6 +70,32 @@ this group; for most sellers it is larger than the one above:
   the replies tell you who you are against)
 - **Gatekeeper spec you cannot meet** — a third party names the exact capability gap
   in their own words
+
+**Presence and artifacts** — nobody said anything; something is observably in a
+different state than it was. Full treatment in `references/presence-signals.md`:
+
+- **Rating trajectory break** — the movement and its window, never the rating
+- **Review content naming the workaround** — buyers describe the manual process in
+  reviews, unprompted, and almost nobody reads them as evidence
+- **Marketplace listing state** — listed · delisted · out of stock · suspended ·
+  price moved · seller-of-record changed
+- **Certification, licence or registry state** — obtained, expiring, lapsed. Dated by
+  a third party and cohort-forming for free
+- **Profile and link-stack fragmentation** — the workaround visible on the profile
+- **Content cadence break** — continuity break seen from outside
+- **Content role changing hands** — a byline change or a ghostwriter req means the
+  in-house arrangement failed and somebody is now being paid
+- **Public stack disclosure** — a tools page, an affiliate link, a job ad naming the
+  incumbent by name
+- **Competitor footprint movement** — their pricing page, status page, changelog or
+  careers page changed, which strands *their* customers
+- **Comment-section residue** · **directory or listicle presence**
+
+Every row in this group must name **the baseline** in `detection`: what you compare
+against and how often you would look. "They have a 3.9 rating" is a fact; "it fell
+from 4.6 over sixty days" is a signal, and the difference is a snapshot you took
+earlier. Where no baseline exists yet, say so — most of this group starts working in
+month two, and that is worth telling the seller.
 
 **Conditional:** unaware the category exists · new person in a buying role ·
 building it themselves (works on a lag) · hiring for the pain (B2B only) ·

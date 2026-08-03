@@ -22,3 +22,33 @@ signals.
 
 In B2B, name both roles from `seller.buyer` where they differ: the one who feels it
 and the one who signs. A signal that reaches only the first is a signal that stalls.
+
+## Artifact signals: the thing you watch is not the thing you contact
+
+For everything in `references/presence-signals.md`, two entities are in play and they
+are routinely different. Decide both, per signal, and never assume they are the same:
+
+- **The observed entity** — whose artifact changed. The account whose rating fell, the
+  listing that went out of stock, the profile carrying four tools, the competitor whose
+  changelog deprecated something.
+- **The lead** — who you would actually approach.
+
+| Signal | Observed | Lead |
+|---|---|---|
+| A review complaining about a manual process | the reviewer | the **business reviewed** — or on a software review site, the reviewer's **employer** |
+| A rating falling over a quarter | the rated business | the same business |
+| A competitor's changelog deprecating a feature | the **competitor** | never them — the cohort using them, whom you must enumerate by another route |
+| An influencer disclosing their stack | the influencer | depends entirely on the seller: buyer, channel, or neither |
+| A certificate lapsing | the holder | the holder, or their employer where the employer paid |
+
+**Derive it, do not default to it.** The answer comes from `seller.motion` and the
+competitor tiers in the profile, not from who is easiest to find. Two rules that hold
+across sellers:
+
+- **Never make the competitor the lead.** Their footprint moving is evidence about
+  their customers. If you cannot enumerate those customers, the signal is real and
+  unusable — say exactly that rather than quietly retargeting the competitor.
+- **Where the observed entity is a channel** — the influencer, the reviewer with an
+  audience, the person who answers every thread — pitching them is the fastest way to
+  lose them. That is the same rule as the recommender above, and artifact signals
+  surface far more of them.
