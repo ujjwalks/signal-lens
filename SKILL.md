@@ -18,7 +18,7 @@ compatibility: >-
   Requires network access to fetch the seller's website. No third-party Python
   packages. Not usable where the runtime has no network.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   author: ujjwalks
   homepage: https://github.com/ujjwalks/signal-lens
 ---
