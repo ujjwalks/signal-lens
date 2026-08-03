@@ -43,6 +43,15 @@ UNCOUNTABLE = {
     "accuracy", "visibility", "insight", "data", "information", "quality",
 }
 
+# Text that names a category rather than a product. A competitor you cannot navigate
+# to is not a competitor: there is no changelog to poll, no pricing page to diff, no
+# reviews to read.
+PLACEHOLDER = re.compile(
+    r"\b(generic|various|several|assorted|other|misc|unknown|unclear|unnamed|"
+    r"not (established|identified|named|determined|found|listed|specified)|"
+    r"none (found|identified)|tbd|n/?a|category|competitors?|alternatives?|"
+    r"tools?|software|platforms?|vendors?|solutions?|products?|systems?)\b", re.I)
+
 # Search filler. These attach to any query in any market and are not evidence that
 # anyone translated anything. Without this set the whole check is defeated by adding one
 # word: "reverse ETL" is caught, "looking for a reverse ETL tool" is not, and the second
@@ -195,8 +204,36 @@ def semantic_checks(p):
                                  "unnamed. When that person leaves the workaround dies, and "
                                  "that departure is one of the highest-yield signals there is."))
 
-    # --- the tier sellers forget ---
+    # --- named competitors, or an admission that you did not find them ---
+    # A real run produced competitors.direct = ["Generic BI tools", "generic FP&A tools",
+    # "multi-entity consolidation software; exact named products were not established
+    # from the website."] and the plan built on it lost SIX signals — every
+    # competitor-watching row came back n/a, because you cannot poll a changelog, diff a
+    # pricing page or read reviews of a category noun. An unnamed competitor set kills a
+    # whole signal group silently, so it is not allowed to pass as filled in.
     comp = arts.get("competitors") or {}
+    direct = [str(c).strip() for c in (comp.get("direct") or []) if str(c).strip()]
+    named = [c for c in direct if not PLACEHOLDER.search(c)]
+    if direct and not named:
+        asked = any("competitor" in str(u.get("field", "")).lower()
+                    or "competitor" in str(u.get("question", "")).lower()
+                    or "compete" in str(u.get("question", "")).lower()
+                    for u in (p.get("unresolved") or []) if isinstance(u, dict))
+        detail = (f"none of {len(direct)} entries names a product: "
+                  f"{', '.join(map(repr, direct[:3]))}. You cannot poll a changelog, diff "
+                  "a pricing page or read reviews of a category noun, so every "
+                  "competitor-watching signal downstream comes back n/a. Look at "
+                  "/compare, /vs and /alternatives pages, at review-site category "
+                  "listings, and at who customers say they switched from.")
+        if asked:
+            warnings.append(("artifacts.competitors.direct", detail +
+                             " You have recorded the question, so this is a warning."))
+        else:
+            errors.append(("artifacts.competitors.direct", detail +
+                           " If the site genuinely names none, add the question to "
+                           "`unresolved` rather than filling the field with a category."))
+
+    # --- the tier sellers forget ---
     if not [c for c in (comp.get("the_person_they_pay") or []) if str(c).strip()]:
         errors.append(("artifacts.competitors.the_person_they_pay",
                        "empty. Someone is being paid to do this by hand today — a bookkeeper, "

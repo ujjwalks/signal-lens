@@ -79,14 +79,21 @@ class RealFixtures(unittest.TestCase):
         self.assertEqual(rc, 1, out)
         self.assertIn("ragged-rows", out)
 
-    def test_the_good_fixture_still_passes_every_content_check(self):
-        """The point of the finding: content was fine, structure was not, and only
-        the content was ever checked."""
+    def test_the_good_fixture_fails_only_on_structure_never_on_content(self):
+        """The shape of every finding in this file: the content was fine and the
+        structure was not, and only the content was ever checked.
+
+        It failed one structural check when raggedness was added, and three once the
+        column vocabularies were. Each was invisible for as long as nothing looked.
+        """
         rc, out = run(os.path.join(FIXTURES, "plan-good.md"), "--json")
-        errors = [f["check"] for f in json.loads(out)["findings"]
-                  if f["severity"] == "error"]
-        self.assertEqual(errors, ["ragged-rows"],
-                         f"expected raggedness to be the only error, got {errors}")
+        errors = {f["check"] for f in json.loads(out)["findings"]
+                  if f["severity"] == "error"}
+        structural = {"ragged-rows", "where-vocabulary", "strength-vocabulary"}
+        self.assertTrue(errors <= structural,
+                        f"a content check now fails too, which is a different finding: "
+                        f"{sorted(errors - structural)}")
+        self.assertIn("ragged-rows", errors)
 
 
 class ContractRules(unittest.TestCase):
@@ -159,3 +166,60 @@ class ContractRules(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ColumnVocabularies(unittest.TestCase):
+    """`where` and `strength` are controlled vocabularies, and neither was checked.
+
+    A real 35-row finboard.ai plan used 25 distinct `where` values across 35 rows, of
+    which exactly one was canonical: "company announcement plus finance artifact",
+    "tools page, job listing, or public post", "status-page history". Free text there
+    means nothing downstream can group or filter by form, which is the only reason the
+    column exists — and phase 2 reads it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def plan(self, where="post", strength="strong", rows=25):
+        lines = [HEADER]
+        for i in range(rows):
+            lines.append(
+                f'sig_{i},"they said something specific",{where},r/example,'
+                f'"because the arrangement broke",the poster,{strength},'
+                f'"looks the same but is a researcher","keyword match"')
+        p = os.path.join(self.tmp.name, "p.md")
+        with io.open(p, "w", encoding="utf-8") as fh:
+            fh.write("```csv\n" + "\n".join(lines) + "\n```\n\nDo not use: distress.\n")
+        return p
+
+    def test_a_canonical_where_passes(self):
+        rc, out = run(self.plan(where="post"))
+        self.assertEqual(rc, 0, out)
+
+    def test_a_compound_of_valid_terms_passes(self):
+        """"post or comment" says something real and should not be punished."""
+        rc, out = run(self.plan(where="post or comment"))
+        self.assertEqual(rc, 0, out)
+
+    def test_free_text_where_fails(self):
+        rc, out = run(self.plan(where="company announcement plus finance artifact"))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("where-vocabulary", out)
+
+    def test_a_compound_with_one_invalid_part_fails(self):
+        """"public firm post" is a post with adjectives, and adjectives do not group."""
+        rc, out = run(self.plan(where="job listing or public firm post"))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("where-vocabulary", out)
+
+    def test_strength_outside_the_vocabulary_fails(self):
+        rc, out = run(self.plan(strength="n/a — excluded"))
+        self.assertEqual(rc, 1, out)
+        self.assertIn("strength-vocabulary", out)
+
+    def test_plain_na_strength_is_allowed(self):
+        """Excluded rows have no strength, and saying so is legitimate."""
+        rc, out = run(self.plan(strength="n/a"))
+        self.assertEqual(rc, 0, out)
