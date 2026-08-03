@@ -11,20 +11,31 @@ WHY THE RANK IS COMPUTED HERE RATHER THAN WRITTEN BY THE MODEL.
 
 A model writing `strong` in a column is unfalsifiable, and this repo has already
 established that every strength figure is a prior until backtested. So the spec states
-four components and this script derives the score from them with fixed weights. The
+five components and this script derives the score from them with fixed weights. The
 model cannot assert a rank; it has to state what produces one, and a reader who
 disagrees can argue with a component rather than with a vibe.
 
 The weights are a judgement, stated in one place, and are not measured. They are:
 
-    stage             x3   how close the observable sits to a decision. The library's
-                           highest-scoring signal is the latest-stage one, so this
-                           carries the most weight.
-    evidence_density  x3   how many of {count, date, named incumbent} the query
-                           REQUIRES. This is what separates venting from intent.
+    stage             x2   how close the observable sits to a decision.
+    evidence_density  x3   how many of {numeric_pattern, date_pattern, query.near} the
+                           spec ENFORCES. This is what separates venting from intent.
     separability      x2   whether the doppelganger can be expressed as a rule. Low
                            separability caps precision however good the query is.
     reach             x1   whether one detection enumerates a cohort.
+    contestedness     x2   how little competition is already fishing this signal.
+
+Two of those were corrected after the first real run, against finboard.ai, produced a
+ranking that was visibly wrong in two ways:
+
+  - `count_of` was populated on 26 of 26 detectable specs, so it contributed 1 to every
+    density and discriminated nothing. Density was really measuring two things on a
+    0-2 range while being reported out of 3. It now counts `numeric_pattern`, a regex
+    that has to contain a digit class, so the COUNT gate costs something to claim.
+  - stage at x3 buried the only uncontested volume in the market. "Does not know this
+    category exists" ranked 27th of 28, while the library calls that type the one place
+    with no competition at all. `contestedness` now carries its own weight, and stage
+    dropped to x2.
 
     python3 scripts/validate_signals.py signal-lens/example.com.signals.json
     python3 scripts/validate_signals.py <file> --profile signal-lens/example.com.json
@@ -45,8 +56,13 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_PATH = os.path.join(HERE, "signals_schema.json")
 
-WEIGHTS = {"stage": 3, "evidence_density": 3, "separability": 2, "reach": 1}
-MAX_SCORE = 4 * 3 + 3 * 3 + 2 * 2 + 2 * 1  # 27
+WEIGHTS = {"stage": 2, "evidence_density": 3, "separability": 2, "reach": 1,
+           "contestedness": 2}
+MAX_SCORE = 4 * 2 + 3 * 3 + 2 * 2 + 2 * 1 + 2 * 2  # 27
+
+# A pattern only counts as enforcing something if it can actually match a digit. A
+# field being non-empty costs nothing to write; a working regex does not.
+HAS_DIGIT_CLASS = re.compile(r"\\d|\[0-9\]|\\p\{N\}")
 
 # Platform names that are not surfaces. "LinkedIn" does not tell anyone where to look;
 # a named newsletter or a specific board does.
@@ -67,6 +83,16 @@ def _walk():
 def score(rank):
     """Deterministic. Same components in, same number out, on every run and every model."""
     return sum(WEIGHTS[k] * int(rank.get(k, 0) or 0) for k in WEIGHTS)
+
+
+def enforced(s):
+    """What the spec actually requires, as opposed to what it says it requires."""
+    m = s.get("must_also_have") or {}
+    num = str(m.get("numeric_pattern") or "")
+    dat = str(m.get("date_pattern") or "")
+    return sum([bool(num and HAS_DIGIT_CLASS.search(num)),
+                bool(dat and HAS_DIGIT_CLASS.search(dat)),
+                bool((s.get("query") or {}).get("near"))])
 
 
 def semantic_checks(doc, profile=None):
@@ -143,17 +169,24 @@ def semantic_checks(doc, profile=None):
                                  "the wrong thing."))
 
         # evidence_density claims must be visible in the spec.
+        # Surfaces listed twice inflate nothing but signal a spec assembled carelessly.
+        surfaces = [str(x).strip() for x in (s.get("surface") or [])]
+        if len(surfaces) != len(set(surfaces)):
+            dupes = sorted({x for x in surfaces if surfaces.count(x) > 1})
+            warnings.append((f"{where}.surface",
+                             f"listed more than once: {', '.join(dupes)}. Harmless to a "
+                             "reader and a sign the spec was assembled rather than written."))
+
         rank = s.get("rank") or {}
         if isinstance(rank, dict) and rank.get("evidence_density") is not None:
-            m = s.get("must_also_have") or {}
-            supported = sum([bool(m.get("count_of")), bool(m.get("date_from_text")),
-                             bool((s.get("query") or {}).get("near"))])
+            supported = enforced(s)
             if int(rank.get("evidence_density") or 0) > supported:
                 errors.append((f"{where}.rank.evidence_density",
-                               f"claims {rank['evidence_density']} but the spec requires "
-                               f"only {supported} of {{count_of, date_from_text, "
-                               "query.near}}. The component has to be readable off the "
-                               "spec, or the rank is an assertion again."))
+                               f"claims {rank['evidence_density']} but the spec enforces "
+                               f"only {supported} of {{numeric_pattern with a digit class, "
+                               "date_pattern with a digit class, query.near}}. Naming a "
+                               "noun in count_of is free; a working pattern is not, and "
+                               "only the pattern counts."))
     return errors, warnings
 
 

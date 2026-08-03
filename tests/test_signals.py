@@ -38,12 +38,14 @@ def one(name, **kw):
         "method": "keyword",
         "query": {"any_of": ["consolidating six files"], "near": ["Fathom"]},
         "must_also_have": {"count_of": "legal entities", "date_from_text": False,
-                           "demand_side": True},
+                           "demand_side": True,
+                           "numeric_pattern": r"\\d+\\s*(entit|compan)"},
         "disqualifiers": ["a ProAdvisor answering on someone else's behalf"],
         "baseline": {"required": False},
         "freshness_days": 45,
         "yields": {"entity": "the poster's employer", "contactable": "sometimes"},
-        "rank": {"stage": 2, "evidence_density": 2, "separability": 2, "reach": 0},
+        "rank": {"stage": 2, "evidence_density": 2, "separability": 2, "reach": 0,
+                 "contestedness": 1},
     }
     d.update(kw)
     return d
@@ -101,7 +103,8 @@ class Contract(unittest.TestCase):
                 unspecifiable_because="leaves no public trace until the close slips",
                 disqualifiers=[],
                 # nothing is detected, so nothing is required: density must be 0
-                rank={"stage": 3, "evidence_density": 0, "separability": 0, "reach": 0})
+                rank={"stage": 3, "evidence_density": 0, "separability": 0, "reach": 0,
+                      "contestedness": 2})
         s.pop("query")
         rc, out = self.check(doc([s]))
         self.assertEqual(rc, 0, out)
@@ -146,9 +149,11 @@ class Ranking(unittest.TestCase):
 
     def test_later_stage_outranks_earlier_all_else_equal(self):
         late = one("quote in hand", rank={"stage": 4, "evidence_density": 2,
-                                          "separability": 2, "reach": 0})
+                                          "separability": 2, "reach": 0,
+                                          "contestedness": 1})
         early = one("vaguely annoyed", rank={"stage": 0, "evidence_density": 2,
-                                             "separability": 2, "reach": 0})
+                                             "separability": 2, "reach": 0,
+                                             "contestedness": 1})
         rc, out = run(self.write(doc([late, early])), "--json")
         order = [r["signal"] for r in json.loads(out)["ranked"]]
         self.assertLess(order.index("quote in hand"), order.index("vaguely annoyed"))
@@ -156,8 +161,10 @@ class Ranking(unittest.TestCase):
     def test_an_inflated_component_is_rejected(self):
         """Claiming evidence_density 3 when the spec requires one thing is how a rank
         becomes an assertion again."""
-        s = one("named signal", rank={"stage": 2, "evidence_density": 3, "separability": 2,
-                           "reach": 0},
+        s = one("named signal",
+                rank={"stage": 2, "evidence_density": 3, "separability": 2,
+                      "reach": 0, "contestedness": 1},
+                # count_of is free to write; only a pattern with a digit class counts
                 must_also_have={"count_of": "legal entities", "date_from_text": False,
                                 "demand_side": True},
                 query={"any_of": ["something"]})
@@ -169,7 +176,8 @@ class Ranking(unittest.TestCase):
         s = one("high value, no method", method="none_known", observable="none",
                 unspecifiable_because="no public trace exists",
                 disqualifiers=[],
-                rank={"stage": 4, "evidence_density": 0, "separability": 0, "reach": 0})
+                rank={"stage": 4, "evidence_density": 0, "separability": 0, "reach": 0,
+                      "contestedness": 2})
         s.pop("query")
         rc, out = run(self.write(doc([s])), "--ranked")
         self.assertEqual(rc, 0, out)
@@ -197,3 +205,105 @@ class CrossChecks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WeightCalibration(unittest.TestCase):
+    """Both weight changes came from a real run, and both are pinned here.
+
+    The first ranking of finboard.ai was wrong in two measurable ways. `count_of` was
+    populated on 26 of 26 detectable specs, so it contributed 1 to every density and
+    discriminated nothing. And stage at x3 put "does not know this category exists"
+    27th of 28, while the library calls that type the only uncontested volume in the
+    market.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def write(self, d):
+        p = os.path.join(self.tmp.name, "w.json")
+        with io.open(p, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(d))
+        return p
+
+    def test_count_of_alone_does_not_buy_density(self):
+        """Naming a noun is free. Only a pattern that can match a digit counts."""
+        s = one("named signal",
+                must_also_have={"count_of": "legal entities", "date_from_text": False,
+                                "demand_side": True},
+                query={"any_of": ["something"]},
+                rank={"stage": 2, "evidence_density": 1, "separability": 2, "reach": 0,
+                      "contestedness": 1})
+        rc, out = run(self.write(doc([s])))
+        self.assertEqual(rc, 1, f"count_of alone should enforce nothing\n{out}")
+
+    def test_a_pattern_without_a_digit_class_does_not_count(self):
+        s = one("named signal",
+                must_also_have={"count_of": "legal entities", "date_from_text": False,
+                                "demand_side": True, "numeric_pattern": "entities"},
+                query={"any_of": ["something"]},
+                rank={"stage": 2, "evidence_density": 1, "separability": 2, "reach": 0,
+                      "contestedness": 1})
+        rc, out = run(self.write(doc([s])))
+        self.assertEqual(rc, 1, f"'entities' cannot match a number\n{out}")
+
+    def test_a_real_numeric_pattern_does_count(self):
+        s = one("named signal",
+                must_also_have={"count_of": "legal entities", "date_from_text": False,
+                                "demand_side": True,
+                                "numeric_pattern": r"\d+\s*entities"},
+                query={"any_of": ["something"]},
+                rank={"stage": 2, "evidence_density": 1, "separability": 2, "reach": 0,
+                      "contestedness": 1})
+        rc, out = run(self.write(doc([s])))
+        self.assertEqual(rc, 0, out)
+
+    def test_an_uncontested_signal_is_not_buried_by_early_stage(self):
+        """The category-unaware case. Stage 0, but nobody else is fishing it."""
+        buried = one("category unaware", rank={"stage": 0, "evidence_density": 1,
+                                               "separability": 1, "reach": 0,
+                                               "contestedness": 2})
+        contested = one("crowded mid-stage", rank={"stage": 2, "evidence_density": 1,
+                                                   "separability": 1, "reach": 0,
+                                                   "contestedness": 0})
+        rc, out = run(self.write(doc([buried, contested])), "--json")
+        r = {x["signal"]: x["score"] for x in json.loads(out)["ranked"]}
+        self.assertGreaterEqual(r["category unaware"], r["crowded mid-stage"],
+                                "contestedness must be able to offset two stages")
+
+    def test_duplicate_surfaces_warn(self):
+        s = one("named signal", surface=["r/Accounting", "r/Accounting"])
+        rc, out = run(self.write(doc([s])))
+        self.assertEqual(rc, 0, out)
+        self.assertIn("more than once", out)
+
+
+class RealRun(unittest.TestCase):
+    """The first real phase 2 run: 28 specs for finboard.ai, derived from
+    tests/fixtures/profile-good.json by walking every type in step 3 plus the presence
+    group. Unlike the synthetic fixtures above, this is an actual output.
+
+    It is kept because the two weight corrections came out of reading it, and because
+    a schema change that breaks a real run should fail loudly rather than quietly.
+    """
+
+    REAL = os.path.join(HERE, "fixtures", "signals-finboard-real.json")
+
+    def test_the_real_run_validates(self):
+        rc, out = run(self.REAL, "--profile", PROFILE)
+        self.assertEqual(rc, 0, out)
+
+    def test_it_keeps_the_undetectable_signals(self):
+        rc, out = run(self.REAL, "--json")
+        undetectable = [r for r in json.loads(out)["ranked"] if not r["detectable"]]
+        self.assertEqual(len(undetectable), 2, "the none_known entries were dropped")
+
+    def test_the_highest_undetectable_outranks_real_specs(self):
+        """The point of keeping them: this is the argument for what to build next.
+        If it ranked last it would be noise instead."""
+        rc, out = run(self.REAL, "--json")
+        rows = json.loads(out)["ranked"]
+        top_undet = max(r["score"] for r in rows if not r["detectable"])
+        below = [r for r in rows if r["detectable"] and r["score"] < top_undet]
+        self.assertTrue(below, "no detectable signal ranks below the best undetectable one")

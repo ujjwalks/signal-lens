@@ -11,3 +11,5 @@ out/
 *.plan.json
 *.profile.json
 report-scaffold.md
+
+signal-lens/
