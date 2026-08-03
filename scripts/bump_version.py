@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Bump the version in every place that has to agree.
 
-Four files carry the version and all four must match, because the Codex plugin cache is
-keyed by version: `~/.codex/plugins/cache/<marketplace>/<plugin>/<version>/`. Push without
-bumping and installed users see nothing — which happened once already, silently, for three
-commits' worth of work.
+Three JSON files carry the version and all three must match, because the Codex plugin
+cache is keyed by version: `~/.codex/plugins/cache/<marketplace>/<plugin>/<version>/`.
+Push without bumping and installed users see nothing — which happened once already,
+silently, for three commits' worth of work.
 
-`tests/test_plugin_mirror.py` checks the four agree with each other. It cannot check that
+The version deliberately does NOT live in SKILL.md frontmatter. The cache key comes from
+plugin.json; measured across the 19 plugins cached on a real machine, 18 carry no
+`metadata.version` at all and every one still resolves to a correct version directory.
+A copy in SKILL.md is a fourth thing to keep in sync that nothing reads.
+
+`tests/test_plugin_mirror.py` checks the three agree with each other. It cannot check that
 you remembered to bump, so this exists to make forgetting harder than remembering.
 
 Usage:
@@ -32,8 +37,6 @@ JSON_TARGETS = [
     (os.path.join(ROOT, "plugins", NAME, ".claude-plugin", "plugin.json"), [("version",)]),
     (os.path.join(ROOT, "plugins", NAME, ".codex-plugin", "plugin.json"), [("version",)]),
 ]
-SKILL = os.path.join(ROOT, "SKILL.md")
-SKILL_RE = re.compile(r'(^\s*version:\s*)"[^"]+"', re.M)
 
 
 def get(obj, path):
@@ -50,8 +53,6 @@ def put(obj, path, value):
 
 def current():
     found = {}
-    m = SKILL_RE.search(open(SKILL, encoding="utf-8").read())
-    found["SKILL.md"] = m.group(0).split('"')[1] if m else None
     for path, keys in JSON_TARGETS:
         d = json.load(open(path, encoding="utf-8"))
         for kp in keys:
@@ -81,13 +82,6 @@ def main():
     if new in set(now.values()) and len(set(now.values())) == 1:
         print(f"already at {new} — nothing to do", file=sys.stderr)
         return 2
-
-    raw = open(SKILL, encoding="utf-8").read()
-    raw, n = SKILL_RE.subn(lambda m: f'{m.group(1)}"{new}"', raw, count=1)
-    if not n:
-        print("could not find `version:` in SKILL.md frontmatter", file=sys.stderr)
-        return 2
-    io.open(SKILL, "w", encoding="utf-8").write(raw)
 
     for path, keys in JSON_TARGETS:
         d = json.load(open(path, encoding="utf-8"))

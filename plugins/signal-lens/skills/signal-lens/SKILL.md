@@ -10,14 +10,7 @@ description: >-
   ask what to watch for. Works out which public conversations mean someone is
   about to buy from that specific seller, and who the lead actually is, which is
   often not the person who posted.
-license: MIT
-compatibility: >-
-  Requires network access to fetch the seller's website. No third-party Python
-  packages. Not usable where the runtime has no network.
-metadata:
-  version: "1.0.1"
-  author: ujjwalks
-  homepage: https://github.com/ujjwalks/signal-lens
+compatibility: Requires network access to fetch the seller's website.
 ---
 
 # signal-lens

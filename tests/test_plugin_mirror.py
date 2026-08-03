@@ -83,20 +83,24 @@ class Manifests(unittest.TestCase):
             self.assertTrue(manifest["skills"].rstrip("/").endswith("skills"),
                             f"{parts[0]} does not point at ./skills")
 
-    def test_versions_agree_across_manifests_and_the_skill(self):
+    def test_versions_agree_across_manifests(self):
         versions = {
             "marketplace": load(".claude-plugin", "marketplace.json")["plugins"][0]["version"],
             "claude-plugin": load("plugins", NAME, ".claude-plugin", "plugin.json")["version"],
             "codex-plugin": load("plugins", NAME, ".codex-plugin", "plugin.json")["version"],
         }
-        with open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8") as fh:
-            head = fh.read(2000)
-        for line in head.splitlines():
-            if line.strip().startswith("version:"):
-                versions["SKILL.md"] = line.split(":", 1)[1].strip().strip('"')
-                break
         self.assertEqual(len(set(versions.values())), 1,
                          f"version drift across manifests: {versions}")
+
+    def test_skill_frontmatter_carries_no_version(self):
+        """The cache key comes from plugin.json. Measured on a real machine: 18 of 19
+        cached plugins have no `metadata.version` and all resolve correctly. A copy here
+        is a fourth thing to keep in sync that nothing reads."""
+        with open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8") as fh:
+            head = fh.read(2000)
+        fm = head.split("---")[1] if head.count("---") >= 2 else head
+        self.assertNotIn("version:", fm,
+                         "SKILL.md frontmatter has re-grown a version field")
 
 
 if __name__ == "__main__":
