@@ -294,9 +294,28 @@ Its 16 prohibition classes fed directly into `references/prohibitions.md`.
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests -v          # 65 tests, stdlib only, no deps
+python3 -m unittest discover -s tests -v          # 106 tests, stdlib only, no deps
 python3 scripts/check_output.py <a-plan-the-skill-produced>
+python3 scripts/validate_profile.py signal-lens/<domain>.json
+python3 scripts/validate_signals.py signal-lens/<domain>.signals.json --ranked
 ```
+
+### Releasing
+
+```bash
+python3 scripts/bump_version.py 1.6.0
+python3 scripts/sync_plugin.py
+git commit -am "1.6.0 — what changed"
+python3 scripts/release.py            # dry run: reports and refuses
+python3 scripts/release.py --go       # tags, pushes, creates the GitHub release
+```
+
+`release.py` refuses rather than reminds, and every check it makes corresponds to a
+release that actually went wrong here. The one worth knowing about: **it refuses if
+there are commits since the last tag and the version has not changed.** That is how
+`1.2.0` came to name two different states of main — one with a vocabulary check
+defeated by a filler word, one with the fix — because PR #2 shipped a real bug fix
+without bumping. `bump_version.py` already existed. Nobody ran it.
 
 `check_output.py` ships with the skill and **step 7 of SKILL.md runs it** before a plan is
 presented. That is deliberate: the twenty-row floor used to be a sentence asking the model

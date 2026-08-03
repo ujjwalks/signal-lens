@@ -81,7 +81,8 @@ class Mirror(unittest.TestCase):
         """The allowlist is only a guard if someone cannot quietly widen it. Version
         bumping, the mirror sync and the parked catalogue validator are build tooling;
         an install has no use for any of them."""
-        for name in ("bump_version.py", "sync_plugin.py", "validate_catalogue.py"):
+        for name in ("bump_version.py", "sync_plugin.py", "validate_catalogue.py",
+                     "release.py"):
             self.assertNotIn(name, _sync_plugin().SCRIPTS,
                              f"{name} is repo machinery and must not ship to users")
 
