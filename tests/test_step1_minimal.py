@@ -87,6 +87,39 @@ class StaysMinimal(unittest.TestCase):
                              "prose repeating it is the accretion this file prevents")
 
 
+class EveryStepStaysSmall(unittest.TestCase):
+    """The same rule as step 1, applied to the rest. Steps 2-6 have no script
+    enforcing them, so prose is all they have — but that is an argument for keeping
+    the instruction, not for keeping the justification around it.
+
+    What was cut everywhere: explanations of why a rule exists, the story of the run
+    that produced it, and anything a checker already refuses. What was kept: the
+    instruction itself, the lists that are the actual knowledge (signal types, the
+    three gates, the lead shapes, the discriminators), and the contract.
+    """
+
+    # Generous bounds. They exist to make growth visible, not to force a rewrite.
+    BOUNDS = {"step-1-profile.md": 500, "step-2-validate.md": 400,
+              "step-3-signals.md": 800, "step-4-doppelgangers.md": 300,
+              "step-5-lead.md": 400, "step-6-prohibitions.md": 300,
+              "step-7-output.md": 400, "step-8-specify.md": 600}
+
+    def test_no_step_has_grown_past_its_bound(self):
+        over = []
+        for name, limit in sorted(self.BOUNDS.items()):
+            words = len(read(os.path.join(ROOT, "references", name)).split())
+            if words > limit:
+                over.append(f"{name} {words}>{limit}")
+        self.assertEqual(over, [],
+                         f"steps grew: {'; '.join(over)}. If a run failed for want of "
+                         "the addition, raise the bound in the same commit and say "
+                         "which run. If it merely seemed useful, cut it.")
+
+    def test_the_steps_are_all_present(self):
+        for name in self.BOUNDS:
+            self.assertTrue(os.path.isfile(os.path.join(ROOT, "references", name)), name)
+
+
 class TheSafetyNetIsIntact(unittest.TestCase):
     """Stripping the prose is only safe while the validator still refuses these. If a
     check is ever removed, the corresponding instruction has to come back."""

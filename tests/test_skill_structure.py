@@ -43,10 +43,18 @@ class InlineFloor(unittest.TestCase):
         """The floor must be a superset. A type only in step 3 vanishes entirely
         whenever the references cannot be read."""
         s3 = read(REFS, "step-3-signals.md")
-        types = re.findall(r"^- \*\*([^*]+)\*\*", s3, re.M)
-        for block in re.findall(r"\*\*(?:Conditional|And the artifact forms[^:]*):\*\*(.+?)\n\n",
-                                s3 + "\n\n", re.S):
-            types += [c for c in re.split(r"·", block)]
+        # Types live in "**Group:**  a · b · c" blocks. An earlier version of this test
+        # parsed "- **Type**" bullets; step 3 was later rewritten to inline lists and
+        # the extraction silently fell to 5 types from 18, so the test kept passing
+        # while checking almost nothing. Parse the format that is actually there, and
+        # assert a floor on how many types it finds.
+        types = []
+        for block in re.findall(r"\*\*[A-Z][^*:]{3,40}:\*\*(.+?)(?=\n\n)", s3, re.S):
+            types += [t for t in re.split(r"·", block)]
+        self.assertGreater(len(types), 15,
+                           f"only {len(types)} signal types parsed out of step 3 — the "
+                           "extraction has drifted from the file's format again, and a "
+                           "test that finds nothing passes")
         # Normalise before splitting, in this order, because each step broke the
         # previous attempt: collapse newlines (the floor is line-wrapped, so \n cut
         # "certification or / licence expiring" in half), strip **bold** (the lead-in
